@@ -1,0 +1,301 @@
+{
+  "repeat_rate": 0.8,
+  "cross_type_sharing": 0.75,
+  "seed": 7,
+  "n_cases": 45000,
+  "alpha": 0.28571428571428564,
+  "seconds": 37.6,
+  "core_habit_transfer": {
+    "mean_lift_same_type": 0.392,
+    "mean_lift_cross_type": 0.145
+  },
+  "pairs": {
+    "ingested_cases": 44551,
+    "dropped_out_of_scope": 449,
+    "true_pairs_all": 15833,
+    "prior_bits_all_property": -15.936,
+    "same_type": {
+      "BURGLARY_RESIDENTIAL": {
+        "cases": 12971,
+        "true_pairs": 3144,
+        "prior_bits": -14.707
+      },
+      "BURGLARY_COMMERCIAL": {
+        "cases": 4472,
+        "true_pairs": 976,
+        "prior_bits": -13.322
+      },
+      "VEHICLE_THEFT": {
+        "cases": 15517,
+        "true_pairs": 4854,
+        "prior_bits": -14.598
+      },
+      "SNATCHING": {
+        "cases": 8074,
+        "true_pairs": 2798,
+        "prior_bits": -13.508
+      },
+      "ATM_TAMPERING": {
+        "cases": 3517,
+        "true_pairs": 1720,
+        "prior_bits": -11.811
+      }
+    },
+    "cross_type": {
+      "true_pairs": 2341,
+      "prior_bits": -18.268
+    },
+    "cross_state_true_pairs": 2768
+  },
+  "validators": {
+    "2_truth_mi": {
+      "passed": true,
+      "excess_bits": 1.0614
+    },
+    "3_recorded_mi": {
+      "passed": true,
+      "excess_bits": 0.7043,
+      "excess_kept_vs_truth": 0.664
+    }
+  },
+  "same_type": {
+    "queries": 1488,
+    "agreement_count": {
+      "hit_at_10": 0.2688,
+      "recall_at_10": 0.1143,
+      "precision_at_10": 0.0428,
+      "pr_auc": 0.0742
+    },
+    "fs": {
+      "hit_at_10": 0.3723,
+      "recall_at_10": 0.2139,
+      "precision_at_10": 0.0786,
+      "pr_auc": 0.1562
+    },
+    "fs_lr": {
+      "hit_at_10": 0.3703,
+      "recall_at_10": 0.2111,
+      "precision_at_10": 0.0772,
+      "pr_auc": 0.1514
+    }
+  },
+  "cross_type": {
+    "queries": 512,
+    "queries_sampled": false,
+    "mean_candidates": 34537,
+    "prior_bits": -18.034,
+    "mean_true_pair_evidence_bits": 0.128,
+    "random": {
+      "precision_at_10": 6.4e-05
+    },
+    "agreement_count": {
+      "hit_at_10": 0.0039,
+      "recall_at_10": 0.0022,
+      "precision_at_10": 0.0004,
+      "pr_auc": 0.0015,
+      "median_first_rank": 6146
+    },
+    "fs": {
+      "hit_at_10": 0.0273,
+      "recall_at_10": 0.0117,
+      "precision_at_10": 0.0037,
+      "pr_auc": 0.0081,
+      "median_first_rank": 6549
+    },
+    "fs_lr": {
+      "hit_at_10": 0.0293,
+      "recall_at_10": 0.0127,
+      "precision_at_10": 0.0039,
+      "pr_auc": 0.0092,
+      "median_first_rank": 6809
+    }
+  },
+  "pools": {
+    "BURGLARY_RESIDENTIAL": {
+      "queries": 348,
+      "queries_sampled": false,
+      "mean_candidates": 12458,
+      "prior_bits": -14.77,
+      "mean_true_pair_evidence_bits": 3.206,
+      "random": {
+        "precision_at_10": 0.000332
+      },
+      "agreement_count": {
+        "hit_at_10": 0.2931,
+        "recall_at_10": 0.1219,
+        "precision_at_10": 0.052,
+        "pr_auc": 0.0856,
+        "median_first_rank": 101
+      },
+      "fs": {
+        "hit_at_10": 0.3879,
+        "recall_at_10": 0.2211,
+        "precision_at_10": 0.0948,
+        "pr_auc": 0.1874,
+        "median_first_rank": 34
+      },
+      "fs_lr": {
+        "hit_at_10": 0.3908,
+        "recall_at_10": 0.2186,
+        "precision_at_10": 0.0948,
+        "pr_auc": 0.1799,
+        "median_first_rank": 36
+      }
+    },
+    "BURGLARY_COMMERCIAL": {
+      "queries": 123,
+      "queries_sampled": false,
+      "mean_candidates": 4983,
+      "prior_bits": -13.728,
+      "mean_true_pair_evidence_bits": 6.071,
+      "random": {
+        "precision_at_10": 0.000565
+      },
+      "agreement_count": {
+        "hit_at_10": 0.5691,
+        "recall_at_10": 0.3461,
+        "precision_at_10": 0.078,
+        "pr_auc": 0.214,
+        "median_first_rank": 6
+      },
+      "fs": {
+        "hit_at_10": 0.7236,
+        "recall_at_10": 0.5733,
+        "precision_at_10": 0.1439,
+        "pr_auc": 0.443,
+        "median_first_rank": 2
+      },
+      "fs_lr": {
+        "hit_at_10": 0.7073,
+        "recall_at_10": 0.5505,
+        "precision_at_10": 0.1366,
+        "pr_auc": 0.4259,
+        "median_first_rank": 2
+      }
+    },
+    "VEHICLE_THEFT": {
+      "queries": 514,
+      "queries_sampled": false,
+      "mean_candidates": 15516,
+      "prior_bits": -14.598,
+      "mean_true_pair_evidence_bits": 3.1,
+      "random": {
+        "precision_at_10": 0.000279
+      },
+      "agreement_count": {
+        "hit_at_10": 0.1907,
+        "recall_at_10": 0.0591,
+        "precision_at_10": 0.0292,
+        "pr_auc": 0.0397,
+        "median_first_rank": 189
+      },
+      "fs": {
+        "hit_at_10": 0.2646,
+        "recall_at_10": 0.1114,
+        "precision_at_10": 0.0521,
+        "pr_auc": 0.08,
+        "median_first_rank": 71
+      },
+      "fs_lr": {
+        "hit_at_10": 0.2626,
+        "recall_at_10": 0.1103,
+        "precision_at_10": 0.0504,
+        "pr_auc": 0.0757,
+        "median_first_rank": 70
+      }
+    },
+    "SNATCHING": {
+      "queries": 342,
+      "queries_sampled": false,
+      "mean_candidates": 8073,
+      "prior_bits": -13.508,
+      "mean_true_pair_evidence_bits": 2.915,
+      "random": {
+        "precision_at_10": 0.000502
+      },
+      "agreement_count": {
+        "hit_at_10": 0.2602,
+        "recall_at_10": 0.0894,
+        "precision_at_10": 0.0418,
+        "pr_auc": 0.0583,
+        "median_first_rank": 90
+      },
+      "fs": {
+        "hit_at_10": 0.3596,
+        "recall_at_10": 0.2008,
+        "precision_at_10": 0.0775,
+        "pr_auc": 0.1263,
+        "median_first_rank": 38
+      },
+      "fs_lr": {
+        "hit_at_10": 0.3596,
+        "recall_at_10": 0.2044,
+        "precision_at_10": 0.0775,
+        "pr_auc": 0.129,
+        "median_first_rank": 38
+      }
+    },
+    "ATM_TAMPERING": {
+      "queries": 161,
+      "queries_sampled": false,
+      "mean_candidates": 3516,
+      "prior_bits": -11.811,
+      "mean_true_pair_evidence_bits": 2.663,
+      "random": {
+        "precision_at_10": 0.000979
+      },
+      "agreement_count": {
+        "hit_at_10": 0.2547,
+        "recall_at_10": 0.1498,
+        "precision_at_10": 0.0416,
+        "pr_auc": 0.0864,
+        "median_first_rank": 45
+      },
+      "fs": {
+        "hit_at_10": 0.441,
+        "recall_at_10": 0.2792,
+        "precision_at_10": 0.0807,
+        "pr_auc": 0.1764,
+        "median_first_rank": 18
+      },
+      "fs_lr": {
+        "hit_at_10": 0.4348,
+        "recall_at_10": 0.2714,
+        "precision_at_10": 0.0789,
+        "pr_auc": 0.1695,
+        "median_first_rank": 20
+      }
+    },
+    "CROSS_TYPE": {
+      "queries": 512,
+      "queries_sampled": false,
+      "mean_candidates": 34537,
+      "prior_bits": -18.034,
+      "mean_true_pair_evidence_bits": 0.128,
+      "random": {
+        "precision_at_10": 6.4e-05
+      },
+      "agreement_count": {
+        "hit_at_10": 0.0039,
+        "recall_at_10": 0.0022,
+        "precision_at_10": 0.0004,
+        "pr_auc": 0.0015,
+        "median_first_rank": 6146
+      },
+      "fs": {
+        "hit_at_10": 0.0273,
+        "recall_at_10": 0.0117,
+        "precision_at_10": 0.0037,
+        "pr_auc": 0.0081,
+        "median_first_rank": 6549
+      },
+      "fs_lr": {
+        "hit_at_10": 0.0293,
+        "recall_at_10": 0.0127,
+        "precision_at_10": 0.0039,
+        "pr_auc": 0.0092,
+        "median_first_rank": 6809
+      }
+    }
+  }
+}

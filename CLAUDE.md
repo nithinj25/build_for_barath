@@ -29,6 +29,11 @@ These are easy to violate by accident and each one breaks something real.
 4. **Never render a probability in the UI.** A strong match posteriors at
    ~0.27% and that reads as broken. Render rank, bits, and the driving
    features: `rank 2 of 10,482 · +5.85 bits · roof entry, disabled CCTV`.
+   **+5.85 is a STRONG match, not a typical one** — it is the spec's
+   constructed example and sits in the top 0.5–11% of true pairs depending on
+   crime type. Measured medians are +0.0 to +1.5 bits, p90 +3.0 to +6.5
+   (`results/pre_core_fix/evidence_distribution.json`). Never quote +5.85 as
+   what a link scores; quote it as a strong case beside the typical range.
 
 5. **No protected attributes as features.** No caste, religion, community,
    or any proxy for them. Not in the schema, not in the generator, not in
@@ -71,7 +76,10 @@ infra/          SAM template (skeleton: GET /health)
 TECHNICAL_SPEC.md           full technical spec
 TASK_DATA_GENERATION.md     generator brief
 DATASET.md      dataset card: artifacts, key numbers, limitations
-data/           gitignored except data/final/ (the 45k corpus)
+FINDINGS.md     measured results + their provenance; read before quoting numbers
+scripts/        local tooling (plot_sweep.py)
+results/        committed results: pre_core_fix/, post_core_fix/, sweep/
+data/           gitignored except the two committed sweep-endpoint corpora
 ```
 
 ## Key constants
@@ -95,10 +103,12 @@ data/           gitignored except data/final/ (the 45k corpus)
 
 ```bash
 python -m linkage.config                           # check config/, list unfilled entries
-python -m linkage.generate --seed 7 --out data/dev/  # synthetic corpus
+python -m linkage.generate --seed 7 --cross-type-sharing 1 --out data/dev/   # corpus (sharing is required)
+python -m linkage.sweep --out results/sweep         # repeat_rate × cross_type_sharing grid
+python scripts/plot_sweep.py results/sweep          # headline figure + summary.csv
 python -m linkage.normalise --feeds data/final/feeds --out data/final_normalised.parquet --check data/final/truth.parquet
-python -m linkage.train --normalised data/final_normalised.parquet --truth data/final/truth.parquet --out data/weights.json
-python -m linkage.evaluate --normalised data/final_normalised.parquet --truth data/final/truth.parquet --weights data/weights.json --out data/eval.json
+python -m linkage.train --normalised data/final_sharing1_normalised.parquet --truth data/final_sharing1/truth.parquet --out data/weights.json
+python -m linkage.evaluate --normalised data/final_sharing1_normalised.parquet --truth data/final_sharing1/truth.parquet --weights data/weights.json --out data/eval.json
 sam build && sam deploy                            # from infra/
 ```
 
@@ -124,5 +134,16 @@ These go in the README and the demo, not just the code.
   performance. Say so.
 - Don't tune `repeat_rate` until the numbers look good. Present the sweep
   from 0.2 to 0.9 as the finding.
+- `cross_type_sharing` has no default and `corpus.yaml` leaves it null: no
+  published figure says how much MO habit transfers between offence types.
+  Report the repeat_rate × sharing curve, never a single value.
+- Cross-type is "keyword search cannot surface these pairs at all; this
+  surfaces them as candidates" — not "we link reliably across crime types".
+  It scores 8 fields against a prior ~2 bits worse and stays weak.
+- Extraction quality is not the bottleneck: perfect extraction of the
+  free-text state moves same-type hit@10 by 2.2 points. Don't spend time on
+  extraction prompts expecting linkage gains.
+- Measured results and their provenance live in `FINDINGS.md`. Read it before
+  quoting any number in a writeup or demo.
 - Unlabelled pairs are not confirmed non-links. This is positive-unlabelled
   learning; don't report accuracy treating unlabelled as negative.

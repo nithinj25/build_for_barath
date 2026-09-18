@@ -1,0 +1,138 @@
+[
+  {
+    "repeat_rate": 0.65,
+    "cross_type_sharing": 0.0,
+    "alpha": 0.636,
+    "core_lift_same_type": 0.308,
+    "core_lift_cross_type": 0.027,
+    "same_type": {
+      "hit_at_10": 0.25,
+      "recall_at_10": 0.1194,
+      "precision_at_10": 0.0452,
+      "pr_auc": 0.0805
+    },
+    "cross_type": {
+      "hit_at_10": 0.0033,
+      "recall_at_10": 0.0005,
+      "precision_at_10": 0.0003,
+      "pr_auc": 0.0007,
+      "median_first_rank": 7587
+    },
+    "same_type_mean_true_pair_bits": 2.059,
+    "cross_type_mean_true_pair_bits": 0.032,
+    "cross_type_prior_bits": -17.3,
+    "validators": {
+      "2_truth_mi": {
+        "passed": true,
+        "excess_bits": 0.9572
+      },
+      "3_recorded_mi": {
+        "passed": true,
+        "excess_bits": 0.8081,
+        "excess_kept_vs_truth": 0.844
+      }
+    }
+  },
+  {
+    "repeat_rate": 0.65,
+    "cross_type_sharing": 1.0,
+    "alpha": 0.636,
+    "core_lift_same_type": 0.321,
+    "core_lift_cross_type": 0.269,
+    "same_type": {
+      "hit_at_10": 0.2698,
+      "recall_at_10": 0.1269,
+      "precision_at_10": 0.0491,
+      "pr_auc": 0.0875
+    },
+    "cross_type": {
+      "hit_at_10": 0.0183,
+      "recall_at_10": 0.0123,
+      "precision_at_10": 0.0018,
+      "pr_auc": 0.0068,
+      "median_first_rank": 3547
+    },
+    "same_type_mean_true_pair_bits": 2.274,
+    "cross_type_mean_true_pair_bits": 0.454,
+    "cross_type_prior_bits": -17.3,
+    "validators": {
+      "2_truth_mi": {
+        "passed": true,
+        "excess_bits": 0.8249
+      },
+      "3_recorded_mi": {
+        "passed": true,
+        "excess_bits": 0.6579,
+        "excess_kept_vs_truth": 0.798
+      }
+    }
+  },
+  {
+    "repeat_rate": 0.9,
+    "cross_type_sharing": 0.0,
+    "alpha": 0.125,
+    "core_lift_same_type": 0.447,
+    "core_lift_cross_type": 0.002,
+    "same_type": {
+      "hit_at_10": 0.5079,
+      "recall_at_10": 0.3038,
+      "precision_at_10": 0.1302,
+      "pr_auc": 0.2406
+    },
+    "cross_type": {
+      "hit_at_10": 0.098,
+      "recall_at_10": 0.0851,
+      "precision_at_10": 0.0114,
+      "pr_auc": 0.0619,
+      "median_first_rank": 3655
+    },
+    "same_type_mean_true_pair_bits": 4.881,
+    "cross_type_mean_true_pair_bits": 0.42,
+    "cross_type_prior_bits": -18.786,
+    "validators": {
+      "2_truth_mi": {
+        "passed": true,
+        "excess_bits": 0.9049
+      },
+      "3_recorded_mi": {
+        "passed": false,
+        "excess_bits": 0.4161,
+        "excess_kept_vs_truth": 0.46
+      }
+    }
+  },
+  {
+    "repeat_rate": 0.9,
+    "cross_type_sharing": 1.0,
+    "alpha": 0.125,
+    "core_lift_same_type": 0.445,
+    "core_lift_cross_type": 0.327,
+    "same_type": {
+      "hit_at_10": 0.5098,
+      "recall_at_10": 0.3088,
+      "precision_at_10": 0.1339,
+      "pr_auc": 0.2382
+    },
+    "cross_type": {
+      "hit_at_10": 0.1144,
+      "recall_at_10": 0.0863,
+      "precision_at_10": 0.0141,
+      "pr_auc": 0.059,
+      "median_first_rank": 1253
+    },
+    "same_type_mean_true_pair_bits": 4.915,
+    "cross_type_mean_true_pair_bits": 0.865,
+    "cross_type_prior_bits": -18.786,
+    "validators": {
+      "2_truth_mi": {
+        "passed": true,
+        "excess_bits": 0.7568
+      },
+      "3_recorded_mi": {
+        "passed": false,
+        "excess_bits": -0.0302,
+        "excess_kept_vs_truth": -0.04
+      }
+    }
+  }
+]

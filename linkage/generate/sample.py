@@ -15,6 +15,7 @@ from datetime import date, datetime, timedelta
 
 import numpy as np
 import pandas as pd
+from scipy.special import betaincinv, erf, gammaincinv
 
 from linkage import schema
 from linkage.config import alpha as solve_alpha
@@ -83,6 +84,7 @@ class FieldModel:
 class Model:
     crime_type: FieldModel
     fields: dict            # (crime_type, field) -> FieldModel
+    core_shared: dict       # mo_core field -> pooled model for person-level habits
     slots: dict             # field -> slice of a crime's uniform block
     block: int
 
@@ -109,6 +111,17 @@ def build_model(cfg: dict) -> Model:
             fields[ct, f] = FieldModel(f, values, np.array([dist[v] for v in values], float),
                                        matrix(entries, values), f in schema.TAG_FIELDS)
 
+    # Pooled mo_core marginals: the centre of an offender's person-level habit.
+    shares = np.array([m["crime_types"]["share"][ct] for ct in cts])
+    core_shared = {}
+    for f in schema.MO_CORE:
+        first = fields[cts[0], f]
+        if any(fields[ct, f].values != first.values for ct in cts):
+            raise ValueError(f"{f}: mo_core value order differs between crime types")
+        pooled = shares @ np.array([fields[ct, f].p for ct in cts])
+        core_shared[f] = FieldModel(f, first.values, pooled if first.tag else pooled / pooled.sum(),
+                                    first.loadings, first.tag)
+
     slots, pos = {"crime_type": slice(0, 1)}, 1
     for f in schema.ALL_MO_FIELDS:
         width = 1
@@ -117,7 +130,48 @@ def build_model(cfg: dict) -> Model:
         slots[f] = slice(pos, pos + width)
         pos += width
     slots["exit_copy"] = slice(pos, pos + 1)
-    return Model(crime_type, fields, slots, pos + 1)
+    return Model(crime_type, fields, core_shared, slots, pos + 1)
+
+
+def theta_coupled(q: np.ndarray, a: float, z: np.ndarray, tag: bool) -> np.ndarray:
+    """θ ~ Dirichlet(a·q) (or Beta per tag) built from standard normals by
+    inverse CDF, so that correlating the normals shares habit across crime
+    types without touching anything within a type.
+
+    mo_core fields (time band, group size, concealment, target selection,
+    approach, tools, property, exit) are properties of the offender, so they
+    should carry across the crime types one offender commits; mo_ext stays
+    type-specific. Here the offender's habit is a set of quantiles: the same
+    z, read against each type's own centre q, favours the same values while
+    each type keeps its own base rates — a night worker is a night worker
+    everywhere, and a rarely-nocturnal crime type still rarely happens at
+    night.
+
+    Because Φ(z) is uniform whatever z's correlation, each type's θ keeps
+    EXACTLY the law it had, so cross_type_sharing cannot change within-type
+    repetition. Two earlier attempts got this wrong and were discarded:
+    blending the drawn thetas flattened them (same-type hit@10 fell a third at
+    mid rho), and displacing the centre then re-solving alpha was infeasible —
+    a sharpened centre already agrees more often than the target, so alpha ran
+    to its ceiling (1.25 → ~4250) and offenders lost their spread. See
+    FINDINGS.md.
+    """
+    u = np.clip(0.5 * (1.0 + erf(np.asarray(z) / np.sqrt(2.0))), 1e-12, 1 - 1e-12)
+    if tag:
+        out = q.copy()
+        inner = (q > 0) & (q < 1)
+        if inner.any():
+            out[inner] = betaincinv(a * q[inner], a * (1 - q[inner]), u[inner])
+        return out
+    support = q > 0
+    g = np.zeros_like(q)
+    g[support] = gammaincinv(a * q[support], u[support])
+    total = g.sum()
+    if not np.isfinite(total) or total <= 0:      # every gamma underflowed
+        out = np.zeros_like(q)
+        out[int(np.argmax(q))] = 1.0
+        return out
+    return g / total
 
 
 def draw_values(model: Model, ct_weights, weights_for, u: np.ndarray, exit_same: float):
@@ -245,9 +299,23 @@ def _offender(i: int, seed: int, cfg: dict, model: Model, world: World, a: float
     n = int((offsets <= world.days).sum())
     moved = dest is not None and move_at < n
 
+    rho = c["cross_type_sharing"]
+    habit = {}
+    if rho:                       # own stream, so the rho = 0 theta draws keep their order
+        rh = streams.stream(seed, streams.SHARED, i)
+        habit = {f: rh.standard_normal(len(fm.values)) for f, fm in model.core_shared.items()}
+
     rt = streams.stream(seed, streams.THETA, i)
     theta_ct = model.crime_type.theta(model.crime_type.tilt(s, tau), a, rt)
-    theta = {key: fm.theta(fm.tilt(s, tau), a, rt) for key, fm in model.fields.items()}
+    theta = {}
+    spread = np.sqrt(1 - rho ** 2) if rho else 0.0
+    for key, fm in model.fields.items():
+        q = fm.tilt(s, tau)
+        if rho and fm.name in schema.MO_CORE:
+            z_core = rho * habit[fm.name] + spread * rt.standard_normal(len(q))
+            theta[key] = theta_coupled(q, a, z_core, fm.tag)
+        else:
+            theta[key] = fm.theta(q, a, rt)
     blocks = streams.stream(seed, streams.CRIMES, i).random((drawn, model.block))
 
     offender_id = f"S{i:05d}"
@@ -266,6 +334,7 @@ def _offender(i: int, seed: int, cfg: dict, model: Model, world: World, a: float
         "offender_id": offender_id,
         **{f"style_{ax}": float(x) for ax, x in zip(AXES, s)},
         "repeat_rate": c["repeat_rate"]["value"], "alpha": a,
+        "cross_type_sharing": c["cross_type_sharing"],
         "series_length_drawn": drawn, "series_length": n,
         "home_state": home,
         "destination_state": dest if moved else None,

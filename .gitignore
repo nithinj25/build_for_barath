@@ -1,5 +1,6 @@
-data/*
+﻿data/*
 !data/final/
+!data/final_sharing1/
 __pycache__/
 *.pyc
 .venv/

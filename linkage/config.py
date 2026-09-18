@@ -341,7 +341,7 @@ def check_states(s: dict, m: dict, r: Report) -> None:
 
 def check_corpus(c: dict, m: dict, r: Report) -> None:
     keys = ("n_cases", "date_range", "geography", "exit_same_as_approach",
-            "serial_case_fraction", "repeat_rate", "style", "tau",
+            "serial_case_fraction", "repeat_rate", "style", "tau", "cross_type_sharing",
             "series_length", "gap_days", "relocation", "occurrence_window_hours",
             "registration_delay_hours", "time_band")
     if not _same_keys(r, "corpus", c, keys):
@@ -360,6 +360,8 @@ def check_corpus(c: dict, m: dict, r: Report) -> None:
     if _same_keys(r, "corpus.geography", c["geography"], ("same_district_rate",)):
         _rate(r, "corpus.geography.same_district_rate", c["geography"]["same_district_rate"])
     _rate(r, "corpus.exit_same_as_approach", c["exit_same_as_approach"])
+    if c["cross_type_sharing"] is not None:      # null = must be passed on the command line
+        _rate(r, "corpus.cross_type_sharing", c["cross_type_sharing"])
 
     frac = c["serial_case_fraction"]
     if not (_is_num(frac) and 0 < frac < 1):
@@ -515,6 +517,7 @@ def derived(cfg: dict) -> list[str]:
         f"sweep 0.2 → {alpha(0.2, q):.3f}, 0.9 → {alpha(0.9, q):.3f})",
         f"series length    mean {mean_len:g}, ≈{serial_cases / mean_len:.0f} serial offenders, "
         f"≈{c['n_cases'] - serial_cases:.0f} background one-offs",
+        f"cross_type_sharing {c['cross_type_sharing'] if c['cross_type_sharing'] is not None else 'null — pass --cross-type-sharing'}",
     ]
 
 

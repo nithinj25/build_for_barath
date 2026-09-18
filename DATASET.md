@@ -5,15 +5,28 @@ can invert this generator — not real-world performance.
 
 ## Regenerate
 
+Two corpora are committed: the **endpoints** of the `cross_type_sharing`
+sweep. That parameter says how much of an offender's mo_core habit carries
+across crime types, nothing published fixes its value, so the finding is the
+curve between these two — never one of them on its own
+(`results/sweep/`, `FINDINGS.md`).
+
+| Corpus | `cross_type_sharing` | Use it for |
+|---|---|---|
+| `data/final/` | 0 — habits per crime type | the zero endpoint; cross-type linkage is impossible on it by construction (tag `pre-core-fix`) |
+| `data/final_sharing1/` | 1 — habits fully person-level | the upper endpoint; **use this one for demos and pipeline work** |
+
 ```bash
 python -m linkage.config                                          # must print READY
-python -m linkage.generate --seed 7 --n-cases 45000 --out data/final/
-python -m linkage.generate --seed 7 --out data/dev/               # 10k dev corpus
+python -m linkage.generate --seed 7 --n-cases 45000 --cross-type-sharing 1 --out data/final_sharing1/
+python -m linkage.generate --seed 7 --cross-type-sharing 1 --out data/dev/   # 10k dev corpus
 python -m linkage.generate.tau --n-cases 45000                    # re-derive τ
+python -m linkage.sweep --out results/sweep                       # repeat_rate × sharing grid
 ```
 
-`data/final/` is committed so the corpus is usable without running anything;
-the rest of `data/` is gitignored. Seed + `config/` reproduce any corpus exactly.
+`--cross-type-sharing` is required and has no default. Both committed corpora
+are usable without running anything; the rest of `data/` is gitignored. Seed +
+`config/` reproduce any corpus exactly.
 
 ## Artifacts
 
@@ -39,8 +52,23 @@ too wide to know the time band · `__ABSENT__` state has no such column.
   burglary) to −12.16 (ATM). Cross-type: −16.93.
 - Top 10% of offenders hold 49.5% of true pairs — report per-offender metrics
   alongside per-pair ones.
-- All six validators pass. The 10k dev corpus fails validator 3 (recorded MI
-  not significant at that size); use the 45k corpus for evaluation.
+Both corpora share those counts: sharing changes what offenders do, not how
+many cases, offenders or links there are.
+
+**Validators.** Both 45k corpora pass all six. The 10k dev corpus fails
+validator 3 (recorded cross-field mutual information not significant at that
+size); use a 45k corpus for evaluation.
+
+**Linkage measured on each** (held-out test offenders, full-pool ranking):
+
+| | same-type hit@10 | cross-type hit@10 | cross-type mean true-pair evidence |
+|---|---|---|---|
+| sharing 0 | 0.136 | 0.004 (≈5× random) | −0.01 bits |
+| sharing 1 | 0.128 | 0.013 (≈17× random) | +0.18 bits |
+
+Cross-type stays weak either way: it scores 8 fields against a prior ~2 bits
+worse. The claim that holds is that keyword search on IPC sections cannot
+surface these pairs at all, and this surfaces them as candidates.
 
 ## Limitations
 
@@ -57,6 +85,14 @@ too wide to know the time band · `__ABSENT__` state has no such column.
   a scorer can exploit. The ATM same-type prior (−12.16) partly reflects it.
 - Crime type is drawn through the style chain (proposal adopted), so style
   selects offenders into crime types and amplifies within-type drift.
+- **This corpus has `cross_type_sharing = 0`** (see manifest `derived`):
+  offenders' mo_core habits were drawn per crime type, so person-level habits
+  do not transfer across types and cross-type linkage is impossible on it by
+  construction. That was a defect, fixed 2026-09-18; this corpus is kept as
+  the zero endpoint of the sweep (tag `pre-core-fix`). See `FINDINGS.md` §1.
+- **Evidence per link is small.** Median true pair +0.0 to +1.5 bits; the
+  spec's +5.85 example is a strong match (top 0.5–11%), not a typical one.
 - Non-links here are clean. Real unlabelled pairs are not confirmed
   non-links (positive-unlabelled); don't carry accuracy-style metrics over.
-- Not checked: state predictability after normalisation (no normaliser yet).
+- Not checked: state predictability after normalisation (the normaliser now
+  exists; the check does not).

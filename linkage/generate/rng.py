@@ -15,6 +15,7 @@ CRIMES = 2       # per offender: fixed-size uniform block per crime for value dr
 BACKGROUND = 3   # one stream for all background one-offs
 CORRUPTION = 4   # recording noise; takes its own seed so truth can be held fixed
 RENDER = 5       # narrative choices
+SHARED = 6       # per offender: person-level mo_core habit (cross_type_sharing)
 
 
 def stream(seed: int, kind: int, index: int = 0) -> np.random.Generator:

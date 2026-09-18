@@ -29,6 +29,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--corruption-seed", type=int, default=None, help="defaults to --seed")
     ap.add_argument("--n-cases", type=int, default=None, help="override corpus.yaml n_cases (recorded in manifest)")
+    ap.add_argument("--cross-type-sharing", type=float, default=None,
+                    help="0-1, required: how much mo_core habit is person-level (swept; no default)")
     ap.add_argument("--config-dir", type=Path, default=config_mod.CONFIG_DIR)
     args = ap.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8")
@@ -42,6 +44,14 @@ def main(argv: list[str] | None = None) -> int:
     overrides = {}
     if args.n_cases is not None:
         cfg["corpus"]["n_cases"] = overrides["n_cases"] = args.n_cases
+    if args.cross_type_sharing is not None:
+        cfg["corpus"]["cross_type_sharing"] = overrides["cross_type_sharing"] = args.cross_type_sharing
+    if cfg["corpus"]["cross_type_sharing"] is None:
+        print("cross_type_sharing has no default: pass --cross-type-sharing (swept 0 to 1)")
+        return 1
+    if not 0 <= cfg["corpus"]["cross_type_sharing"] <= 1:
+        print("--cross-type-sharing must be between 0 and 1")
+        return 1
     cseed = args.seed if args.corruption_seed is None else args.corruption_seed
 
     print(f"sampling truth ({cfg['corpus']['n_cases']} cases, seed {args.seed})")
@@ -77,7 +87,8 @@ def main(argv: list[str] | None = None) -> int:
         "seed": args.seed, "corruption_seed": cseed, "overrides": overrides,
         "versions": {"python": platform.python_version(), "numpy": np.__version__, "pandas": pd.__version__},
         "derived": {"alpha": config_mod.alpha(rr["value"], rr["reference_frequency"]),
-                    "repeat_rate": rr["value"], "tau": cfg["corpus"]["tau"]},
+                    "repeat_rate": rr["value"], "tau": cfg["corpus"]["tau"],
+                    "cross_type_sharing": cfg["corpus"]["cross_type_sharing"]},
         "counts": {
             "cases": int(len(cases)), "serial_cases": int(cases["is_serial"].sum()),
             "serial_offenders": int(len(offenders)),
@@ -85,6 +96,7 @@ def main(argv: list[str] | None = None) -> int:
             "feed_rows": {code: int(len(f)) for code, f in feeds.items()},
         },
         "pairs": report.pair_stats(cases),
+        "core_habit_transfer": report.core_agreement(cases),
         "marginal_drift_largest": drift,
         "realised_marginals": marginals,
         "validators": results,

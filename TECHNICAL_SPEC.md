@@ -36,7 +36,13 @@ Property crime family only:
 
 **Headline capability:** cross-type linking. A gang doing house burglaries in one
 state and chain snatchings in another files under different IPC sections, so
-keyword search can never connect them. Behaviour-based matching can.
+keyword search can never connect them — not weakly, at all. This surfaces them
+as *candidates*.
+
+State the claim that way. Cross-type scores on 8 fields instead of 13 against a
+prior ~2 bits worse, so it will stay far weaker than same-type linking and will
+not produce confident links. Going from no capability to a weak one is the
+claim that holds; "we link reliably across crime types" is not.
 
 ---
 
@@ -134,7 +140,23 @@ For multi-label tags with offender rate `~ Beta(αp, α(1-p))`:
 m_tag = (1-p)/(α+1) + p
 ```
 
-### 4.3 Worked example (burglary, α = 7.05)
+### 4.3 Worked example — a STRONG match, not a typical one (burglary, α = 7.05)
+
+This pair was constructed to show the mechanism. **It is not representative**,
+and the total below must never be quoted as what a link scores. Measured on
+held-out offenders (45k corpus, repeat_rate 0.5, `results/`):
+
+| | median true pair | p90 | this example |
+|---|---|---|---|
+| residential burglary | +0.33 bits | +4.91 | +5.85 (top 7.7%) |
+| commercial burglary | +1.49 | +6.53 | top 11.2% |
+| vehicle theft | +0.66 | +4.16 | top 3.6% |
+| snatching | +0.45 | +2.99 | top 0.5% |
+| ATM tampering | +0.00 | +3.65 | top 1.9% |
+
+Most linked pairs carry about a bit; a few carry six. Finding those few in a
+haystack is exactly a ranker's job — and why §11's base-rate limit stands.
+
 
 | field | value | u | m | bits |
 |---|---|---|---|---|
@@ -151,7 +173,9 @@ m_tag = (1-p)/(α+1) + p
 | property | cash | 0.54 | 0.597 | +0.145 |
 | | | | | **+5.845** |
 
-Two rare agreements carry 3.9 of the 5.8 bits. Rarity weighting **is** the signal.
+Two rare agreements carry 3.9 of the 5.8 bits. Rarity weighting **is** the
+signal — which is also why the typical pair, agreeing only on common values,
+lands near a bit.
 
 ### 4.4 Prior — derived from pool composition
 
@@ -340,9 +364,16 @@ that looks broken to anyone who hasn't followed the derivation.
 Render instead:
 
 ```
-rank 2 of 10,482   ·   +5.85 bits
+rank 2 of 10,482   ·   +5.85 bits          ← a strong match (top ~8%)
 driven by: roof entry, disabled CCTV, cutter marks
+
+rank 7 of 10,482   ·   +1.10 bits          ← what most true links look like
+driven by: night, 2-3 persons
 ```
+
+Design the panel for the second one. A shortlist of median-strength links is
+the normal case; show the bit total next to the pool's typical range so an
+analyst can tell a rare-value match from an ordinary one.
 
 Contribution bar chart: supporting evidence right, opposing left, marker at the
 break-even bit line so the analyst sees how far short of certainty the evidence
@@ -362,10 +393,16 @@ falls.
 4. **Base rate.** MO evidence alone cannot clear a −14 to −16 bit prior. The
    system is a ranker, not a classifier. Extra bits must come from *outside* the
    MO distribution — recovered property serials, pawnshop records, vehicle
-   sightings — not from more MO columns.
-5. **Protected attributes excluded by design.** No caste, religion or community
+   sightings — not from more MO columns. Measured: true pairs average +0.4 to
+   +2.1 bits, median +0.0 to +1.5 (§4.3).
+5. **Extraction quality is not the bottleneck; information is.** Replacing LLM
+   extraction with the true values for the free-text state moves same-type
+   hit@10 from 0.136 to 0.158 — 2.2 points. Effort spent on extraction prompts
+   or extra passes buys almost nothing; the ceiling is in how few bits an FIR's
+   MO carries. (`results/pre_core_fix/eval_oracle.json`)
+6. **Protected attributes excluded by design.** No caste, religion or community
    fields. Say so explicitly.
-6. **Serious crime out of scope.** The method extends there, and international
+7. **Serious crime out of scope.** The method extends there, and international
    systems like ViCLAS operate there, but it needs analyst-coded input, tighter
    access control, and a legal basis for sensitive inter-state sharing. Scoped to
    property crime where the data is honest and a false link is recoverable.

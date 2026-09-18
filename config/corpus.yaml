@@ -43,6 +43,18 @@ style:
   axes: [stealth, planned, group]
   sd: 1.0
 
+# SWEEP 0 -> 1. How much of an offender's mo_core habit (time band, group
+# size, concealment, target selection, approach, tools, property, exit) is
+# person-level and therefore carries across the crime types they commit;
+# mo_ext stays type-specific. 0 draws core habits independently per type,
+# which is what the generator did before 2026-09-18 and contradicts why the
+# core/extension split exists (see FINDINGS.md).
+#
+# Deliberately null: no published figure says how much habit transfers
+# between offence types, so there is no defensible default. Pass
+# --cross-type-sharing explicitly and report the curve, never one value.
+cross_type_sharing: null
+
 # Chosen by `python -m linkage.generate.tau --n-cases 45000`; rule, per-seed
 # numbers and the two discarded sweeps are in config/tau_selection.json.
 # Smallest grid τ where truth MI is significant and survives recording on all

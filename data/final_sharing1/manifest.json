@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-09-18T07:50:21+00:00",
+  "generated_at": "2026-09-18T07:56:31+00:00",
   "synthetic": true,
-  "command": "python -m linkage.generate --seed 7 --n-cases 45000 --cross-type-sharing 0 --out data/final/",
+  "command": "python -m linkage.generate --seed 7 --n-cases 45000 --cross-type-sharing 1.0 --out data/final_sharing1/",
   "seed": 7,
   "corruption_seed": 7,
   "overrides": {
     "n_cases": 45000,
-    "cross_type_sharing": 0.0
+    "cross_type_sharing": 1.0
   },
   "versions": {
     "python": "3.12.5",
@@ -17,7 +17,7 @@
     "alpha": 1.25,
     "repeat_rate": 0.5,
     "tau": 0.75,
-    "cross_type_sharing": 0.0
+    "cross_type_sharing": 1.0
   },
   "counts": {
     "cases": 45000,
@@ -78,134 +78,134 @@
     ],
     "note": "Do mo_core habits transfer across crime types?",
     "same_offender_same_type": {
-      "time_band": 0.708,
-      "group_size_est": 0.71,
-      "counter_forensic": 0.78,
-      "target_selection": 0.778
+      "time_band": 0.704,
+      "group_size_est": 0.724,
+      "counter_forensic": 0.777,
+      "target_selection": 0.762
     },
     "random_same_type": {
-      "time_band": 0.402,
-      "group_size_est": 0.442,
-      "counter_forensic": 0.647,
-      "target_selection": 0.523
+      "time_band": 0.4,
+      "group_size_est": 0.443,
+      "counter_forensic": 0.648,
+      "target_selection": 0.521
     },
     "same_offender_cross_type": {
-      "time_band": 0.41,
-      "group_size_est": 0.453,
-      "counter_forensic": 0.496,
-      "target_selection": 0.553
+      "time_band": 0.619,
+      "group_size_est": 0.626,
+      "counter_forensic": 0.658,
+      "target_selection": 0.663
     },
     "random_cross_type": {
-      "time_band": 0.354,
-      "group_size_est": 0.402,
-      "counter_forensic": 0.504,
-      "target_selection": 0.454
+      "time_band": 0.353,
+      "group_size_est": 0.397,
+      "counter_forensic": 0.509,
+      "target_selection": 0.452
     },
     "lift_same_type": {
-      "time_band": 0.306,
-      "group_size_est": 0.268,
-      "counter_forensic": 0.133,
-      "target_selection": 0.255
+      "time_band": 0.304,
+      "group_size_est": 0.281,
+      "counter_forensic": 0.129,
+      "target_selection": 0.241
     },
-    "mean_lift_same_type": 0.24,
+    "mean_lift_same_type": 0.239,
     "lift_cross_type": {
-      "time_band": 0.056,
-      "group_size_est": 0.051,
-      "counter_forensic": -0.008,
-      "target_selection": 0.099
+      "time_band": 0.266,
+      "group_size_est": 0.229,
+      "counter_forensic": 0.149,
+      "target_selection": 0.211
     },
-    "mean_lift_cross_type": 0.05
+    "mean_lift_cross_type": 0.214
   },
   "marginal_drift_largest": [
     {
-      "value": "ATM_TAMPERING.attack_method.explosive",
-      "config": 0.05,
-      "realised": 0.0642,
-      "relative_drift": 0.284
-    },
-    {
-      "value": "BURGLARY_COMMERCIAL.tools.gas_cutter",
-      "config": 0.08,
-      "realised": 0.0989,
-      "relative_drift": 0.236
-    },
-    {
-      "value": "VEHICLE_THEFT.ignition_method.key_left",
-      "config": 0.1,
-      "realised": 0.1193,
-      "relative_drift": 0.193
+      "value": "BURGLARY_RESIDENTIAL.tools.gas_cutter",
+      "config": 0.02,
+      "realised": 0.0254,
+      "relative_drift": 0.27
     },
     {
       "value": "SNATCHING.group_size_est.4+",
       "config": 0.03,
-      "realised": 0.0358,
-      "relative_drift": 0.193
+      "realised": 0.0367,
+      "relative_drift": 0.223
     },
     {
-      "value": "BURGLARY_COMMERCIAL.property_taken.vehicle",
-      "config": 0.02,
-      "realised": 0.0238,
-      "relative_drift": 0.19
+      "value": "VEHICLE_THEFT.ignition_method.key_left",
+      "config": 0.1,
+      "realised": 0.1213,
+      "relative_drift": 0.213
     },
     {
-      "value": "SNATCHING.tools.cutter",
-      "config": 0.02,
-      "realised": 0.0163,
-      "relative_drift": -0.185
+      "value": "BURGLARY_COMMERCIAL.tools.gas_cutter",
+      "config": 0.08,
+      "realised": 0.0967,
+      "relative_drift": 0.209
     },
     {
-      "value": "BURGLARY_RESIDENTIAL.entry_point.wall_breach",
-      "config": 0.04,
-      "realised": 0.0473,
-      "relative_drift": 0.183
+      "value": "ATM_TAMPERING.group_size_est.4+",
+      "config": 0.15,
+      "realised": 0.1782,
+      "relative_drift": 0.188
     },
     {
       "value": "BURGLARY_COMMERCIAL.entry_method.duplicate_key",
       "config": 0.08,
-      "realised": 0.094,
-      "relative_drift": 0.175
-    },
-    {
-      "value": "SNATCHING.counter_forensic.gloves",
-      "config": 0.03,
-      "realised": 0.0248,
-      "relative_drift": -0.173
-    },
-    {
-      "value": "SNATCHING.target_selection.insider_info",
-      "config": 0.02,
-      "realised": 0.0168,
-      "relative_drift": -0.16
-    },
-    {
-      "value": "ATM_TAMPERING.property_taken.electronics",
-      "config": 0.02,
-      "realised": 0.0232,
-      "relative_drift": 0.16
+      "realised": 0.0945,
+      "relative_drift": 0.181
     },
     {
       "value": "ATM_TAMPERING.alarm_defeated.defeated",
       "config": 0.3,
-      "realised": 0.3454,
-      "relative_drift": 0.151
+      "realised": 0.3489,
+      "relative_drift": 0.163
     },
     {
-      "value": "SNATCHING.counter_forensic.cctv_disabled",
-      "config": 0.02,
-      "realised": 0.0171,
-      "relative_drift": -0.145
+      "value": "ATM_TAMPERING.attack_method.explosive",
+      "config": 0.05,
+      "realised": 0.0581,
+      "relative_drift": 0.162
     },
     {
-      "value": "ATM_TAMPERING.time_band.day",
-      "config": 0.1,
-      "realised": 0.0859,
-      "relative_drift": -0.141
+      "value": "BURGLARY_RESIDENTIAL.entry_point.wall_breach",
+      "config": 0.04,
+      "realised": 0.0464,
+      "relative_drift": 0.16
     },
     {
       "value": "BURGLARY_COMMERCIAL.entry_point.wall_breach",
       "config": 0.1,
-      "realised": 0.1125,
-      "relative_drift": 0.125
+      "realised": 0.115,
+      "relative_drift": 0.15
+    },
+    {
+      "value": "ATM_TAMPERING.time_band.day",
+      "config": 0.1,
+      "realised": 0.0856,
+      "relative_drift": -0.144
+    },
+    {
+      "value": "SNATCHING.counter_forensic.gloves",
+      "config": 0.03,
+      "realised": 0.0262,
+      "relative_drift": -0.127
+    },
+    {
+      "value": "ATM_TAMPERING.target_selection.insider_info",
+      "config": 0.1,
+      "realised": 0.112,
+      "relative_drift": 0.12
+    },
+    {
+      "value": "ATM_TAMPERING.property_taken.electronics",
+      "config": 0.02,
+      "realised": 0.0224,
+      "relative_drift": 0.12
+    },
+    {
+      "value": "SNATCHING.victim_activity.riding_pillion",
+      "config": 0.08,
+      "realised": 0.0895,
+      "relative_drift": 0.119
     }
   ],
   "realised_marginals": {
@@ -240,113 +240,113 @@
       "time_band": {
         "night": {
           "config": 0.52,
-          "realised": 0.5167,
-          "serial_only": 0.5024
+          "realised": 0.5192,
+          "serial_only": 0.5203
         },
         "early_morning": {
           "config": 0.18,
-          "realised": 0.1799,
-          "serial_only": 0.1783
+          "realised": 0.1765,
+          "serial_only": 0.1545
         },
         "day": {
           "config": 0.3,
-          "realised": 0.3034,
-          "serial_only": 0.3193
+          "realised": 0.3043,
+          "serial_only": 0.3252
         }
       },
       "group_size_est": {
         "1": {
           "config": 0.34,
-          "realised": 0.343,
-          "serial_only": 0.3571
+          "realised": 0.3424,
+          "serial_only": 0.3528
         },
         "2-3": {
           "config": 0.48,
-          "realised": 0.4757,
-          "serial_only": 0.4554
+          "realised": 0.4742,
+          "serial_only": 0.4452
         },
         "4+": {
           "config": 0.18,
-          "realised": 0.1813,
-          "serial_only": 0.1875
+          "realised": 0.1833,
+          "serial_only": 0.2021
         }
       },
       "tools": {
         "crowbar": {
           "config": 0.3,
-          "realised": 0.3122,
-          "serial_only": 0.3474
+          "realised": 0.3094,
+          "serial_only": 0.3279
         },
         "cutter": {
           "config": 0.16,
-          "realised": 0.1588,
-          "serial_only": 0.1632
+          "realised": 0.1616,
+          "serial_only": 0.1831
         },
         "screwdriver": {
           "config": 0.35,
-          "realised": 0.3396,
-          "serial_only": 0.315
+          "realised": 0.3443,
+          "serial_only": 0.3485
         },
         "gas_cutter": {
           "config": 0.02,
-          "realised": 0.0223,
-          "serial_only": 0.0405
+          "realised": 0.0254,
+          "serial_only": 0.0621
         }
       },
       "counter_forensic": {
         "none": {
           "config": 0.8,
-          "realised": 0.801,
-          "serial_only": 0.7898
+          "realised": 0.804,
+          "serial_only": 0.8109
         },
         "gloves": {
           "config": 0.1,
-          "realised": 0.0981,
-          "serial_only": 0.1151
+          "realised": 0.0946,
+          "serial_only": 0.0902
         },
         "face_covered": {
           "config": 0.07,
-          "realised": 0.0699,
-          "serial_only": 0.0589
+          "realised": 0.0708,
+          "serial_only": 0.0654
         },
         "cctv_disabled": {
           "config": 0.03,
-          "realised": 0.0309,
-          "serial_only": 0.0362
+          "realised": 0.0306,
+          "serial_only": 0.0335
         }
       },
       "target_selection": {
         "opportunistic": {
           "config": 0.55,
-          "realised": 0.5399,
-          "serial_only": 0.49
+          "realised": 0.5428,
+          "serial_only": 0.5105
         },
         "scouted": {
           "config": 0.37,
-          "realised": 0.3787,
-          "serial_only": 0.4122
+          "realised": 0.3773,
+          "serial_only": 0.4025
         },
         "insider_info": {
           "config": 0.08,
-          "realised": 0.0814,
-          "serial_only": 0.0978
+          "realised": 0.0799,
+          "serial_only": 0.087
         }
       },
       "property_taken": {
         "gold": {
           "config": 0.61,
-          "realised": 0.6117,
-          "serial_only": 0.6197
+          "realised": 0.6135,
+          "serial_only": 0.6321
         },
         "cash": {
           "config": 0.54,
-          "realised": 0.5354,
-          "serial_only": 0.5505
+          "realised": 0.537,
+          "serial_only": 0.5619
         },
         "electronics": {
           "config": 0.35,
-          "realised": 0.3461,
-          "serial_only": 0.3479
+          "realised": 0.3428,
+          "serial_only": 0.3247
         },
         "documents": {
           "config": 0.08,
@@ -355,152 +355,152 @@
         },
         "vehicle": {
           "config": 0.04,
-          "realised": 0.0397,
-          "serial_only": 0.0378
+          "realised": 0.0417,
+          "serial_only": 0.0519
         }
       },
       "approach_mode": {
         "on_foot": {
           "config": 0.4,
-          "realised": 0.4005,
-          "serial_only": 0.4117
+          "realised": 0.4009,
+          "serial_only": 0.4149
         },
         "two_wheeler": {
           "config": 0.45,
-          "realised": 0.446,
-          "serial_only": 0.4046
+          "realised": 0.4425,
+          "serial_only": 0.3803
         },
         "four_wheeler": {
           "config": 0.15,
-          "realised": 0.1536,
-          "serial_only": 0.1837
+          "realised": 0.1565,
+          "serial_only": 0.2048
         }
       },
       "exit_mode": {
         "on_foot": {
           "config": 0.35,
-          "realised": 0.3907,
-          "serial_only": 0.3944
+          "realised": 0.3929,
+          "serial_only": 0.4095
         },
         "two_wheeler": {
           "config": 0.48,
-          "realised": 0.453,
-          "serial_only": 0.4165
+          "realised": 0.4486,
+          "serial_only": 0.3852
         },
         "four_wheeler": {
           "config": 0.17,
-          "realised": 0.1562,
-          "serial_only": 0.1891
+          "realised": 0.1585,
+          "serial_only": 0.2053
         }
       },
       "entry_point": {
         "door": {
           "config": 0.55,
-          "realised": 0.5408,
-          "serial_only": 0.5219
+          "realised": 0.5377,
+          "serial_only": 0.5003
         },
         "window": {
           "config": 0.25,
-          "realised": 0.2501,
-          "serial_only": 0.2237
+          "realised": 0.2531,
+          "serial_only": 0.2453
         },
         "balcony": {
           "config": 0.1,
-          "realised": 0.0992,
-          "serial_only": 0.1037
+          "realised": 0.0982,
+          "serial_only": 0.0967
         },
         "roof": {
           "config": 0.06,
-          "realised": 0.0627,
-          "serial_only": 0.0621
+          "realised": 0.0646,
+          "serial_only": 0.0751
         },
         "wall_breach": {
           "config": 0.04,
-          "realised": 0.0473,
-          "serial_only": 0.0886
+          "realised": 0.0464,
+          "serial_only": 0.0827
         }
       },
       "entry_method": {
         "lock_broken": {
           "config": 0.45,
-          "realised": 0.4393,
-          "serial_only": 0.3901
+          "realised": 0.4428,
+          "serial_only": 0.4149
         },
         "forced_open": {
           "config": 0.25,
-          "realised": 0.2596,
-          "serial_only": 0.269
+          "realised": 0.2557,
+          "serial_only": 0.242
         },
         "grill_cut": {
           "config": 0.1,
-          "realised": 0.0981,
-          "serial_only": 0.0908
+          "realised": 0.1004,
+          "serial_only": 0.107
         },
         "no_force": {
           "config": 0.12,
-          "realised": 0.1173,
-          "serial_only": 0.1226
+          "realised": 0.1153,
+          "serial_only": 0.108
         },
         "duplicate_key": {
           "config": 0.08,
-          "realised": 0.0857,
-          "serial_only": 0.1275
+          "realised": 0.0858,
+          "serial_only": 0.128
         }
       },
       "premise": {
         "independent_house": {
           "config": 0.42,
-          "realised": 0.4194,
-          "serial_only": 0.4052
+          "realised": 0.4231,
+          "serial_only": 0.4317
         },
         "apartment": {
           "config": 0.4,
-          "realised": 0.3928,
-          "serial_only": 0.3825
+          "realised": 0.3953,
+          "serial_only": 0.4003
         },
         "row_house": {
           "config": 0.12,
-          "realised": 0.1291,
-          "serial_only": 0.1426
+          "realised": 0.1258,
+          "serial_only": 0.1194
         },
         "mixed_use": {
           "config": 0.06,
-          "realised": 0.0587,
-          "serial_only": 0.0697
+          "realised": 0.0557,
+          "serial_only": 0.0486
         }
       },
       "occupancy": {
         "occupied": {
           "config": 0.22,
-          "realised": 0.224,
-          "serial_only": 0.2388
+          "realised": 0.2236,
+          "serial_only": 0.2361
         },
         "temporarily_away": {
           "config": 0.58,
-          "realised": 0.5798,
-          "serial_only": 0.544
+          "realised": 0.5785,
+          "serial_only": 0.5343
         },
         "vacant_extended": {
           "config": 0.2,
-          "realised": 0.1961,
-          "serial_only": 0.2172
+          "realised": 0.1979,
+          "serial_only": 0.2296
         }
       },
       "search_pattern": {
         "selective": {
           "config": 0.28,
-          "realised": 0.2719,
-          "serial_only": 0.2528
+          "realised": 0.2739,
+          "serial_only": 0.2669
         },
         "ransacked": {
           "config": 0.57,
-          "realised": 0.5723,
-          "serial_only": 0.5543
+          "realised": 0.5735,
+          "serial_only": 0.5629
         },
         "targeted": {
           "config": 0.15,
-          "realised": 0.1559,
-          "serial_only": 0.1929
+          "realised": 0.1526,
+          "serial_only": 0.1702
         }
       }
     },
@@ -508,262 +508,262 @@
       "time_band": {
         "night": {
           "config": 0.7,
-          "realised": 0.6946,
-          "serial_only": 0.6803
+          "realised": 0.6952,
+          "serial_only": 0.6846
         },
         "early_morning": {
           "config": 0.2,
-          "realised": 0.1991,
-          "serial_only": 0.1924
+          "realised": 0.2033,
+          "serial_only": 0.2192
         },
         "day": {
           "config": 0.1,
-          "realised": 0.1064,
-          "serial_only": 0.1273
+          "realised": 0.1015,
+          "serial_only": 0.0962
         }
       },
       "group_size_est": {
         "1": {
           "config": 0.25,
-          "realised": 0.2429,
-          "serial_only": 0.2164
+          "realised": 0.2394,
+          "serial_only": 0.1938
         },
         "2-3": {
           "config": 0.5,
-          "realised": 0.4975,
-          "serial_only": 0.4356
+          "realised": 0.5001,
+          "serial_only": 0.4526
         },
         "4+": {
           "config": 0.25,
-          "realised": 0.2596,
-          "serial_only": 0.3479
+          "realised": 0.2605,
+          "serial_only": 0.3536
         }
       },
       "tools": {
         "crowbar": {
           "config": 0.4,
-          "realised": 0.3922,
-          "serial_only": 0.4356
+          "realised": 0.3856,
+          "serial_only": 0.3932
         },
         "cutter": {
           "config": 0.35,
-          "realised": 0.3435,
-          "serial_only": 0.3748
+          "realised": 0.342,
+          "serial_only": 0.3649
         },
         "screwdriver": {
           "config": 0.2,
-          "realised": 0.2048,
-          "serial_only": 0.2093
+          "realised": 0.2008,
+          "serial_only": 0.1839
         },
         "gas_cutter": {
           "config": 0.08,
-          "realised": 0.0989,
-          "serial_only": 0.2207
+          "realised": 0.0967,
+          "serial_only": 0.2065
         }
       },
       "counter_forensic": {
         "none": {
           "config": 0.65,
-          "realised": 0.6391,
-          "serial_only": 0.5827
+          "realised": 0.6382,
+          "serial_only": 0.5771
         },
         "gloves": {
           "config": 0.12,
-          "realised": 0.124,
-          "serial_only": 0.1287
+          "realised": 0.126,
+          "serial_only": 0.1414
         },
         "face_covered": {
           "config": 0.13,
-          "realised": 0.1374,
-          "serial_only": 0.1782
+          "realised": 0.1321,
+          "serial_only": 0.1443
         },
         "cctv_disabled": {
           "config": 0.1,
-          "realised": 0.0995,
-          "serial_only": 0.1103
+          "realised": 0.1037,
+          "serial_only": 0.1372
         }
       },
       "target_selection": {
         "opportunistic": {
           "config": 0.4,
-          "realised": 0.3966,
-          "serial_only": 0.3593
+          "realised": 0.3907,
+          "serial_only": 0.3211
         },
         "scouted": {
           "config": 0.48,
-          "realised": 0.471,
-          "serial_only": 0.4752
+          "realised": 0.4783,
+          "serial_only": 0.5219
         },
         "insider_info": {
           "config": 0.12,
-          "realised": 0.1323,
-          "serial_only": 0.1655
+          "realised": 0.131,
+          "serial_only": 0.157
         }
       },
       "property_taken": {
         "gold": {
           "config": 0.15,
-          "realised": 0.1497,
-          "serial_only": 0.1697
+          "realised": 0.146,
+          "serial_only": 0.1457
         },
         "cash": {
           "config": 0.6,
-          "realised": 0.6021,
-          "serial_only": 0.5926
+          "realised": 0.6038,
+          "serial_only": 0.604
         },
         "electronics": {
           "config": 0.4,
-          "realised": 0.4004,
-          "serial_only": 0.396
+          "realised": 0.397,
+          "serial_only": 0.3748
         },
         "documents": {
           "config": 0.1,
-          "realised": 0.1017,
-          "serial_only": 0.0905
+          "realised": 0.1022,
+          "serial_only": 0.0934
         },
         "vehicle": {
           "config": 0.02,
-          "realised": 0.0238,
-          "serial_only": 0.0325
+          "realised": 0.022,
+          "serial_only": 0.0212
         }
       },
       "approach_mode": {
         "on_foot": {
           "config": 0.25,
-          "realised": 0.2455,
-          "serial_only": 0.2051
+          "realised": 0.2488,
+          "serial_only": 0.2263
         },
         "two_wheeler": {
           "config": 0.4,
-          "realised": 0.3896,
-          "serial_only": 0.3536
+          "realised": 0.3885,
+          "serial_only": 0.3465
         },
         "four_wheeler": {
           "config": 0.35,
-          "realised": 0.3649,
-          "serial_only": 0.4413
+          "realised": 0.3627,
+          "serial_only": 0.4272
         }
       },
       "exit_mode": {
         "on_foot": {
           "config": 0.2,
-          "realised": 0.2348,
-          "serial_only": 0.1938
+          "realised": 0.2376,
+          "serial_only": 0.2122
         },
         "two_wheeler": {
           "config": 0.4,
-          "realised": 0.3865,
-          "serial_only": 0.3536
+          "realised": 0.3854,
+          "serial_only": 0.3465
         },
         "four_wheeler": {
           "config": 0.4,
-          "realised": 0.3788,
-          "serial_only": 0.4526
+          "realised": 0.377,
+          "serial_only": 0.4413
         }
       },
       "entry_point": {
         "door": {
           "config": 0.3,
-          "realised": 0.301,
-          "serial_only": 0.2857
+          "realised": 0.2933,
+          "serial_only": 0.2362
         },
         "shutter": {
           "config": 0.4,
-          "realised": 0.3856,
-          "serial_only": 0.3819
+          "realised": 0.3821,
+          "serial_only": 0.3593
         },
         "window": {
           "config": 0.1,
-          "realised": 0.0971,
-          "serial_only": 0.082
+          "realised": 0.1035,
+          "serial_only": 0.1231
         },
         "roof": {
           "config": 0.1,
-          "realised": 0.1037,
-          "serial_only": 0.1146
+          "realised": 0.1061,
+          "serial_only": 0.1301
         },
         "wall_breach": {
           "config": 0.1,
-          "realised": 0.1125,
-          "serial_only": 0.1358
+          "realised": 0.115,
+          "serial_only": 0.1513
         }
       },
       "entry_method": {
         "lock_broken": {
           "config": 0.5,
-          "realised": 0.4854,
-          "serial_only": 0.3847
+          "realised": 0.5056,
+          "serial_only": 0.5149
         },
         "forced_open": {
           "config": 0.25,
-          "realised": 0.2449,
-          "serial_only": 0.2645
+          "realised": 0.2348,
+          "serial_only": 0.1994
         },
         "grill_cut": {
           "config": 0.1,
-          "realised": 0.1042,
-          "serial_only": 0.1174
+          "realised": 0.0973,
+          "serial_only": 0.0736
         },
         "no_force": {
           "config": 0.07,
-          "realised": 0.0716,
-          "serial_only": 0.0849
+          "realised": 0.0678,
+          "serial_only": 0.0608
         },
         "duplicate_key": {
           "config": 0.08,
-          "realised": 0.094,
-          "serial_only": 0.1485
+          "realised": 0.0945,
+          "serial_only": 0.1513
         }
       },
       "premise": {
         "shop": {
           "config": 0.55,
-          "realised": 0.5296,
-          "serial_only": 0.4144
+          "realised": 0.5362,
+          "serial_only": 0.4569
         },
         "office": {
           "config": 0.15,
-          "realised": 0.1482,
-          "serial_only": 0.1556
+          "realised": 0.1442,
+          "serial_only": 0.1301
         },
         "warehouse": {
           "config": 0.2,
-          "realised": 0.2237,
-          "serial_only": 0.3564
+          "realised": 0.2193,
+          "serial_only": 0.3281
         },
         "mixed_use": {
           "config": 0.1,
-          "realised": 0.0984,
-          "serial_only": 0.0736
+          "realised": 0.1002,
+          "serial_only": 0.0849
         }
       },
       "occupancy": {
         "closed_overnight": {
           "config": 0.8,
-          "realised": 0.7906,
-          "serial_only": 0.7115
+          "realised": 0.7926,
+          "serial_only": 0.7242
         },
         "closed_extended": {
           "config": 0.2,
-          "realised": 0.2094,
-          "serial_only": 0.2885
+          "realised": 0.2074,
+          "serial_only": 0.2758
         }
       },
       "search_pattern": {
         "selective": {
           "config": 0.35,
-          "realised": 0.3495,
-          "serial_only": 0.3975
+          "realised": 0.333,
+          "serial_only": 0.2914
         },
         "ransacked": {
           "config": 0.45,
-          "realised": 0.4358,
-          "serial_only": 0.3239
+          "realised": 0.4554,
+          "serial_only": 0.4498
         },
         "targeted": {
           "config": 0.2,
-          "realised": 0.2147,
-          "serial_only": 0.2786
+          "realised": 0.2116,
+          "serial_only": 0.2588
         }
       }
     },
@@ -771,30 +771,30 @@
       "time_band": {
         "night": {
           "config": 0.45,
-          "realised": 0.4519,
-          "serial_only": 0.4753
+          "realised": 0.4526,
+          "serial_only": 0.48
         },
         "early_morning": {
           "config": 0.15,
-          "realised": 0.1496,
-          "serial_only": 0.1309
+          "realised": 0.1504,
+          "serial_only": 0.136
         },
         "day": {
           "config": 0.4,
-          "realised": 0.3986,
-          "serial_only": 0.3939
+          "realised": 0.3971,
+          "serial_only": 0.3841
         }
       },
       "group_size_est": {
         "1": {
           "config": 0.55,
-          "realised": 0.5608,
-          "serial_only": 0.607
+          "realised": 0.5609,
+          "serial_only": 0.6078
         },
         "2-3": {
           "config": 0.4,
-          "realised": 0.3901,
-          "serial_only": 0.3402
+          "realised": 0.39,
+          "serial_only": 0.3393
         },
         "4+": {
           "config": 0.05,
@@ -805,62 +805,62 @@
       "tools": {
         "crowbar": {
           "config": 0.03,
-          "realised": 0.0308,
-          "serial_only": 0.0239
+          "realised": 0.0314,
+          "serial_only": 0.0277
         },
         "cutter": {
           "config": 0.1,
-          "realised": 0.1006,
-          "serial_only": 0.0968
+          "realised": 0.0997,
+          "serial_only": 0.0908
         },
         "screwdriver": {
           "config": 0.35,
-          "realised": 0.345,
-          "serial_only": 0.3559
+          "realised": 0.3445,
+          "serial_only": 0.3525
         },
         "gas_cutter": {
           "config": 0.01,
-          "realised": 0.0107,
-          "serial_only": 0.0128
+          "realised": 0.01,
+          "serial_only": 0.0081
         }
       },
       "counter_forensic": {
         "none": {
           "config": 0.85,
-          "realised": 0.8483,
-          "serial_only": 0.8525
+          "realised": 0.847,
+          "serial_only": 0.8436
         },
         "gloves": {
           "config": 0.05,
-          "realised": 0.053,
-          "serial_only": 0.0537
+          "realised": 0.0546,
+          "serial_only": 0.0648
         },
         "face_covered": {
           "config": 0.07,
-          "realised": 0.0694,
-          "serial_only": 0.0614
+          "realised": 0.0698,
+          "serial_only": 0.0639
         },
         "cctv_disabled": {
           "config": 0.03,
-          "realised": 0.0293,
-          "serial_only": 0.0324
+          "realised": 0.0285,
+          "serial_only": 0.0277
         }
       },
       "target_selection": {
         "opportunistic": {
           "config": 0.7,
-          "realised": 0.7035,
-          "serial_only": 0.7242
+          "realised": 0.7021,
+          "serial_only": 0.7148
         },
         "scouted": {
           "config": 0.25,
-          "realised": 0.245,
-          "serial_only": 0.2255
+          "realised": 0.247,
+          "serial_only": 0.2383
         },
         "insider_info": {
           "config": 0.05,
-          "realised": 0.0514,
-          "serial_only": 0.0503
+          "realised": 0.0509,
+          "serial_only": 0.0469
         }
       },
       "property_taken": {
@@ -871,18 +871,18 @@
         },
         "cash": {
           "config": 0.02,
-          "realised": 0.0198,
-          "serial_only": 0.0209
+          "realised": 0.0211,
+          "serial_only": 0.0298
         },
         "electronics": {
           "config": 0.03,
-          "realised": 0.0289,
-          "serial_only": 0.0311
+          "realised": 0.0287,
+          "serial_only": 0.0298
         },
         "documents": {
           "config": 0.15,
-          "realised": 0.1519,
-          "serial_only": 0.1569
+          "realised": 0.1564,
+          "serial_only": 0.1867
         },
         "vehicle": {
           "config": 1.0,
@@ -893,18 +893,18 @@
       "approach_mode": {
         "on_foot": {
           "config": 0.6,
-          "realised": 0.6045,
-          "serial_only": 0.6257
+          "realised": 0.6078,
+          "serial_only": 0.6479
         },
         "two_wheeler": {
           "config": 0.35,
-          "realised": 0.3462,
-          "serial_only": 0.3278
+          "realised": 0.3417,
+          "serial_only": 0.298
         },
         "four_wheeler": {
           "config": 0.05,
-          "realised": 0.0493,
-          "serial_only": 0.0465
+          "realised": 0.0505,
+          "serial_only": 0.0541
         }
       },
       "exit_mode": {
@@ -915,89 +915,89 @@
         },
         "two_wheeler": {
           "config": 0.75,
-          "realised": 0.7546,
-          "serial_only": 0.772
+          "realised": 0.7528,
+          "serial_only": 0.76
         },
         "four_wheeler": {
           "config": 0.25,
-          "realised": 0.2454,
-          "serial_only": 0.228
+          "realised": 0.2472,
+          "serial_only": 0.24
         }
       },
       "vehicle_class": {
         "motorcycle": {
           "config": 0.5,
-          "realised": 0.5062,
-          "serial_only": 0.4919
+          "realised": 0.508,
+          "serial_only": 0.5034
         },
         "scooter": {
           "config": 0.25,
-          "realised": 0.2483,
-          "serial_only": 0.2801
+          "realised": 0.2448,
+          "serial_only": 0.2566
         },
         "car": {
           "config": 0.18,
-          "realised": 0.1755,
-          "serial_only": 0.1564
+          "realised": 0.1782,
+          "serial_only": 0.1743
         },
         "commercial": {
           "config": 0.07,
-          "realised": 0.0699,
-          "serial_only": 0.0716
+          "realised": 0.069,
+          "serial_only": 0.0656
         }
       },
       "ignition_method": {
         "duplicate_key": {
           "config": 0.3,
-          "realised": 0.3039,
-          "serial_only": 0.3312
+          "realised": 0.2972,
+          "serial_only": 0.2873
         },
         "direct_wiring": {
           "config": 0.25,
-          "realised": 0.2353,
-          "serial_only": 0.1795
+          "realised": 0.2377,
+          "serial_only": 0.1957
         },
         "handle_lock_broken": {
           "config": 0.25,
-          "realised": 0.2421,
-          "serial_only": 0.208
+          "realised": 0.2405,
+          "serial_only": 0.1978
         },
         "key_left": {
           "config": 0.1,
-          "realised": 0.1193,
-          "serial_only": 0.2042
+          "realised": 0.1213,
+          "serial_only": 0.2174
         },
         "towed_or_lifted": {
           "config": 0.1,
-          "realised": 0.0995,
-          "serial_only": 0.0772
+          "realised": 0.1032,
+          "serial_only": 0.1019
         }
       },
       "location_type": {
         "residential_parking": {
           "config": 0.35,
-          "realised": 0.3432,
-          "serial_only": 0.3333
+          "realised": 0.3447,
+          "serial_only": 0.3431
         },
         "street": {
           "config": 0.3,
-          "realised": 0.2993,
-          "serial_only": 0.2928
+          "realised": 0.3034,
+          "serial_only": 0.3201
         },
         "market": {
           "config": 0.15,
-          "realised": 0.1564,
-          "serial_only": 0.1871
+          "realised": 0.1532,
+          "serial_only": 0.1658
         },
         "public_parking": {
           "config": 0.12,
-          "realised": 0.1205,
-          "serial_only": 0.11
+          "realised": 0.1192,
+          "serial_only": 0.101
         },
         "transit_hub": {
           "config": 0.08,
-          "realised": 0.0805,
-          "serial_only": 0.0767
+          "realised": 0.0795,
+          "serial_only": 0.0699
         }
       }
     },
@@ -1005,35 +1005,35 @@
       "time_band": {
         "night": {
           "config": 0.15,
-          "realised": 0.1355,
-          "serial_only": 0.1153
+          "realised": 0.1332,
+          "serial_only": 0.1026
         },
         "early_morning": {
           "config": 0.35,
-          "realised": 0.3341,
-          "serial_only": 0.2925
+          "realised": 0.3387,
+          "serial_only": 0.3185
         },
         "day": {
           "config": 0.5,
-          "realised": 0.5304,
-          "serial_only": 0.5923
+          "realised": 0.5281,
+          "serial_only": 0.5789
         }
       },
       "group_size_est": {
         "1": {
           "config": 0.25,
-          "realised": 0.2535,
-          "serial_only": 0.2678
+          "realised": 0.2452,
+          "serial_only": 0.2212
         },
         "2-3": {
           "config": 0.72,
-          "realised": 0.7108,
-          "serial_only": 0.6775
+          "realised": 0.7181,
+          "serial_only": 0.7189
         },
         "4+": {
           "config": 0.03,
-          "realised": 0.0358,
-          "serial_only": 0.0546
+          "realised": 0.0367,
+          "serial_only": 0.06
         }
       },
       "tools": {
@@ -1044,8 +1044,8 @@
         },
         "cutter": {
           "config": 0.02,
-          "realised": 0.0163,
-          "serial_only": 0.0187
+          "realised": 0.0198,
+          "serial_only": 0.0386
         },
         "screwdriver": {
           "config": 0.0,
@@ -1061,62 +1061,62 @@
       "counter_forensic": {
         "none": {
           "config": 0.55,
-          "realised": 0.559,
-          "serial_only": 0.6103
+          "realised": 0.5617,
+          "serial_only": 0.6256
         },
         "gloves": {
           "config": 0.03,
-          "realised": 0.0248,
-          "serial_only": 0.0187
+          "realised": 0.0262,
+          "serial_only": 0.0266
         },
         "face_covered": {
           "config": 0.4,
-          "realised": 0.3991,
-          "serial_only": 0.3591
+          "realised": 0.3936,
+          "serial_only": 0.3278
         },
         "cctv_disabled": {
           "config": 0.02,
-          "realised": 0.0171,
-          "serial_only": 0.012
+          "realised": 0.0185,
+          "serial_only": 0.02
         }
       },
       "target_selection": {
         "opportunistic": {
           "config": 0.75,
-          "realised": 0.7567,
-          "serial_only": 0.7928
+          "realised": 0.7508,
+          "serial_only": 0.7595
         },
         "scouted": {
           "config": 0.23,
-          "realised": 0.2266,
-          "serial_only": 0.1939
+          "realised": 0.2307,
+          "serial_only": 0.2172
         },
         "insider_info": {
           "config": 0.02,
-          "realised": 0.0168,
-          "serial_only": 0.0133
+          "realised": 0.0185,
+          "serial_only": 0.0233
         }
       },
       "property_taken": {
         "gold": {
           "config": 0.85,
-          "realised": 0.8488,
-          "serial_only": 0.8408
+          "realised": 0.8464,
+          "serial_only": 0.8268
         },
         "cash": {
           "config": 0.1,
-          "realised": 0.0923,
-          "serial_only": 0.0839
+          "realised": 0.0916,
+          "serial_only": 0.0799
         },
         "electronics": {
           "config": 0.2,
-          "realised": 0.2136,
-          "serial_only": 0.2432
+          "realised": 0.2128,
+          "serial_only": 0.2385
         },
         "documents": {
           "config": 0.03,
-          "realised": 0.0273,
-          "serial_only": 0.0247
+          "realised": 0.0286,
+          "serial_only": 0.032
         },
         "vehicle": {
           "config": 0.0,
@@ -1127,13 +1127,13 @@
       "approach_mode": {
         "on_foot": {
           "config": 0.12,
-          "realised": 0.1145,
-          "serial_only": 0.0999
+          "realised": 0.1217,
+          "serial_only": 0.1406
         },
         "two_wheeler": {
           "config": 0.85,
-          "realised": 0.8855,
-          "serial_only": 0.9001
+          "realised": 0.8783,
+          "serial_only": 0.8594
         },
         "four_wheeler": {
           "config": 0.03,
@@ -1144,13 +1144,13 @@
       "exit_mode": {
         "on_foot": {
           "config": 0.1,
-          "realised": 0.1145,
-          "serial_only": 0.0999
+          "realised": 0.1217,
+          "serial_only": 0.1406
         },
         "two_wheeler": {
           "config": 0.87,
-          "realised": 0.8855,
-          "serial_only": 0.9001
+          "realised": 0.8783,
+          "serial_only": 0.8594
         },
         "four_wheeler": {
           "config": 0.03,
@@ -1161,62 +1161,62 @@
       "vehicle_used": {
         "motorcycle": {
           "config": 0.65,
-          "realised": 0.6606,
-          "serial_only": 0.6815
+          "realised": 0.6536,
+          "serial_only": 0.6422
         },
         "scooter": {
           "config": 0.23,
-          "realised": 0.2249,
-          "serial_only": 0.2185
+          "realised": 0.2247,
+          "serial_only": 0.2172
         },
         "none": {
           "config": 0.12,
-          "realised": 0.1145,
-          "serial_only": 0.0999
+          "realised": 0.1217,
+          "serial_only": 0.1406
         }
       },
       "victim_activity": {
         "walking": {
           "config": 0.45,
-          "realised": 0.4483,
-          "serial_only": 0.445
+          "realised": 0.4495,
+          "serial_only": 0.4517
         },
         "morning_walk": {
           "config": 0.25,
-          "realised": 0.2384,
-          "serial_only": 0.1885
+          "realised": 0.2432,
+          "serial_only": 0.2159
         },
         "shopping": {
           "config": 0.12,
-          "realised": 0.127,
-          "serial_only": 0.1639
+          "realised": 0.1181,
+          "serial_only": 0.1139
         },
         "riding_pillion": {
           "config": 0.08,
-          "realised": 0.0887,
-          "serial_only": 0.1153
+          "realised": 0.0895,
+          "serial_only": 0.1193
         },
         "waiting_for_transport": {
           "config": 0.1,
-          "realised": 0.0976,
-          "serial_only": 0.0873
+          "realised": 0.0997,
+          "serial_only": 0.0993
         }
       },
       "escape_direction": {
         "main_road": {
           "config": 0.45,
-          "realised": 0.4693,
-          "serial_only": 0.509
+          "realised": 0.4697,
+          "serial_only": 0.511
         },
         "lanes": {
           "config": 0.4,
-          "realised": 0.3857,
-          "serial_only": 0.3364
+          "realised": 0.3812,
+          "serial_only": 0.3111
         },
         "highway": {
           "config": 0.15,
-          "realised": 0.145,
-          "serial_only": 0.1546
+          "realised": 0.1492,
+          "serial_only": 0.1779
         }
       }
     },
@@ -1224,8 +1224,8 @@
       "time_band": {
         "night": {
           "config": 0.65,
-          "realised": 0.6493,
-          "serial_only": 0.6145
+          "realised": 0.6496,
+          "serial_only": 0.6158
         },
         "early_morning": {
           "config": 0.25,
@@ -1234,69 +1234,69 @@
         },
         "day": {
           "config": 0.1,
-          "realised": 0.0859,
-          "serial_only": 0.0776
+          "realised": 0.0856,
+          "serial_only": 0.0763
         }
       },
       "group_size_est": {
         "1": {
           "config": 0.3,
-          "realised": 0.2853,
-          "serial_only": 0.2578
+          "realised": 0.2839,
+          "serial_only": 0.2516
         },
         "2-3": {
           "config": 0.55,
-          "realised": 0.5483,
-          "serial_only": 0.5369
+          "realised": 0.5379,
+          "serial_only": 0.4919
         },
         "4+": {
           "config": 0.15,
-          "realised": 0.1663,
-          "serial_only": 0.2053
+          "realised": 0.1782,
+          "serial_only": 0.2566
         }
       },
       "tools": {
         "crowbar": {
           "config": 0.15,
-          "realised": 0.1637,
-          "serial_only": 0.1865
+          "realised": 0.1611,
+          "serial_only": 0.1752
         },
         "cutter": {
           "config": 0.2,
-          "realised": 0.2075,
-          "serial_only": 0.2428
+          "realised": 0.2093,
+          "serial_only": 0.2503
         },
         "screwdriver": {
           "config": 0.3,
-          "realised": 0.3086,
-          "serial_only": 0.3104
+          "realised": 0.3106,
+          "serial_only": 0.3191
         },
         "gas_cutter": {
           "config": 0.25,
-          "realised": 0.4763,
-          "serial_only": 0.5507
+          "realised": 0.4784,
+          "serial_only": 0.5594
         }
       },
       "counter_forensic": {
         "none": {
           "config": 0.25,
-          "realised": 0.2276,
-          "serial_only": 0.1564
+          "realised": 0.2389,
+          "serial_only": 0.2053
         },
         "gloves": {
           "config": 0.15,
-          "realised": 0.1425,
-          "serial_only": 0.1327
+          "realised": 0.1509,
+          "serial_only": 0.169
         },
         "face_covered": {
           "config": 0.35,
-          "realised": 0.3498,
-          "serial_only": 0.3367
+          "realised": 0.3405,
+          "serial_only": 0.2966
         },
         "cctv_disabled": {
           "config": 0.25,
-          "realised": 0.2801,
-          "serial_only": 0.3742
+          "realised": 0.2697,
+          "serial_only": 0.3292
         }
       },
       "target_selection": {
@@ -1307,13 +1307,13 @@
         },
         "scouted": {
           "config": 0.75,
-          "realised": 0.7544,
-          "serial_only": 0.811
+          "realised": 0.7498,
+          "serial_only": 0.791
         },
         "insider_info": {
           "config": 0.1,
-          "realised": 0.1074,
-          "serial_only": 0.1139
+          "realised": 0.112,
+          "serial_only": 0.1339
         }
       },
       "property_taken": {
@@ -1324,13 +1324,13 @@
         },
         "cash": {
           "config": 0.9,
-          "realised": 0.9074,
-          "serial_only": 0.9212
+          "realised": 0.9062,
+          "serial_only": 0.9161
         },
         "electronics": {
           "config": 0.02,
-          "realised": 0.0232,
-          "serial_only": 0.02
+          "realised": 0.0224,
+          "serial_only": 0.0163
         },
         "documents": {
           "config": 0.0,
@@ -1346,91 +1346,91 @@
       "approach_mode": {
         "on_foot": {
           "config": 0.2,
-          "realised": 0.1913,
-          "serial_only": 0.164
+          "realised": 0.1846,
+          "serial_only": 0.1352
         },
         "two_wheeler": {
           "config": 0.45,
-          "realised": 0.4174,
-          "serial_only": 0.2816
+          "realised": 0.4319,
+          "serial_only": 0.3442
         },
         "four_wheeler": {
           "config": 0.35,
-          "realised": 0.3913,
-          "serial_only": 0.5544
+          "realised": 0.3835,
+          "serial_only": 0.5207
         }
       },
       "exit_mode": {
         "on_foot": {
           "config": 0.15,
-          "realised": 0.1811,
-          "serial_only": 0.1615
+          "realised": 0.1742,
+          "serial_only": 0.1314
         },
         "two_wheeler": {
           "config": 0.45,
-          "realised": 0.4177,
-          "serial_only": 0.2879
+          "realised": 0.4296,
+          "serial_only": 0.3392
         },
         "four_wheeler": {
           "config": 0.4,
-          "realised": 0.4012,
-          "serial_only": 0.5507
+          "realised": 0.3962,
+          "serial_only": 0.5294
         }
       },
       "machine_type": {
         "onsite_branch": {
           "config": 0.45,
-          "realised": 0.4174,
-          "serial_only": 0.3166
+          "realised": 0.438,
+          "serial_only": 0.4055
         },
         "offsite_kiosk": {
           "config": 0.4,
-          "realised": 0.4226,
-          "serial_only": 0.4919
+          "realised": 0.4049,
+          "serial_only": 0.4155
         },
         "white_label": {
           "config": 0.15,
-          "realised": 0.1599,
-          "serial_only": 0.1915
+          "realised": 0.157,
+          "serial_only": 0.179
         }
       },
       "attack_method": {
         "skimmer": {
           "config": 0.35,
-          "realised": 0.344,
-          "serial_only": 0.2854
+          "realised": 0.3507,
+          "serial_only": 0.3141
         },
         "cash_trap": {
           "config": 0.2,
-          "realised": 0.1927,
-          "serial_only": 0.2153
+          "realised": 0.1936,
+          "serial_only": 0.219
         },
         "gas_cutting": {
           "config": 0.25,
-          "realised": 0.2578,
-          "serial_only": 0.2666
+          "realised": 0.2595,
+          "serial_only": 0.2741
         },
         "physical_forcing": {
           "config": 0.15,
-          "realised": 0.1414,
-          "serial_only": 0.0876
+          "realised": 0.1382,
+          "serial_only": 0.0738
         },
         "explosive": {
           "config": 0.05,
-          "realised": 0.0642,
-          "serial_only": 0.1452
+          "realised": 0.0581,
+          "serial_only": 0.1189
         }
       },
       "alarm_defeated": {
         "defeated": {
           "config": 0.3,
-          "realised": 0.3454,
-          "serial_only": 0.4956
+          "realised": 0.3489,
+          "serial_only": 0.5106
         },
         "not_defeated": {
           "config": 0.7,
-          "realised": 0.6546,
-          "serial_only": 0.5044
+          "realised": 0.6511,
+          "serial_only": 0.4894
         }
       }
     }
@@ -1454,26 +1454,26 @@
     },
     "2_truth_mi": {
       "passed": true,
-      "observed_bits": 2.3973,
-      "null_mean_bits": 1.5,
-      "null_max_bits": 1.6621,
-      "excess_bits": 0.8972,
+      "observed_bits": 2.3501,
+      "null_mean_bits": 1.4746,
+      "null_max_bits": 1.6402,
+      "excess_bits": 0.8755,
       "criterion": "summed cross-field MI in serial truth (one crime per offender per type) exceeds all 50 permutation nulls"
     },
     "3_recorded_mi": {
       "passed": true,
-      "observed_bits": 3.3542,
-      "null_mean_bits": 2.7023,
-      "null_max_bits": 2.9785,
-      "excess_bits": 0.6519,
-      "excess_kept_vs_truth": 0.727,
+      "observed_bits": 3.2577,
+      "null_mean_bits": 2.7243,
+      "null_max_bits": 3.1031,
+      "excess_bits": 0.5334,
+      "excess_kept_vs_truth": 0.609,
       "criterion": "recorded MI exceeds all 50 permutation nulls and keeps >= 50% of truth's excess"
     },
     "4_cheat_detector": {
       "passed": true,
-      "auc_time_only": 0.8175,
-      "auc_time_plus_metadata": 0.8235,
-      "auc_metadata_only": 0.823,
+      "auc_time_only": 0.8176,
+      "auc_time_plus_metadata": 0.8236,
+      "auc_metadata_only": 0.8232,
       "metadata_added_auc": 0.006,
       "pairs": 31620,
       "not_run": "state predictability after normalisation: no normaliser exists yet",
@@ -1510,7 +1510,7 @@
           },
           "value_confusion": {
             "config": 0.12,
-            "realised_upper_bound": 0.1185
+            "realised_upper_bound": 0.1181
           }
         },
         "KA": {
@@ -1520,7 +1520,7 @@
           },
           "value_confusion": {
             "config": 0.08,
-            "realised_upper_bound": 0.0805
+            "realised_upper_bound": 0.0804
           }
         },
         "TG": {
@@ -3411,7 +3411,7 @@
         ],
         "sd": 1.0
       },
-      "cross_type_sharing": 0.0,
+      "cross_type_sharing": 1.0,
       "tau": 0.75,
       "series_length": {
         "minimum": 2,
