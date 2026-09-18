@@ -1,0 +1,250 @@
+{
+  "cases": 60,
+  "model": "llama3.2",
+  "mean_seconds_per_case": 3.5,
+  "overall": {
+    "accuracy": 0.8057,
+    "declined_when_unrecorded": 0.1818,
+    "recovered_when_unrecorded": 0.4805,
+    "invented_when_unrecorded": 0.3377,
+    "recorded": 494,
+    "correct": 398,
+    "unrecorded": 154,
+    "declined": 28,
+    "recovered": 74,
+    "invented": 52
+  },
+  "per_field": {
+    "group_size_est": {
+      "accuracy": 0.68,
+      "declined_when_unrecorded": 0.9,
+      "invented_when_unrecorded": 0.0,
+      "recorded": 50,
+      "correct": 34,
+      "unrecorded": 10,
+      "declined": 9,
+      "recovered": 1,
+      "invented": 0
+    },
+    "tools": {
+      "accuracy": 0.429,
+      "declined_when_unrecorded": 0.5,
+      "invented_when_unrecorded": 0.5,
+      "recorded": 56,
+      "correct": 24,
+      "unrecorded": 4,
+      "declined": 2,
+      "recovered": 0,
+      "invented": 2
+    },
+    "counter_forensic": {
+      "accuracy": 0.609,
+      "declined_when_unrecorded": 0.429,
+      "invented_when_unrecorded": 0.071,
+      "recorded": 46,
+      "correct": 28,
+      "unrecorded": 14,
+      "declined": 6,
+      "recovered": 7,
+      "invented": 1
+    },
+    "target_selection": {
+      "accuracy": 1.0,
+      "declined_when_unrecorded": 0.065,
+      "invented_when_unrecorded": 0.387,
+      "recorded": 29,
+      "correct": 29,
+      "unrecorded": 31,
+      "declined": 2,
+      "recovered": 17,
+      "invented": 12
+    },
+    "property_taken": {
+      "accuracy": 0.791,
+      "declined_when_unrecorded": 0.059,
+      "invented_when_unrecorded": 0.294,
+      "recorded": 43,
+      "correct": 34,
+      "unrecorded": 17,
+      "declined": 1,
+      "recovered": 11,
+      "invented": 5
+    },
+    "approach_mode": {
+      "accuracy": 0.959,
+      "declined_when_unrecorded": 0.0,
+      "invented_when_unrecorded": 0.182,
+      "recorded": 49,
+      "correct": 47,
+      "unrecorded": 11,
+      "declined": 0,
+      "recovered": 9,
+      "invented": 2
+    },
+    "exit_mode": {
+      "accuracy": 0.98,
+      "declined_when_unrecorded": 0.0,
+      "invented_when_unrecorded": 0.2,
+      "recorded": 50,
+      "correct": 49,
+      "unrecorded": 10,
+      "declined": 0,
+      "recovered": 8,
+      "invented": 2
+    },
+    "entry_point": {
+      "accuracy": 0.952,
+      "declined_when_unrecorded": 0.0,
+      "invented_when_unrecorded": 0.333,
+      "recorded": 21,
+      "correct": 20,
+      "unrecorded": 3,
+      "declined": 0,
+      "recovered": 2,
+      "invented": 1
+    },
+    "entry_method": {
+      "accuracy": 0.75,
+      "declined_when_unrecorded": 0.0,
+      "invented_when_unrecorded": 1.0,
+      "recorded": 20,
+      "correct": 15,
+      "unrecorded": 4,
+      "declined": 0,
+      "recovered": 0,
+      "invented": 4
+    },
+    "premise": {
+      "accuracy": 0.933,
+      "declined_when_unrecorded": 0.0,
+      "invented_when_unrecorded": 0.333,
+      "recorded": 15,
+      "correct": 14,
+      "unrecorded": 9,
+      "declined": 0,
+      "recovered": 6,
+      "invented": 3
+    },
+    "occupancy": {
+      "accuracy": 0.8,
+      "declined_when_unrecorded": 0.0,
+      "invented_when_unrecorded": 0.75,
+      "recorded": 20,
+      "correct": 16,
+      "unrecorded": 4,
+      "declined": 0,
+      "recovered": 1,
+      "invented": 3
+    },
+    "search_pattern": {
+      "accuracy": 0.733,
+      "declined_when_unrecorded": 0.111,
+      "invented_when_unrecorded": 0.667,
+      "recorded": 15,
+      "correct": 11,
+      "unrecorded": 9,
+      "declined": 1,
+      "recovered": 2,
+      "invented": 6
+    },
+    "vehicle_class": {
+      "accuracy": 1.0,
+      "declined_when_unrecorded": 0.4,
+      "invented_when_unrecorded": 0.4,
+      "recorded": 15,
+      "correct": 15,
+      "unrecorded": 5,
+      "declined": 2,
+      "recovered": 1,
+      "invented": 2
+    },
+    "ignition_method": {
+      "accuracy": 1.0,
+      "declined_when_unrecorded": 0.6,
+      "invented_when_unrecorded": 0.2,
+      "recorded": 15,
+      "correct": 15,
+      "unrecorded": 5,
+      "declined": 3,
+      "recovered": 1,
+      "invented": 1
+    },
+    "location_type": {
+      "accuracy": 1.0,
+      "declined_when_unrecorded": 0.0,
+      "invented_when_unrecorded": 0.667,
+      "recorded": 17,
+      "correct": 17,
+      "unrecorded": 3,
+      "declined": 0,
+      "recovered": 1,
+      "invented": 2
+    },
+    "vehicle_used": {
+      "accuracy": 1.0,
+      "declined_when_unrecorded": 0.0,
+      "invented_when_unrecorded": 1.0,
+      "recorded": 7,
+      "correct": 7,
+      "unrecorded": 1,
+      "declined": 0,
+      "recovered": 0,
+      "invented": 1
+    },
+    "victim_activity": {
+      "accuracy": 1.0,
+      "declined_when_unrecorded": 0.5,
+      "invented_when_unrecorded": 0.0,
+      "recorded": 6,
+      "correct": 6,
+      "unrecorded": 2,
+      "declined": 1,
+      "recovered": 1,
+      "invented": 0
+    },
+    "escape_direction": {
+      "accuracy": 1.0,
+      "declined_when_unrecorded": 0.0,
+      "invented_when_unrecorded": 0.667,
+      "recorded": 5,
+      "correct": 5,
+      "unrecorded": 3,
+      "declined": 0,
+      "recovered": 1,
+      "invented": 2
+    },
+    "machine_type": {
+      "accuracy": 1.0,
+      "declined_when_unrecorded": 0.5,
+      "invented_when_unrecorded": 0.0,
+      "recorded": 6,
+      "correct": 6,
+      "unrecorded": 2,
+      "declined": 1,
+      "recovered": 1,
+      "invented": 0
+    },
+    "attack_method": {
+      "accuracy": 0.8,
+      "declined_when_unrecorded": 0.0,
+      "invented_when_unrecorded": 0.667,
+      "recorded": 5,
+      "correct": 4,
+      "unrecorded": 3,
+      "declined": 0,
+      "recovered": 1,
+      "invented": 2
+    },
+    "alarm_defeated": {
+      "accuracy": 0.5,
+      "declined_when_unrecorded": 0.0,
+      "invented_when_unrecorded": 0.25,
+      "recorded": 4,
+      "correct": 2,
+      "unrecorded": 4,
+      "declined": 0,
+      "recovered": 3,
+      "invented": 1
+    }
+  }
+}

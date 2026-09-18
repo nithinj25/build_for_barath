@@ -276,12 +276,35 @@ First pilot, llama3.2 (3B), 41 cases, prompt without value descriptions:
 **55% accuracy** on recorded values, and on fields where nothing was recorded
 it **invented a value 23% of the time**. The failure was specific: with no
 explanation of what the enum values mean, the model could not map "wore
-gloves" to `gloves` and declined (counter_forensic 0%). The prompt now
-carries a hand-written field guide; the rerun and the full 8,295-case pass
-are pending. Invented values matter more than blanks here — a wrong value
-scores as evidence, a blank scores zero — so the rerun must report the
-invention rate, not just accuracy. Also expect optimism: the templated text
-and a guide written by the same author make this easier than real FIRs.
+gloves" to `gloves` and declined (counter_forensic 0%). With a hand-written field guide in the prompt (60 cases,
+`results/extraction_pilot_llama3.2.json`):
+
+| llama3.2 | no guide | with guide |
+|---|---|---|
+| accuracy on recorded values | 55% | **81%** |
+| unrecorded field: correctly left null | 56% | 18% |
+| unrecorded field: recovered the true value from the narrative | 21% | 48% |
+| unrecorded field: **invented a wrong value** | 23% | **34%** |
+
+The guide made the model answer more readily — much better where a value
+was recorded, but it now fills a third of unrecorded fields wrongly, and a
+wrong value scores as evidence where a blank scores zero.
+
+Does it help linkage anyway? Injecting errors into the free-text state's true
+values at exactly those measured rates, then retraining and evaluating
+(`scripts/simulate_extraction.py`, `results/extraction_simulation.json`):
+
+| free-text state's MO fields | same-type hit@10 | PR-AUC |
+|---|---|---|
+| blank (pipeline today) | 0.128 | 0.041 |
+| extracted at llama3.2's measured error rates | 0.141 | 0.041 |
+| perfect extraction | 0.156 | 0.046 |
+
+It helps despite the inventions, recovering about half of an already small
+gain, with PR-AUC unmoved — consistent with §3. This is a simulation of the
+extraction's effect, not a full run; the full 8,295-case pass (~4 h locally)
+is deferred as low value. Expect optimism throughout: the templated text and
+a guide written by the same author make extraction easier than real FIRs.
 
 ---
 

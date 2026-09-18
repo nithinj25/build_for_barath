@@ -1,0 +1,62 @@
+{
+  "note": "Is running the LLM over every free-text case worth it? python scripts/simulate_extraction.py",
+  "pilot_rates": {
+    "accuracy": 0.8057,
+    "declined_when_unrecorded": 0.1818,
+    "recovered_when_unrecorded": 0.4805,
+    "invented_when_unrecorded": 0.3377,
+    "recorded": 494,
+    "correct": 398,
+    "unrecorded": 154,
+    "declined": 28,
+    "recovered": 74,
+    "invented": 52
+  },
+  "conditions": {
+    "blank": {
+      "same_type": {
+        "hit_at_10": 0.1282,
+        "recall_at_10": 0.0618,
+        "precision_at_10": 0.0161,
+        "pr_auc": 0.0407
+      },
+      "cross_type": {
+        "hit_at_10": 0.0129,
+        "recall_at_10": 0.0062,
+        "precision_at_10": 0.0014,
+        "pr_auc": 0.0032,
+        "median_first_rank": 4722
+      }
+    },
+    "simulated": {
+      "same_type": {
+        "hit_at_10": 0.1411,
+        "recall_at_10": 0.0673,
+        "precision_at_10": 0.0178,
+        "pr_auc": 0.0406
+      },
+      "cross_type": {
+        "hit_at_10": 0.0129,
+        "recall_at_10": 0.0059,
+        "precision_at_10": 0.0014,
+        "pr_auc": 0.0034,
+        "median_first_rank": 4008
+      }
+    },
+    "perfect": {
+      "same_type": {
+        "hit_at_10": 0.1563,
+        "recall_at_10": 0.0718,
+        "precision_at_10": 0.0197,
+        "pr_auc": 0.0465
+      },
+      "cross_type": {
+        "hit_at_10": 0.0149,
+        "recall_at_10": 0.0068,
+        "precision_at_10": 0.0016,
+        "pr_auc": 0.0038,
+        "median_first_rank": 4218
+      }
+    }
+  }
+}
