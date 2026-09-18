@@ -1,0 +1,40 @@
+{
+  "state_predictability": {
+    "normalised_accuracy": 0.7019,
+    "recorded_values_accuracy": 0.7019,
+    "majority_class": 0.351,
+    "added_by_normalisation": 0.0,
+    "passed": true,
+    "criterion": "normalisation adds < 0.02 accuracy over the same values pre-rendering; state is predictable at all only because states differ in what they record"
+  },
+  "numpy_only_inference": {
+    "passed": true,
+    "blocked_modules": [
+      "pandas",
+      "scipy",
+      "sklearn"
+    ],
+    "self_pair_evidence_bits": 14.632,
+    "driving_fields": [
+      [
+        "entry_point",
+        3.464
+      ],
+      [
+        "counter_forensic",
+        2.881
+      ],
+      [
+        "tools",
+        1.618
+      ]
+    ],
+    "criterion": "linkage.score imports and scores with pandas/sklearn/scipy unavailable"
+  },
+  "model_artifact": {
+    "path": "model\\weights.json",
+    "kb": 18.6,
+    "passed": true,
+    "criterion": "weights ship as JSON, well inside Lambda's limits"
+  }
+}
