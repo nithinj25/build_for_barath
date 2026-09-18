@@ -1,0 +1,171 @@
+# Adapter: Maharashtra (MH) feed → canonical case record.
+#
+# Everything the pipeline knows about this state's feed lives here; the
+# normaliser has no per-state code, so onboarding a state is a new file like
+# this one. Bootstrapped 2026-09-17 from the synthetic feeds' format
+# definition, then owned by the pipeline: linkage.normalise never reads
+# config/ or linkage.generate.
+#
+# layout          structured: one column per MO field
+#                 free_text_mo: MO lives in prose; fields need LLM extraction
+# columns         native column → canonical field (a canonical field with no
+#                 column here is structurally ABSENT in this state)
+# crime_type      native label → canonical crime type
+# values          canonical field → native label → canonical value. Labels
+#                 match case- and whitespace-insensitively. Tag fields map
+#                 their "nothing" label to none_observed (an empty set,
+#                 which is not the same as a blank cell).
+
+state_code: MH
+state_name: Maharashtra
+layout: structured
+narrative_language: en
+datetime_format: '%d/%m/%Y %H:%M'
+date_only_format: '%d/%m/%Y'
+multi_value_delimiter: ;
+columns:
+  FIR_NO: fir_no
+  DISTRICT: district
+  POLICE_STATION: police_station
+  CRIME_HEAD: crime_type
+  OCCURRENCE_FROM: occurred_from
+  OCCURRENCE_TO: occurred_to
+  REGISTRATION_DATE: registered_at
+  NO_OF_ACCUSED: group_size_est
+  WEAPONS_TOOLS: tools
+  CONCEALMENT: counter_forensic
+  TARGET_TYPE: target_selection
+  PROPERTY_STOLEN: property_taken
+  MODE_OF_ARRIVAL: approach_mode
+  MODE_OF_ESCAPE: exit_mode
+  PLACE_OF_ENTRY: entry_point
+  MODE_OF_ENTRY: entry_method
+  PREMISES_TYPE: premise
+  PREMISES_STATUS: occupancy
+  SEARCH_TYPE: search_pattern
+  VEHICLE_TYPE: vehicle_class
+  VEHICLE_START_METHOD: ignition_method
+  PARKING_PLACE: location_type
+  OFFENDER_VEHICLE: vehicle_used
+  VICTIM_ACTIVITY: victim_activity
+  ESCAPE_ROUTE: escape_direction
+  ATM_SITE_TYPE: machine_type
+  ATM_ATTACK: attack_method
+  ALARM_STATUS: alarm_defeated
+  FIR_CONTENTS: narrative
+crime_type:
+  HOUSE BREAKING: BURGLARY_RESIDENTIAL
+  SHOP BREAKING: BURGLARY_COMMERCIAL
+  MOTOR VEHICLE THEFT: VEHICLE_THEFT
+  CHAIN SNATCHING: SNATCHING
+  ATM TAMPERING: ATM_TAMPERING
+values:
+  group_size_est:
+    ONE: '1'
+    2 TO 3: 2-3
+    4 AND ABOVE: 4+
+  tools:
+    CROWBAR: crowbar
+    CUTTER: cutter
+    SCREW DRIVER: screwdriver
+    GAS CUTTER: gas_cutter
+    NIL: none_observed
+  counter_forensic:
+    NIL: none
+    HAND GLOVES: gloves
+    FACE MASKED: face_covered
+    CCTV DAMAGED: cctv_disabled
+  target_selection:
+    CHANCE: opportunistic
+    RECCE DONE: scouted
+    INSIDE INFORMATION: insider_info
+  property_taken:
+    GOLD ORNAMENTS: gold
+    CASH: cash
+    ELECTRONIC ITEMS: electronics
+    DOCUMENTS: documents
+    VEHICLE: vehicle
+    NIL: none_observed
+  approach_mode:
+    ON FOOT: on_foot
+    TWO WHEELER: two_wheeler
+    FOUR WHEELER: four_wheeler
+  exit_mode:
+    ON FOOT: on_foot
+    TWO WHEELER: two_wheeler
+    FOUR WHEELER: four_wheeler
+  entry_point:
+    MAIN DOOR: door
+    WINDOW: window
+    BALCONY: balcony
+    ROOF / TERRACE: roof
+    WALL HOLE: wall_breach
+    SHUTTER: shutter
+  entry_method:
+    LOCK BROKEN: lock_broken
+    DOOR FORCED: forced_open
+    GRILL CUT: grill_cut
+    NO FORCE: no_force
+    DUPLICATE KEY: duplicate_key
+  premise:
+    BUNGALOW: independent_house
+    FLAT: apartment
+    ROW HOUSE: row_house
+    SHOP CUM RESIDENCE: mixed_use
+    SHOP: shop
+    OFFICE: office
+    GODOWN: warehouse
+  occupancy:
+    OCCUPIED: occupied
+    LOCKED - OWNER OUT: temporarily_away
+    LOCKED - OUT OF STATION: vacant_extended
+    CLOSED FOR NIGHT: closed_overnight
+    CLOSED - HOLIDAY: closed_extended
+  search_pattern:
+    SELECTIVE: selective
+    RANSACKED: ransacked
+    DIRECT TO VALUABLES: targeted
+  vehicle_class:
+    MOTOR CYCLE: motorcycle
+    SCOOTER: scooter
+    CAR: car
+    GOODS VEHICLE: commercial
+  ignition_method:
+    DUPLICATE KEY: duplicate_key
+    DIRECT CONNECTION: direct_wiring
+    HANDLE LOCK BROKEN: handle_lock_broken
+    KEY IN VEHICLE: key_left
+    TOWED AWAY: towed_or_lifted
+  location_type:
+    SOCIETY PARKING: residential_parking
+    ROADSIDE: street
+    MARKET AREA: market
+    PAY AND PARK: public_parking
+    RLY STN / BUS STAND: transit_hub
+  vehicle_used:
+    MOTOR CYCLE: motorcycle
+    SCOOTER: scooter
+    NIL: none
+  victim_activity:
+    WALKING: walking
+    MORNING WALK: morning_walk
+    SHOPPING: shopping
+    PILLION RIDER: riding_pillion
+    WAITING AT BUS STOP: waiting_for_transport
+  escape_direction:
+    MAIN ROAD: main_road
+    BY LANES: lanes
+    HIGHWAY: highway
+  machine_type:
+    BRANCH ATM: onsite_branch
+    OFFSITE ATM: offsite_kiosk
+    WHITE LABEL ATM: white_label
+  attack_method:
+    SKIMMER FITTED: skimmer
+    CASH TRAP: cash_trap
+    GAS CUT: gas_cutting
+    FORCIBLY OPENED: physical_forcing
+    EXPLOSIVE USED: explosive
+  alarm_defeated:
+    ALARM DISABLED: defeated
+    ALARM INTACT: not_defeated

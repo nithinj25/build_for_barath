@@ -10,7 +10,6 @@ moves a value only where the swept distribution actually moved.
 """
 from __future__ import annotations
 
-import hashlib
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
@@ -303,7 +302,7 @@ def _assign_fir(truth: pd.DataFrame) -> pd.DataFrame:
     year = truth["registered_at"].dt.year
     serial = truth.groupby([truth["police_station"], year]).cumcount() + 1
     truth["fir_no"] = [f"{ps}/{k:04d}/{y}" for ps, k, y in zip(truth["police_station"], serial, year)]
-    truth["case_id"] = [hashlib.sha1(f"{st}{fir}{y}".encode()).hexdigest()[:16]
+    truth["case_id"] = [schema.case_id(st, fir, y)
                         for st, fir, y in zip(truth["state_code"], truth["fir_no"], year)]
     return truth.sort_values("case_uid").reset_index(drop=True)
 

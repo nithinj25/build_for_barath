@@ -2,7 +2,12 @@
 
 Field names and kinds live here; probabilities live in config/. Value
 vocabularies for mo_ext are defined by config/marginals.yaml.
+
+Shared by the generator and the pipeline. The pipeline (normalise, score)
+imports this module and never linkage.generate or config/.
 """
+import hashlib
+from datetime import datetime
 
 CRIME_TYPES = (
     "BURGLARY_RESIDENTIAL",
@@ -87,8 +92,40 @@ DERIVED_AT_NORMALISATION = ("time_band",)
 MO_DESCRIPTION = "mo_description"
 
 
+# Canonical record markers. A value that is not a real field value is one of:
+MISSING = "__MISSING__"          # the source has the column; this cell is blank
+UNKNOWABLE = "__UNKNOWABLE__"    # time_band only: window too wide to place in one band
+ABSENT = "__ABSENT__"            # the source has no such column at all
+TOKENS = frozenset({MISSING, UNKNOWABLE, ABSENT})
+
+# What each time band means, [start, end) on the 24h clock. corpus.yaml must
+# agree (linkage.config checks), so generator and pipeline derive bands alike.
+TIME_BAND_HOURS = {"night": (22, 4), "early_morning": (4, 7), "day": (7, 22)}
+UNKNOWABLE_ABOVE_HOURS = 12
+
+
 def mo_fields(crime_type: str) -> tuple[str, ...]:
     return MO_CORE + MO_EXT[FAMILY[crime_type]]
 
 
 ALL_MO_FIELDS = MO_CORE + tuple(f for fields in MO_EXT.values() for f in fields)
+
+
+def band_hours(band: str) -> list[int]:
+    a, b = TIME_BAND_HOURS[band]
+    return list(range(a, b)) if a < b else [*range(a, 24), *range(0, b)]
+
+
+BAND_OF_HOUR = {h: band for band in TIME_BAND_HOURS for h in band_hours(band)}
+
+
+def recorded_time_band(occurred_from: datetime, occurred_to: datetime) -> str:
+    """Band of a recorded window with known times: the midpoint's band, or
+    UNKNOWABLE when the window is too wide to place in one band."""
+    if (occurred_to - occurred_from).total_seconds() / 3600 > UNKNOWABLE_ABOVE_HOURS:
+        return UNKNOWABLE
+    return BAND_OF_HOUR[(occurred_from + (occurred_to - occurred_from) / 2).hour]
+
+
+def case_id(state_code: str, fir_no: str, year: int) -> str:
+    return hashlib.sha1(f"{state_code}{fir_no}{year}".encode()).hexdigest()[:16]

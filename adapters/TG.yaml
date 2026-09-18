@@ -1,0 +1,41 @@
+# Adapter: Telangana (TG) feed → canonical case record.
+#
+# Everything the pipeline knows about this state's feed lives here; the
+# normaliser has no per-state code, so onboarding a state is a new file like
+# this one. Bootstrapped 2026-09-17 from the synthetic feeds' format
+# definition, then owned by the pipeline: linkage.normalise never reads
+# config/ or linkage.generate.
+#
+# layout          structured: one column per MO field
+#                 free_text_mo: MO lives in prose; fields need LLM extraction
+# columns         native column → canonical field (a canonical field with no
+#                 column here is structurally ABSENT in this state)
+# crime_type      native label → canonical crime type
+# values          canonical field → native label → canonical value. Labels
+#                 match case- and whitespace-insensitively. Tag fields map
+#                 their "nothing" label to none_observed (an empty set,
+#                 which is not the same as a blank cell).
+
+state_code: TG
+state_name: Telangana
+layout: free_text_mo
+narrative_language: en
+datetime_format: '%Y-%m-%dT%H:%M:%S'
+date_only_format: '%Y-%m-%d'
+multi_value_delimiter: null
+columns:
+  fir_number: fir_no
+  district_name: district
+  ps_name: police_station
+  crime_category: crime_type
+  offence_from_dt: occurred_from
+  offence_to_dt: occurred_to
+  fir_reg_dt: registered_at
+  mo_description: mo_description
+  brief_facts: narrative
+crime_type:
+  HB - Residential: BURGLARY_RESIDENTIAL
+  HB - Commercial: BURGLARY_COMMERCIAL
+  MV Theft: VEHICLE_THEFT
+  Chain Snatching: SNATCHING
+  ATM Offence: ATM_TAMPERING

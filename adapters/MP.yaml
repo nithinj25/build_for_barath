@@ -1,0 +1,171 @@
+# Adapter: Madhya Pradesh (MP) feed → canonical case record.
+#
+# Everything the pipeline knows about this state's feed lives here; the
+# normaliser has no per-state code, so onboarding a state is a new file like
+# this one. Bootstrapped 2026-09-17 from the synthetic feeds' format
+# definition, then owned by the pipeline: linkage.normalise never reads
+# config/ or linkage.generate.
+#
+# layout          structured: one column per MO field
+#                 free_text_mo: MO lives in prose; fields need LLM extraction
+# columns         native column → canonical field (a canonical field with no
+#                 column here is structurally ABSENT in this state)
+# crime_type      native label → canonical crime type
+# values          canonical field → native label → canonical value. Labels
+#                 match case- and whitespace-insensitively. Tag fields map
+#                 their "nothing" label to none_observed (an empty set,
+#                 which is not the same as a blank cell).
+
+state_code: MP
+state_name: Madhya Pradesh
+layout: structured
+narrative_language: en
+datetime_format: '%d-%m-%Y %I:%M %p'
+date_only_format: '%d-%m-%Y'
+multi_value_delimiter: '|'
+columns:
+  THANA: police_station
+  ZILA: district
+  APRADH_KRAMANK: fir_no
+  DARJ_DINANK: registered_at
+  APRADH_SHIRSH: crime_type
+  GHATNA_DINANK_SE: occurred_from
+  GHATNA_DINANK_TAK: occurred_to
+  GHATNA_VIVARAN: narrative
+  PRAVESH_STHAN: entry_point
+  PRAVESH_VIDHI: entry_method
+  PARISAR: premise
+  MAKAN_STHITI: occupancy
+  TALASHI_PRAKAR: search_pattern
+  AAROPI_SANKHYA: group_size_est
+  UPKARAN: tools
+  PEHCHAN_CHHIPANA: counter_forensic
+  LAKSHYA_CHAYAN: target_selection
+  CHORI_SAMPATTI: property_taken
+  AAGAMAN_SADHAN: approach_mode
+  PALAYAN_SADHAN: exit_mode
+  VAHAN_SHRENI: vehicle_class
+  VAHAN_CHALU_VIDHI: ignition_method
+  VAHAN_STHAN: location_type
+  AAROPI_VAHAN: vehicle_used
+  PEEDIT_GATIVIDHI: victim_activity
+  PALAYAN_DISHA: escape_direction
+  ATM_STHAN: machine_type
+  ATM_CHHEDCHHAD: attack_method
+  ALARM_STHITI: alarm_defeated
+crime_type:
+  GRIH_BHEDAN: BURGLARY_RESIDENTIAL
+  DUKAN_BHEDAN: BURGLARY_COMMERCIAL
+  VAHAN_CHORI: VEHICLE_THEFT
+  CHAIN_JHAPATNA: SNATCHING
+  ATM_CHHEDCHHAD: ATM_TAMPERING
+values:
+  group_size_est:
+    EK: '1'
+    DO_TEEN: 2-3
+    CHAAR_SE_ADHIK: 4+
+  tools:
+    SABBAL: crowbar
+    KATAR: cutter
+    PECHKAS: screwdriver
+    GAS_KATAR: gas_cutter
+    KOI_NAHI: none_observed
+  counter_forensic:
+    KOI_NAHI: none
+    DASTANE: gloves
+    MUNH_DHAKA: face_covered
+    CCTV_TODA: cctv_disabled
+  target_selection:
+    AKASMIK: opportunistic
+    REKI_KI: scouted
+    BHEDI_SOOCHNA: insider_info
+  property_taken:
+    SONE_KE_GAHNE: gold
+    NAKAD: cash
+    ELECTRONIC_SAMAN: electronics
+    DASTAVEZ: documents
+    VAHAN: vehicle
+    KUCHH_NAHI: none_observed
+  approach_mode:
+    PAIDAL: on_foot
+    DO_PAHIYA: two_wheeler
+    CHAR_PAHIYA: four_wheeler
+  exit_mode:
+    PAIDAL: on_foot
+    DO_PAHIYA: two_wheeler
+    CHAR_PAHIYA: four_wheeler
+  entry_point:
+    DARWAZA: door
+    KHIDKI: window
+    BALCONY: balcony
+    CHHAT: roof
+    DEEWAR_TODKAR: wall_breach
+    SHUTTER: shutter
+  entry_method:
+    TALA_TODA: lock_broken
+    DHAKKA_DEKAR_KHOLA: forced_open
+    GRILL_KATI: grill_cut
+    BINA_TOD_FOD: no_force
+    NAKLI_CHABI: duplicate_key
+  premise:
+    SWATANTRA_MAKAN: independent_house
+    FLAT: apartment
+    KATAR_MAKAN: row_house
+    DUKAN_SAH_AAWAS: mixed_use
+    DUKAN: shop
+    KARYALAYA: office
+    GODAM: warehouse
+  occupancy:
+    GHAR_WALE_MAUJOOD: occupied
+    THODI_DER_BAHAR: temporarily_away
+    BAHARGAON_GAYE: vacant_extended
+    RAAT_ME_BAND: closed_overnight
+    CHHUTTI_ME_BAND: closed_extended
+  search_pattern:
+    CHUNINDA_SAMAN: selective
+    SAB_BIKHRA: ransacked
+    SEEDHE_TIJORI: targeted
+  vehicle_class:
+    MOTORCYCLE: motorcycle
+    SCOOTY: scooter
+    CAR: car
+    MAAL_VAHAN: commercial
+  ignition_method:
+    NAKLI_CHABI: duplicate_key
+    TAAR_JODKAR: direct_wiring
+    HANDLE_LOCK_TODA: handle_lock_broken
+    CHABI_LAGI_THI: key_left
+    UTHA_LE_GAYE: towed_or_lifted
+  location_type:
+    GHAR_KE_BAHAR: residential_parking
+    SADAK_KINARE: street
+    BAZAAR: market
+    SARVAJANIK_PARKING: public_parking
+    STATION_PARISAR: transit_hub
+  vehicle_used:
+    MOTORCYCLE: motorcycle
+    SCOOTY: scooter
+    KOI_NAHI: none
+  victim_activity:
+    PAIDAL_JA_RAHI: walking
+    SUBAH_TEHALNA: morning_walk
+    KHAREEDARI: shopping
+    PICHHE_BAITHI: riding_pillion
+    BUS_KA_INTEZAAR: waiting_for_transport
+  escape_direction:
+    MUKHYA_MARG: main_road
+    GALIYON_SE: lanes
+    HIGHWAY: highway
+  machine_type:
+    SHAKHA_ATM: onsite_branch
+    BAHARI_ATM: offsite_kiosk
+    WHITE_LABEL_ATM: white_label
+  attack_method:
+    SKIMMER_LAGAYA: skimmer
+    NOTE_ATKAYE: cash_trap
+    GAS_SE_KATA: gas_cutting
+    TODKAR_KHOLA: physical_forcing
+    VISFOTAK: explosive
+  alarm_defeated:
+    ALARM_BAND_KIYA: defeated
+    ALARM_CHALU: not_defeated

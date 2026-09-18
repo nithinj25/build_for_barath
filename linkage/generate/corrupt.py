@@ -12,12 +12,8 @@ import pandas as pd
 
 from linkage import schema
 from linkage.generate import rng as streams
-from linkage.generate.sample import Model, _hours
-
-MISSING = "__MISSING__"          # the column exists; this cell is blank
-UNKNOWABLE = "__UNKNOWABLE__"    # time_band only: window too wide to place in one band
-ABSENT = "__ABSENT__"            # the state has no such column at all
-TOKENS = frozenset({MISSING, UNKNOWABLE, ABSENT})
+from linkage.generate.sample import Model
+from linkage.schema import ABSENT, MISSING, TOKENS, UNKNOWABLE  # noqa: F401  (re-exported)
 
 
 def _adjacency(edges: list) -> dict[str, list[str]]:
@@ -50,8 +46,6 @@ def record(truth: pd.DataFrame, cfg: dict, seed: int, model: Model) -> pd.DataFr
     states = cfg["states"]["states"]
     oos = set(cfg["states"]["out_of_scope_crime_types"])
     graph = {f: _adjacency(e) for f, e in cfg["states"]["confusability"].items()}
-    tb = cfg["corpus"]["time_band"]
-    band_of_hour = {h: band for band, span in tb["hours"].items() for h in _hours(span)}
     layout, width = _layout(model)
     U = streams.stream(seed, streams.CORRUPTION).random((int(truth["case_uid"].max()) + 1, width))
 
@@ -83,14 +77,7 @@ def record(truth: pd.DataFrame, cfg: dict, seed: int, model: Model) -> pd.DataFr
             dropped = uf[-1] < drop_rates.get(f, rec["dropout"]["default"])
 
             if f == "time_band":
-                window_h = (r["occurred_to"] - r["occurred_from"]).total_seconds() / 3600
-                if dropped:
-                    out[key] = MISSING
-                elif window_h > tb["unknowable_above_hours"]:
-                    out[key] = UNKNOWABLE
-                else:
-                    mid = r["occurred_from"] + (r["occurred_to"] - r["occurred_from"]) / 2
-                    out[key] = band_of_hour[mid.hour]
+                out[key] = MISSING if dropped else schema.recorded_time_band(r["occurred_from"], r["occurred_to"])
                 continue
             if dropped:
                 out[key] = MISSING

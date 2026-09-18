@@ -51,8 +51,10 @@ These are easy to violate by accident and each one breaks something real.
 linkage/        pure functions, no AWS imports
   schema.py     field names, kinds, mo_core vocabulary (spec §3.1)
   config.py     loads and checks config/*.yaml
-  features.py   pair featurisation, Fellegi-Sunter weights
-  score.py      inference from exported coefficients
+  normalise.py  feed rows → canonical records via adapters/ (no per-state code)
+  features.py   pair featurisation, Fellegi-Sunter weights (numpy only)
+  score.py      inference from exported coefficients (numpy only)
+  dataset.py    local: normalised records + labels, offender split, pairs
   generate/     synthetic corpus with ground-truth offender IDs
     sample.py     truth: style tilt → θ → values, series, geography, clocks
     corrupt.py    per-state recording noise (canonical vocab, tokens)
@@ -61,10 +63,11 @@ linkage/        pure functions, no AWS imports
     report.py     manifest content: realised marginals, priors, limitations
     tau.py        τ selection sweep → config/tau_selection.json
   train.py      local only, writes weights.json
-  evaluate.py   recall@50, precision@10, PR-AUC per pair_class
+  evaluate.py   test offenders, full-pool ranking: hit/recall/precision@10, PR-AUC per pair_class
 config/         generator inputs: marginals, loadings, states, corpus, vocab
+adapters/       one YAML per state feed; the pipeline's only state knowledge
 handlers/       Lambda entry points, boto3 lives here
-infra/          SAM template
+infra/          SAM template (skeleton: GET /health)
 TECHNICAL_SPEC.md           full technical spec
 TASK_DATA_GENERATION.md     generator brief
 DATASET.md      dataset card: artifacts, key numbers, limitations
@@ -93,8 +96,9 @@ data/           gitignored except data/final/ (the 45k corpus)
 ```bash
 python -m linkage.config                           # check config/, list unfilled entries
 python -m linkage.generate --seed 7 --out data/dev/  # synthetic corpus
-python -m linkage.train                            # writes weights.json
-python -m linkage.evaluate                         # recall@50, precision@10
+python -m linkage.normalise --feeds data/final/feeds --out data/final_normalised.parquet --check data/final/truth.parquet
+python -m linkage.train --normalised data/final_normalised.parquet --truth data/final/truth.parquet --out data/weights.json
+python -m linkage.evaluate --normalised data/final_normalised.parquet --truth data/final/truth.parquet --weights data/weights.json --out data/eval.json
 sam build && sam deploy                            # from infra/
 ```
 

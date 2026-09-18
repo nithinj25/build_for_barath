@@ -5,3 +5,4 @@ __pycache__/
 .venv/
 .aws-sam/
 weights.json
+!results/**/weights*.json

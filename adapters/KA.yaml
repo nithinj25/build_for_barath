@@ -1,0 +1,164 @@
+# Adapter: Karnataka (KA) feed → canonical case record.
+#
+# Everything the pipeline knows about this state's feed lives here; the
+# normaliser has no per-state code, so onboarding a state is a new file like
+# this one. Bootstrapped 2026-09-17 from the synthetic feeds' format
+# definition, then owned by the pipeline: linkage.normalise never reads
+# config/ or linkage.generate.
+#
+# layout          structured: one column per MO field
+#                 free_text_mo: MO lives in prose; fields need LLM extraction
+# columns         native column → canonical field (a canonical field with no
+#                 column here is structurally ABSENT in this state)
+# crime_type      native label → canonical crime type
+# values          canonical field → native label → canonical value. Labels
+#                 match case- and whitespace-insensitively. Tag fields map
+#                 their "nothing" label to none_observed (an empty set,
+#                 which is not the same as a blank cell).
+
+state_code: KA
+state_name: Karnataka
+layout: structured
+narrative_language: en
+datetime_format: '%d-%b-%Y %H%M hrs'
+date_only_format: '%d-%b-%Y'
+multi_value_delimiter: ' / '
+columns:
+  FIR No.: fir_no
+  FIR Date: registered_at
+  Unit Name: district
+  PS Name: police_station
+  Crime Head: crime_type
+  Occurrence From: occurred_from
+  Occurrence To: occurred_to
+  MO - Tools: tools
+  MO - Entry Point: entry_point
+  MO - Entry: entry_method
+  MO - Premises: premise
+  MO - Search: search_pattern
+  Accused Count: group_size_est
+  MO - Concealment: counter_forensic
+  MO - Target: target_selection
+  Property Lost: property_taken
+  Came By: approach_mode
+  Fled By: exit_mode
+  Vehicle Category: vehicle_class
+  MO - Vehicle Start: ignition_method
+  Place Of Theft: location_type
+  Offender Vehicle: vehicle_used
+  Victim Was: victim_activity
+  Fled Towards: escape_direction
+  ATM Location Type: machine_type
+  MO - ATM: attack_method
+  Alarm: alarm_defeated
+  Brief Facts: narrative
+crime_type:
+  Burglary - Dwelling: BURGLARY_RESIDENTIAL
+  Burglary - Commercial: BURGLARY_COMMERCIAL
+  Theft - Vehicle: VEHICLE_THEFT
+  Theft - Chain Snatching: SNATCHING
+  Cheating - ATM: ATM_TAMPERING
+values:
+  group_size_est:
+    Single: '1'
+    Two-Three: 2-3
+    Gang (4+): 4+
+  tools:
+    Iron Rod: crowbar
+    Cutting Plier: cutter
+    Screwdriver: screwdriver
+    Gas Welding Set: gas_cutter
+    None Observed: none_observed
+  counter_forensic:
+    None: none
+    Gloves Worn: gloves
+    Face Covered: face_covered
+    CCTV Tampered: cctv_disabled
+  target_selection:
+    Random: opportunistic
+    Pre-Surveyed: scouted
+    Insider Tip: insider_info
+  property_taken:
+    Gold Jewellery: gold
+    Cash: cash
+    Electronics: electronics
+    Documents: documents
+    Vehicle: vehicle
+    Nothing Lost: none_observed
+  approach_mode:
+    Walking: on_foot
+    Bike: two_wheeler
+    Car/Jeep: four_wheeler
+  exit_mode:
+    Walking: on_foot
+    Bike: two_wheeler
+    Car/Jeep: four_wheeler
+  entry_point:
+    Door: door
+    Window: window
+    Balcony: balcony
+    Terrace: roof
+    Wall Breached: wall_breach
+    Rolling Shutter: shutter
+  entry_method:
+    Forced - lock: lock_broken
+    Forced - door: forced_open
+    Forced - grill cut: grill_cut
+    Unforced: no_force
+    Unforced - key: duplicate_key
+  premise:
+    Independent House: independent_house
+    Apartment: apartment
+    Row House: row_house
+    Mixed Use: mixed_use
+    Shop: shop
+    Office: office
+    Warehouse: warehouse
+  search_pattern:
+    Selective Search: selective
+    Ransacked: ransacked
+    Targeted: targeted
+  vehicle_class:
+    Motorcycle: motorcycle
+    Scooter: scooter
+    Car: car
+    Goods Vehicle: commercial
+  ignition_method:
+    Master Key: duplicate_key
+    Wire Bypass: direct_wiring
+    Handle Lock Broken: handle_lock_broken
+    Key Left In Vehicle: key_left
+    Lifted/Towed: towed_or_lifted
+  location_type:
+    Residence Parking: residential_parking
+    Road Side: street
+    Market: market
+    Public Parking: public_parking
+    Bus/Railway Station: transit_hub
+  vehicle_used:
+    Motorcycle: motorcycle
+    Scooter: scooter
+    No Vehicle: none
+  victim_activity:
+    Walking On Road: walking
+    Morning Walk: morning_walk
+    Shopping: shopping
+    Pillion Riding: riding_pillion
+    Waiting For Bus: waiting_for_transport
+  escape_direction:
+    Main Road: main_road
+    Cross Roads: lanes
+    Highway: highway
+  machine_type:
+    Onsite: onsite_branch
+    Offsite: offsite_kiosk
+    WLA: white_label
+  attack_method:
+    Skimming: skimmer
+    Cash Trapping: cash_trap
+    Gas Cutting: gas_cutting
+    Physical Attack: physical_forcing
+    Explosion: explosive
+  alarm_defeated:
+    Disabled: defeated
+    Working: not_defeated

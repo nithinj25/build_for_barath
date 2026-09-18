@@ -14,7 +14,7 @@ import pandas as pd
 
 from linkage import schema
 from linkage.generate import rng as streams
-from linkage.generate.corrupt import ABSENT, MISSING, UNKNOWABLE
+from linkage.schema import ABSENT, MISSING, UNKNOWABLE
 
 OPENINGS = {
     "MH": [

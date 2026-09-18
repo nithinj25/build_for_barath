@@ -1,0 +1,78 @@
+{
+  "source": "weights.json trained on data/final (pre-core-fix, repeat_rate 0.5, tau 0.75), test offenders only",
+  "strong_example_bits": 5.845,
+  "pools": {
+    "BURGLARY_RESIDENTIAL": {
+      "true_pairs": 506,
+      "mean": 1.37,
+      "p10": -0.79,
+      "median": 0.33,
+      "p90": 4.91,
+      "p99": 10.35,
+      "max": 11.74,
+      "share_at_or_above_strong_example": 0.0771,
+      "random_pairs_median": -0.83,
+      "random_pairs_p99": 2.73
+    },
+    "BURGLARY_COMMERCIAL": {
+      "true_pairs": 98,
+      "mean": 2.06,
+      "p10": -0.81,
+      "median": 1.49,
+      "p90": 6.53,
+      "p99": 9.03,
+      "max": 11.51,
+      "share_at_or_above_strong_example": 0.1122,
+      "random_pairs_median": -1.34,
+      "random_pairs_p99": 3.01
+    },
+    "VEHICLE_THEFT": {
+      "true_pairs": 927,
+      "mean": 1.15,
+      "p10": -1.28,
+      "median": 0.66,
+      "p90": 4.16,
+      "p99": 7.12,
+      "max": 10.3,
+      "share_at_or_above_strong_example": 0.0356,
+      "random_pairs_median": -0.41,
+      "random_pairs_p99": 2.89
+    },
+    "SNATCHING": {
+      "true_pairs": 383,
+      "mean": 0.77,
+      "p10": -1.14,
+      "median": 0.45,
+      "p90": 2.99,
+      "p99": 4.68,
+      "max": 6.79,
+      "share_at_or_above_strong_example": 0.0052,
+      "random_pairs_median": -0.79,
+      "random_pairs_p99": 2.64
+    },
+    "ATM_TAMPERING": {
+      "true_pairs": 316,
+      "mean": 0.38,
+      "p10": -2.46,
+      "median": 0.0,
+      "p90": 3.65,
+      "p99": 6.83,
+      "max": 9.35,
+      "share_at_or_above_strong_example": 0.019,
+      "random_pairs_median": -0.27,
+      "random_pairs_p99": 3.13
+    },
+    "CROSS_TYPE": {
+      "true_pairs": 1301,
+      "mean": -0.01,
+      "p10": -0.53,
+      "median": 0.0,
+      "p90": 0.5,
+      "p99": 1.59,
+      "max": 2.93,
+      "share_at_or_above_strong_example": 0.0,
+      "random_pairs_median": 0.0,
+      "random_pairs_p99": 1.12
+    }
+  }
+}

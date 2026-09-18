@@ -11,7 +11,8 @@ import numpy as np
 import pandas as pd
 
 from linkage import schema
-from linkage.generate.corrupt import ABSENT, MISSING, TOKENS, _adjacency
+from linkage.generate.corrupt import _adjacency
+from linkage.schema import ABSENT, MISSING, TOKENS
 from linkage.generate.sample import IMPLIED
 
 Z_MAX = 4.0

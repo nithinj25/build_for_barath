@@ -422,6 +422,11 @@ def check_corpus(c: dict, m: dict, r: Report) -> None:
     _lognormal(r, "corpus.registration_delay_hours", c["registration_delay_hours"])
 
     tb = c["time_band"]
+    if isinstance(tb, dict):
+        hours = {k: tuple(v) for k, v in (tb.get("hours") or {}).items() if isinstance(v, list)}
+        if hours != schema.TIME_BAND_HOURS or tb.get("unknowable_above_hours") != schema.UNKNOWABLE_ABOVE_HOURS:
+            r.error("corpus.time_band", "must match schema.TIME_BAND_HOURS and UNKNOWABLE_ABOVE_HOURS "
+                                        "(the pipeline derives bands from the schema)")
     if _same_keys(r, "corpus.time_band", tb, ("hours", "unknowable_above_hours")):
         _positive(r, "corpus.time_band.unknowable_above_hours", tb["unknowable_above_hours"])
         bands = tb["hours"]
