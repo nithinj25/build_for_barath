@@ -219,9 +219,19 @@ roof entry are the same operation — verified numerically: pre-filtering to
 roof-entry cases improves the prior by exactly +1.559 bits, which is exactly the
 roof agreement weight.
 
-Therefore: **retrieval uses narrative embedding cosine only. Scoring uses
-structured MO only.** Report retrieval recall@50 and scoring precision@10 as
-separate numbers.
+Therefore: **scoring uses structured MO only**, and nothing blocks on a scored
+field.
+
+*Revised 2026-09-18 after measurement.* The original design gated scoring
+behind a narrative-embedding top-50. Measured, that gate matched on place
+text (every narrative opens with district, station and dates) and retrieved
+**0 of 1,094 cross-state partners**; with the place text removed it was
+barely above random, and the two-stage pipeline scored hit@10 0.045 against
+the MO scorer's 0.128 on the full pool. Full-pool scoring of all 44,533 cases
+takes ~9 minutes on one core, so the gate is unnecessary at this scale.
+LinkBatch now scores each case against its entire crime-type pool (crime type
+defines the pool; it is not scored). Any gate needed at national scale must
+not encode place. See FINDINGS.md §8.
 
 ### 4.7 Model choice
 

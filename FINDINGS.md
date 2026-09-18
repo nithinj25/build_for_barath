@@ -227,6 +227,62 @@ seed noise, so
   overlapping) **is not** — at extreme consistency, sharing adds nothing
   measurable.
 
+## 8. Embedding retrieval matches on place, not behaviour — so it is not the gate
+
+The spec's pipeline retrieved each case's top-50 by narrative-embedding
+cosine and only then scored MO. Measured with `intfloat/multilingual-e5-base`
+on the sharing-1 corpus, test offenders (`results/retrieval.json`,
+`results/retrieval_no_place.json`):
+
+| retrieval recall@50 | same-state partners | cross-state partners |
+|---|---|---|
+| full narratives | 0.127 | **0.000** |
+| place/date opening sentence removed | 0.021 | 0.013 |
+
+Every narrative opens with district, police station and dates, and serial
+offenders stay in one district 70% of the time. The embeddings therefore find
+partners by **place**: they retrieved **none** of the 1,094 cross-state
+same-type partners — the pairs this product exists to find. With the place
+text removed, retrieval is barely above random (0.020 against 0.0057), and
+the two-stage pipeline reaches hit@10 **0.045** where the MO scorer on the
+whole pool reaches **0.128**. The gate discards most true partners before the
+scorer ever sees them.
+
+The gate existed for cost, and the cost is not there at this scale: scoring
+every case against its entire pool takes **~9 minutes on one core** for all
+44,533 cases (≈2 min same-type, ≈7 min cross-type) — about 12 s per chunk
+across the spec's existing Step Functions Map.
+
+**Decision:** LinkBatch scores the full pool, blocked only by crime-type pool,
+which is not a scored field, so "never block on a feature you also score"
+still holds. Embeddings are kept out of the ranking path. At national scale
+(millions of cases) a gate returns, and it must be one that does not encode
+place: a time window, or crime type.
+
+Two cautions this also raises:
+- Cheat-detector validator 4 checked metadata columns only; place leaked
+  through **narrative text**. Any free-text channel needs the same scrutiny.
+- The templated narratives here are easier than real FIRs, so even the
+  place-stripped number is optimistic.
+
+## 9. MO extraction with a local model — in progress
+
+Bedrock is unavailable, so extraction for the free-text state runs locally
+through Ollama with a JSON schema that restricts every field to canonical
+values or null (`enrich/extract.py`, scored by `enrich/score_extraction.py`
+against the values the text was rendered from).
+
+First pilot, llama3.2 (3B), 41 cases, prompt without value descriptions:
+**55% accuracy** on recorded values, and on fields where nothing was recorded
+it **invented a value 23% of the time**. The failure was specific: with no
+explanation of what the enum values mean, the model could not map "wore
+gloves" to `gloves` and declined (counter_forensic 0%). The prompt now
+carries a hand-written field guide; the rerun and the full 8,295-case pass
+are pending. Invented values matter more than blanks here — a wrong value
+scores as evidence, a blank scores zero — so the rerun must report the
+invention rate, not just accuracy. Also expect optimism: the templated text
+and a guide written by the same author make this easier than real FIRs.
+
 ---
 
 ## Where things are

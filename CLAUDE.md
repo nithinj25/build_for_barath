@@ -13,9 +13,13 @@ These are easy to violate by accident and each one breaks something real.
 1. **Never block on a feature you also score.** Filtering by a feature and
    scoring by that feature are the same operation — verified numerically:
    pre-filtering to roof-entry cases improves the prior by exactly the roof
-   agreement weight. Retrieval uses narrative embedding cosine ONLY. Scoring
-   uses structured MO fields ONLY. If someone suggests "filter to X first to
-   speed it up" and X is a scored field, the answer is no.
+   agreement weight. If someone suggests "filter to X first to speed it up"
+   and X is a scored field, the answer is no.
+   **LinkBatch scores the full pool**, blocked only by crime-type pool (not a
+   scored field). Narrative embeddings are NOT a retrieval gate: measured,
+   they match on place text and retrieved 0 of 1,094 cross-state partners
+   (FINDINGS §8). Full-pool scoring of 44.5k cases takes ~9 min on one core.
+   Any future gate must not encode place — a time window or crime type.
 
 2. **`linkage/` must not import boto3.** Core logic is pure functions over
    plain dicts and arrays. Handlers in `handlers/` do the AWS glue. If a

@@ -1,0 +1,33 @@
+{
+  "k": 50,
+  "embedding": "intfloat/multilingual-e5-base",
+  "split": "test offenders (25%)",
+  "classes": {
+    "same_type": {
+      "queries": 1318,
+      "recall_at_50": 0.1039,
+      "hit_at_50": 0.2375,
+      "random_recall_at_50": 0.00567,
+      "pipeline_hit_at_10": 0.1624,
+      "pipeline_recall_at_10": 0.0685,
+      "full_pool_scorer_hit_at_10": 0.1282,
+      "recall_at_50_same_state_partners": 0.1269,
+      "recall_at_50_cross_state_partners": 0.0,
+      "partners_same_state": 3366,
+      "partners_cross_state": 1094
+    },
+    "cross_type": {
+      "queries": 1005,
+      "recall_at_50": 0.0347,
+      "hit_at_50": 0.0876,
+      "random_recall_at_50": 0.0015,
+      "pipeline_hit_at_10": 0.0398,
+      "pipeline_recall_at_10": 0.0146,
+      "full_pool_scorer_hit_at_10": 0.0129,
+      "recall_at_50_same_state_partners": 0.0469,
+      "recall_at_50_cross_state_partners": 0.0,
+      "partners_same_state": 2090,
+      "partners_cross_state": 512
+    }
+  }
+}
