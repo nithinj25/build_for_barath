@@ -54,6 +54,20 @@ curve, not a point.
 a generator defect found by measurement, two rejected parameterisations, and
 why better LLM extraction would buy almost nothing (2.2 points).
 
+## Try it locally
+
+```bash
+python -m linkage.bundle --out data/serve --with-ground-truth   # package the corpus for the API
+python scripts/serve_local.py --demo                            # http://127.0.0.1:8000
+```
+
+The analyst view: open a case, read its ranked shortlist (rank of the whole
+pool, bits of evidence against the pool's typical range, driving fields,
+"other state" flags), widen to other crime types, and open a candidate to see
+each field's contribution against the break-even line. `/api/*` is served by
+`handlers/api.py` — the same handler Lambda runs. `--demo` marks synthetic
+ground-truth links; leave it off to see what an analyst would.
+
 ## Run it
 
 ```bash

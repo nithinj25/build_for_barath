@@ -75,7 +75,12 @@ linkage/        pure functions, no AWS imports
   evaluate.py   test offenders, full-pool ranking: hit/recall/precision@10, PR-AUC per pair_class
 config/         generator inputs: marginals, loadings, states, corpus, vocab
 adapters/       one YAML per state feed; the pipeline's only state knowledge
-handlers/       Lambda entry points, boto3 lives here
+  serve.py      shortlists on request (pure numpy; what the API Lambda runs)
+  bundle.py     local: package corpus + weights into the serve bundle
+  retrieval.py  chunked cosine top-k (kept for diagnostics; NOT a gate)
+enrich/         local models: embeddings (sentence-transformers), MO extraction (Ollama)
+handlers/       Lambda entry points (api.py, store.py); boto3 lives here only
+ui/             analyst view (index.html), served locally by scripts/serve_local.py
 infra/          SAM template (skeleton: GET /health)
 TECHNICAL_SPEC.md           full technical spec
 TASK_DATA_GENERATION.md     generator brief
@@ -113,6 +118,8 @@ python scripts/plot_sweep.py results/sweep          # headline figure + summary.
 python -m linkage.normalise --feeds data/final/feeds --out data/final_normalised.parquet --check data/final/truth.parquet
 python -m linkage.train --normalised data/final_sharing1_normalised.parquet --truth data/final_sharing1/truth.parquet --out data/weights.json
 python -m linkage.evaluate --normalised data/final_sharing1_normalised.parquet --truth data/final_sharing1/truth.parquet --weights data/weights.json --out data/eval.json
+python -m linkage.bundle --out data/serve --with-ground-truth   # serve bundle for the API
+python scripts/serve_local.py --demo               # UI + API locally on :8000, same handler as Lambda
 sam build && sam deploy                            # from infra/
 ```
 

@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linkage — analyst view</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10);
+    --support: #2a78d6; --oppose: #e34948; --neutral: #f0efec; --accent: #2a78d6;
+    --good: #006300; --warn-bg: #fff4d6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+      --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+      --support: #3987e5; --oppose: #e66767; --neutral: #383835; --accent: #3987e5;
+      --good: #0ca30c; --warn-bg: #3a2f10;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink);
+         font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { padding: 16px 20px 12px; border-bottom: 1px solid var(--ring); background: var(--surface); }
+  h1 { font-size: 17px; margin: 0 0 4px; font-weight: 600; }
+  .banner { color: var(--ink-2); font-size: 12.5px; }
+  .banner b { color: var(--ink); }
+  main { display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: 16px; padding: 16px 20px; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; padding: 12px 16px; } }
+  .card { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 14px; }
+  .card + .card { margin-top: 14px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-2); margin: 0 0 10px; font-weight: 600; }
+  input[type=text] { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--axis);
+                     background: var(--page); color: var(--ink); font: inherit; font-variant-numeric: tabular-nums; }
+  button { font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--axis);
+           background: var(--surface); color: var(--ink); padding: 6px 10px; }
+  button:hover { border-color: var(--ink-2); }
+  button:focus-visible, input:focus-visible, tr:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .demo-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .demo-list button { font-size: 12px; padding: 4px 8px; font-variant-numeric: tabular-nums; }
+  .note { color: var(--muted); font-size: 12px; margin-top: 8px; }
+  dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 0; font-size: 13px; }
+  dt { color: var(--ink-2); }
+  dd { margin: 0; overflow-wrap: anywhere; }
+  .prov { font-size: 11px; border-radius: 99px; padding: 0 6px; margin-left: 6px; border: 1px solid var(--ring); color: var(--ink-2); }
+  .prov.llm { border-color: var(--accent); color: var(--accent); }
+  .gap { color: var(--muted); font-style: italic; }
+  .scope { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .scope button[aria-pressed=true] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-weight: 500; color: var(--ink-2); font-size: 12px; padding: 6px 8px; border-bottom: 1px solid var(--grid); }
+  td { padding: 7px 8px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tbody tr { cursor: pointer; }
+  tbody tr:hover, tbody tr[aria-selected=true] { background: var(--neutral); }
+  .chip { display: inline-block; font-size: 11.5px; padding: 1px 7px; border-radius: 99px; margin: 1px 3px 1px 0;
+          border: 1px solid var(--ring); white-space: nowrap; }
+  .chip .sw { display: inline-block; width: 7px; height: 7px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+  .xstate { font-size: 11px; font-weight: 600; color: var(--accent); margin-left: 4px; }
+  .truth { font-size: 11px; color: var(--good); font-weight: 600; }
+  .context { font-size: 12.5px; color: var(--ink-2); margin: 4px 0 10px; }
+  .weak { background: var(--warn-bg); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; margin-bottom: 10px; }
+  .list + .list { margin-top: 22px; }
+  .fb { display: flex; gap: 6px; }
+  .fb button { font-size: 12px; padding: 3px 8px; }
+  .fb .done { font-size: 12px; color: var(--good); }
+  #detail svg { width: 100%; max-width: 640px; height: auto; display: block; overflow: visible; }
+  .id { text-transform: none; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+  #tooltip { position: fixed; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--ring);
+             border-radius: 8px; padding: 6px 9px; font-size: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.12); display: none; max-width: 280px; z-index: 5; }
+  .muted { color: var(--muted); }
+  .empty { color: var(--muted); padding: 20px 0; text-align: center; }
+  details summary { cursor: pointer; color: var(--ink-2); font-size: 12.5px; margin-top: 10px; }
+  .narr { font-size: 12.5px; color: var(--ink-2); white-space: pre-wrap; margin-top: 6px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Cross-jurisdiction linkage — analyst view</h1>
+  <div class="banner"><b>Synthetic data.</b> Ranks candidate cases by behavioural similarity. It never identifies a
+    person and never states a probability — a shortlist for a human to review.</div>
+</header>
+<main>
+  <section>
+    <div class="card">
+      <h2>Open a case</h2>
+      <input id="caseInput" type="text" placeholder="case id (16 hex characters)" aria-label="Case id" spellcheck="false">
+      <div class="demo-list" id="demoList" aria-label="Example cases"></div>
+      <div class="note" id="demoNote"></div>
+    </div>
+    <div class="card" id="caseCard" hidden>
+      <h2>Case</h2>
+      <dl id="caseFields"></dl>
+      <details><summary>Narrative</summary><div class="narr" id="narrative"></div></details>
+    </div>
+  </section>
+  <section>
+    <div class="card">
+      <div class="scope" role="group" aria-label="Scope">
+        <button id="scopeSame" aria-pressed="true">Same crime type</button>
+        <button id="scopeAll" aria-pressed="false">Widen to all property crime</button>
+      </div>
+      <div id="lists"><div class="empty">Open a case to see its shortlist.</div></div>
+    </div>
+    <div class="card" id="detail" hidden>
+      <h2 id="detailTitle">Why this candidate</h2>
+      <div id="totalChart"></div>
+      <div id="contribChart"></div>
+      <details open><summary>Table view</summary><table id="contribTable"></table></details>
+    </div>
+  </section>
+</main>
+<div id="tooltip" role="tooltip"></div>
+<script>
+const API = window.API_BASE || "/api";
+const TOKENS = { "__MISSING__": "blank in record", "__ABSENT__": "no such column", "__UNKNOWABLE__": "window too wide" };
+const state = { caseId: null, scope: "same", meta: null, lists: null, selected: null };
+const $ = id => document.getElementById(id);
+const human = f => f.replace(/_/g, " ");
+const fmtBits = b => (b > 0 ? "+" : b < 0 ? "−" : "") + Math.abs(b).toFixed(2);
+const tip = $("tooltip");
+
+function el(tag, attrs = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") node.className = v; else if (k === "text") node.textContent = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v); else node.setAttribute(k, v);
+  }
+  for (const c of children) if (c != null) node.append(c);
+  return node;
+}
+function valueText(v) {
+  if (v === null || v === undefined) return el("span", { class: "gap", text: "—" });
+  if (TOKENS[v]) return el("span", { class: "gap", text: TOKENS[v] });
+  if (v === "") return el("span", { text: "none" });
+  return el("span", { text: String(v).split(";").map(human).join(", ") });
+}
+async function getJSON(path, opts) {
+  const r = await fetch(API + path, opts);
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.error || r.statusText);
+  return body;
+}
+
+async function init() {
+  state.meta = await getJSON("/meta");
+  const list = $("demoList");
+  for (const d of state.meta.demo_cases) {
+    list.append(el("button", { onclick: () => openCase(d.case_id), title: `${human(d.crime_type)} · ${d.state_code}` },
+      `${d.case_id.slice(0, 6)}… ${d.state_code}`));
+  }
+  $("demoNote").textContent = `Examples: ${state.meta.demo_cases_note}.` +
+    (state.meta.ground_truth_marks ? " Demo mode marks synthetic ground-truth links." : "");
+  $("caseInput").addEventListener("keydown", e => { if (e.key === "Enter") openCase(e.target.value.trim()); });
+  $("scopeSame").onclick = () => setScope("same");
+  $("scopeAll").onclick = () => setScope("all");
+}
+
+function setScope(scope) {
+  state.scope = scope;
+  $("scopeSame").setAttribute("aria-pressed", scope === "same");
+  $("scopeAll").setAttribute("aria-pressed", scope === "all");
+  if (state.caseId) loadLinks();
+}
+
+async function openCase(caseId) {
+  if (!/^[0-9a-f]{16}$/.test(caseId)) { $("lists").replaceChildren(el("div", { class: "empty", text: "A case id is 16 hex characters." })); return; }
+  $("caseInput").value = caseId;
+  try {
+    const c = await getJSON(`/cases/${caseId}`);
+    state.caseId = caseId;
+    renderCase(c);
+    await loadLinks();
+  } catch (e) { $("lists").replaceChildren(el("div", { class: "empty", text: e.message })); }
+}
+
+function renderCase(c) {
+  $("caseCard").hidden = false;
+  const dl = $("caseFields"); dl.replaceChildren();
+  const row = (k, v, prov) => {
+    const dd = el("dd", {}, v instanceof Node ? v : valueText(v));
+    if (prov) dd.append(el("span", { class: "prov" + (prov === "llm_extracted" ? " llm" : ""), text: prov === "llm_extracted" ? "LLM-extracted" : "recorded" }));
+    dl.append(el("dt", { text: k }), dd);
+  };
+  row("Crime type", human(c.crime_type));
+  row("Where", `${c.district}, ${c.state_code} · ${c.police_station}`);
+  row("FIR", c.fir_no);
+  row("Window", `${(c.occurred_from || "").replace("T", " ").slice(0, 16)} → ${(c.occurred_to || "").replace("T", " ").slice(0, 16)}`);
+  const prov = c.field_provenance || {};
+  const fields = ["time_band", "group_size_est", "tools", "counter_forensic", "target_selection", "property_taken",
+    "approach_mode", "exit_mode", "entry_point", "entry_method", "premise", "occupancy", "search_pattern",
+    "vehicle_class", "ignition_method", "location_type", "vehicle_used", "victim_activity", "escape_direction",
+    "machine_type", "attack_method", "alarm_defeated"];
+  for (const f of fields) if (c[f] !== null && c[f] !== undefined) row(human(f), c[f], prov[f]);
+  if (c.needs_extraction) dl.append(el("dt", { text: "MO" }), el("dd", { class: "gap", text: "free text, pending extraction" }));
+  $("narrative").textContent = [c.mo_description, c.narrative_text].filter(Boolean).join("\n\n");
+}
+
+async function loadLinks() {
+  $("lists").replaceChildren(el("div", { class: "empty", text: "Scoring…" }));
+  const r = await getJSON(`/cases/${state.caseId}/links?scope=${state.scope}&limit=10`);
+  state.lists = r.lists;
+  const query = await getJSON(`/cases/${state.caseId}`);
+  const wrap = $("lists"); wrap.replaceChildren();
+  wrap.append(renderList("Same crime type", r.lists.same_type, query, false));
+  if (r.lists.cross_type) wrap.append(renderList("Other property crime types", r.lists.cross_type, query, true));
+  $("detail").hidden = true;
+}
+
+function renderList(title, list, query, cross) {
+  const box = el("div", { class: "list" });
+  box.append(el("h2", { text: `${title} · ${list.pool_size.toLocaleString()} cases scored` }));
+  const t = list.typical_true_link_bits || {};
+  box.append(el("div", { class: "context", text:
+    `A typical true link in this pool scores ${fmtBits(t.median ?? 0)} bits (90th percentile ${fmtBits(t.p90 ?? 0)}); ` +
+    `certainty would need about ${fmtBits(list.breakeven_bits ?? 0)}. Use this list as leads, not conclusions.` }));
+  if (cross) box.append(el("div", { class: "weak", text:
+    "Cross-type candidates score on the 8 person-level fields only, against a weaker prior. Keyword search on IPC " +
+    "sections cannot surface these at all — treat them as leads to check, never as links." }));
+  const table = el("table");
+  table.append(el("thead", {}, el("tr", {},
+    el("th", { class: "num", text: "Rank" }), el("th", { class: "num", text: "Evidence" }),
+    el("th", { text: "Driving fields" }), el("th", { text: "Where / when" }), el("th", { text: "Review" }))));
+  const body = el("tbody");
+  for (const item of list.items) {
+    const tr = el("tr", { tabindex: "0", "aria-selected": "false" });
+    const drivers = el("td");
+    for (const c of item.contributions.slice(0, 3)) {
+      drivers.append(el("span", { class: "chip" },
+        el("span", { class: "sw", style: `background: var(${c.bits >= 0 ? "--support" : "--oppose"})` }),
+        `${human(c.field)} ${fmtBits(c.bits)}`));
+    }
+    const where = el("td", {}, `${item.district}, ${item.state_code}`);
+    if (item.state_code !== query.state_code) where.append(el("span", { class: "xstate", text: "other state" }));
+    where.append(el("div", { class: "muted", text: (item.registered_at || "").slice(0, 10) + (cross ? ` · ${human(item.crime_type)}` : "") }));
+    if (item.ground_truth_link) where.append(el("div", { class: "truth", text: "✓ true link (synthetic ground truth)" }));
+    const fb = el("td", {}, feedbackButtons(item.case_id));
+    tr.append(el("td", { class: "num", text: `${item.rank} of ${list.pool_size.toLocaleString()}` }),
+              el("td", { class: "num", text: `${fmtBits(item.bits)} bits` }), drivers, where, fb);
+    const select = () => {
+      body.querySelectorAll("tr").forEach(r => r.setAttribute("aria-selected", "false"));
+      tr.setAttribute("aria-selected", "true");
+      renderDetail(item, list, query);
+    };
+    tr.addEventListener("click", e => { if (!e.target.closest("button")) select(); });
+    tr.addEventListener("keydown", e => { if (e.key === "Enter") select(); });
+    body.append(tr);
+  }
+  table.append(body);
+  box.append(table);
+  return box;
+}
+
+function feedbackButtons(otherId) {
+  const box = el("div", { class: "fb" });
+  const send = async verdict => {
+    try {
+      await getJSON(`/links/${state.caseId}__${otherId}/feedback`, { method: "POST",
+        headers: { "content-type": "application/json" }, body: JSON.stringify({ verdict }) });
+      box.replaceChildren(el("span", { class: "done", text: verdict === "confirmed" ? "confirmed" : "rejected" }));
+    } catch (e) { box.replaceChildren(el("span", { class: "muted", text: e.message })); }
+  };
+  box.append(el("button", { onclick: () => send("confirmed"), "aria-label": "Confirm link" }, "Confirm"),
+             el("button", { onclick: () => send("rejected"), "aria-label": "Reject link" }, "Reject"));
+  return box;
+}
+
+// ---- detail: total vs break-even, then per-field contributions ----------------
+const NS = "http://www.w3.org/2000/svg";
+function svg(tag, attrs = {}, text) {
+  const n = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+function hover(node, html) {
+  node.addEventListener("mousemove", e => { tip.innerHTML = html; tip.style.display = "block";
+    tip.style.left = Math.min(e.clientX + 14, innerWidth - 290) + "px"; tip.style.top = (e.clientY + 14) + "px"; });
+  node.addEventListener("mouseleave", () => { tip.style.display = "none"; });
+}
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const shown = v => v === null || v === undefined ? "—" : TOKENS[v] || (v === "" ? "none" : String(v).split(";").map(human).join(", "));
+
+function renderDetail(item, list, query) {
+  $("detail").hidden = false;
+  $("detailTitle").replaceChildren(`Why rank ${item.rank}: `, el("span", { class: "id", text: item.case_id }));
+  const W = 640, breakeven = Math.max(list.breakeven_bits || 1, 1);
+
+  // total evidence against what certainty would need
+  const total = svg("svg", { viewBox: `0 0 ${W} 58`, role: "img",
+    "aria-label": `Total evidence ${fmtBits(item.bits)} bits against a break-even of ${fmtBits(breakeven)} bits` });
+  const x0 = 12, x1 = W - 12, scale = (x1 - x0) / (breakeven * 1.08);
+  total.append(svg("rect", { x: x0, y: 22, width: x1 - x0, height: 12, rx: 6, fill: "var(--neutral)" }));
+  const filled = Math.max(0, Math.min(item.bits, breakeven * 1.08));
+  if (filled > 0) total.append(svg("rect", { x: x0, y: 22, width: filled * scale, height: 12, rx: 6, fill: "var(--support)" }));
+  const bx = x0 + breakeven * scale;
+  total.append(svg("line", { x1: bx, x2: bx, y1: 16, y2: 40, stroke: "var(--ink-2)", "stroke-width": 2, "stroke-dasharray": "3 3" }));
+  total.append(svg("text", { x: x0, y: 13, fill: "var(--ink)", "font-size": 12.5 },
+    `${fmtBits(item.bits)} bits of evidence`));
+  total.append(svg("text", { x: bx, y: 54, fill: "var(--ink-2)", "font-size": 11.5, "text-anchor": "end" },
+    `break-even ${fmtBits(breakeven)} · ${Math.max(0, breakeven - item.bits).toFixed(1)} bits short`));
+  $("totalChart").replaceChildren(total);
+
+  // per-field contributions: supporting right, opposing left
+  const rows = item.contributions;
+  const rowH = 26, top = 8, labelW = 150, H = top + rows.length * rowH + 8;
+  const chart = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Evidence contributed by each field" });
+  const maxAbs = Math.max(1, ...rows.map(r => Math.abs(r.bits)));
+  const mid = labelW + (W - labelW) / 2, half = (W - labelW) / 2 - 44;
+  chart.append(svg("line", { x1: mid, x2: mid, y1: 0, y2: H, stroke: "var(--axis)", "stroke-width": 1 }));
+  rows.forEach((r, i) => {
+    const y = top + i * rowH;
+    const w = Math.abs(r.bits) / maxAbs * half;
+    const g = svg("g");
+    g.append(svg("rect", { x: 0, y, width: W, height: rowH, fill: "transparent" }));   // hit target
+    g.append(svg("text", { x: labelW - 10, y: y + 17, "text-anchor": "end", fill: "var(--ink)", "font-size": 12.5 }, human(r.field)));
+    g.append(svg("rect", { x: r.bits >= 0 ? mid : mid - w, y: y + 6, width: Math.max(w, 1.5), height: rowH - 12, rx: 3,
+                           fill: r.bits >= 0 ? "var(--support)" : "var(--oppose)" }));
+    g.append(svg("text", { x: r.bits >= 0 ? mid + w + 6 : mid - w - 6, y: y + 17, "font-size": 12,
+                           "text-anchor": r.bits >= 0 ? "start" : "end", fill: "var(--ink-2)" }, fmtBits(r.bits)));
+    hover(g, `<b>${esc(human(r.field))}</b><br>this case: ${esc(shown(r.value))}<br>candidate: ${esc(shown(r.other_value))}` +
+             `<br>${esc(fmtBits(r.bits))} bits ${r.bits >= 0 ? "(agreement, weighted by rarity)" : "(disagreement)"}`);
+    chart.append(g);
+  });
+  chart.append(svg("text", { x: mid + 6, y: H - 1, "font-size": 11, fill: "var(--muted)" }, "supports →"));
+  chart.append(svg("text", { x: mid - 6, y: H - 1, "font-size": 11, fill: "var(--muted)", "text-anchor": "end" }, "← opposes"));
+  $("contribChart").replaceChildren(chart);
+
+  const table = $("contribTable"); table.replaceChildren();
+  table.append(el("thead", {}, el("tr", {}, el("th", { text: "Field" }), el("th", { text: "This case" }),
+    el("th", { text: "Candidate" }), el("th", { class: "num", text: "Bits" }))));
+  const tb = el("tbody");
+  for (const r of rows) tb.append(el("tr", {}, el("td", { text: human(r.field) }), el("td", { text: shown(r.value) }),
+    el("td", { text: shown(r.other_value) }), el("td", { class: "num", text: fmtBits(r.bits) })));
+  table.append(tb);
+}
+
+init().catch(e => { $("lists").replaceChildren(el("div", { class: "empty", text: "API unavailable: " + e.message })); });
+</script>
+</body>
+</html>
