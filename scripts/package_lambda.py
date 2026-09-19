@@ -22,7 +22,7 @@ APP, LAYER = ROOT / "build/app", ROOT / "build/layer"
 MODULES = ["handlers/__init__.py", "handlers/api.py", "handlers/store.py",
            "linkage/__init__.py", "linkage/schema.py", "linkage/features.py",
            "linkage/score.py", "linkage/serve.py", "ui/index.html"]
-BUNDLE_FILES = ["weights.json", "index.json", "codes.npz", "cases.json.gz", "meta.json", "truth_groups.json"]
+BUNDLE_FILES = ["weights.json", "index.json", "codes.npz", "cases.json.gz", "meta.json", "truth_groups.json", "leads.json.gz"]
 NUMPY = "numpy==1.26.4"            # the version every local test and check ran against
 LAMBDA_UNZIPPED_LIMIT_MB = 250
 
@@ -45,7 +45,7 @@ def main() -> int:
     for name in BUNDLE_FILES:
         if (args.bundle / name).exists():
             shutil.copy2(args.bundle / name, APP / "bundle" / name)
-        elif name != "truth_groups.json":
+        elif name not in ("truth_groups.json", "leads.json.gz"):
             print(f"missing bundle file {name} — run python -m linkage.bundle first")
             return 1
 

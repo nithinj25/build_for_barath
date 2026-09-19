@@ -28,8 +28,10 @@ class Scorer:
             self.pools[pool] = {
                 "fields": fields,
                 "vocab": spec["vocab"],
+                "u": {f: np.asarray(spec["u"][f], float) for f in fields},   # how common each value is
                 "tables": {f: features.weight_table(np.asarray(spec["u"][f]), spec["alpha"][f], f)
                            for f in fields},
+                "gap_bits": np.asarray(spec["time"]["bits"], float) if spec.get("time") else None,
                 "coef": np.asarray(spec["lr"]["coef"], float),
                 "intercept": float(spec["lr"]["intercept"]),
                 "iso_x": np.asarray(spec["isotonic"]["x"], float),
@@ -37,13 +39,22 @@ class Scorer:
             }
 
     def encode(self, pool: str, columns: dict) -> dict:
-        """columns: field → list of canonical values (one per case)."""
+        """columns: field → list of canonical values (one per case); optionally
+        features.DAYS → day numbers (-1 unknown) for the time evidence."""
         p = self.pools[pool]
-        return {f: features.encode(columns[f], f, p["vocab"][f]) for f in p["fields"]}
+        codes = {f: features.encode(columns[f], f, p["vocab"][f]) for f in p["fields"]}
+        if features.DAYS in columns:
+            codes[features.DAYS] = np.asarray(columns[features.DAYS], dtype=np.int64)
+        return codes
 
     def field_bits(self, pool: str, a_codes: dict, b_codes: dict) -> np.ndarray:
         p = self.pools[pool]
-        return features.field_bits(p["tables"], p["fields"], a_codes, b_codes)
+        return features.field_bits(p["tables"], p["fields"], a_codes, b_codes, p["gap_bits"])
+
+    def evidence_names(self, pool: str) -> list[str]:
+        """Column names of field_bits output: MO fields, then days_apart if timed."""
+        p = self.pools[pool]
+        return [*p["fields"], *(["days_apart"] if p["gap_bits"] is not None else [])]
 
     def contributions(self, pool: str, field_bits: np.ndarray) -> np.ndarray:
         return field_bits * self.pools[pool]["coef"] / LN2
@@ -59,5 +70,6 @@ class Scorer:
     def explain(self, pool: str, field_bits_row: np.ndarray, top: int = 3) -> list[tuple[str, float]]:
         """Driving fields for one pair, strongest first: [(field, bits), ...]."""
         contrib = self.contributions(pool, field_bits_row)
+        names = self.evidence_names(pool)
         order = np.argsort(-np.abs(contrib))[:top]
-        return [(self.pools[pool]["fields"][i], round(float(contrib[i]), 3)) for i in order if contrib[i] != 0]
+        return [(names[i], round(float(contrib[i]), 3)) for i in order if contrib[i] != 0]

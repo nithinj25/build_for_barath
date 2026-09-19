@@ -26,6 +26,14 @@ from linkage import schema
 CROSS = "CROSS_TYPE"
 ALPHA_BOUNDS = (1e-3, 1e4)
 
+# Time between offences — evidence from outside the MO (spec §11). Serial
+# offending is bursty, so a short gap raises the odds of one offender and a
+# gap of years lowers them. Weights per bin are learned from training pairs;
+# an unknown date contributes 0. Codes are day numbers (-1 = unknown) under
+# this key, alongside the MO codes.
+DAYS = "__days"
+GAP_EDGES = (0, 30, 90, 180, 365, 730)            # bin i covers [edge i, edge i+1) days
+
 
 def pools() -> tuple[str, ...]:
     return (*schema.CRIME_TYPES, CROSS)
@@ -123,9 +131,34 @@ def weight_table(u: np.ndarray, alpha: float, field: str) -> np.ndarray:
     return np.pad(table, ((0, 1), (0, 1)))
 
 
-def field_bits(tables: dict, fields: tuple[str, ...], a_codes: dict, b_codes: dict) -> np.ndarray:
-    """(n_pairs, n_fields) evidence. Codes broadcast: a scalar query against many."""
-    return np.stack([tables[f][a_codes[f], b_codes[f]] for f in fields], axis=-1)
+def gap_bins(a_days, b_days) -> np.ndarray:
+    """Bin index of |days apart|, or -1 where either date is unknown."""
+    a, b = np.asarray(a_days), np.asarray(b_days)
+    bins = np.searchsorted(GAP_EDGES, np.abs(a - b), side="right") - 1
+    return np.where((a < 0) | (b < 0), -1, bins)
+
+
+def fit_gap_bits(same_bins: np.ndarray, unrelated_bins: np.ndarray) -> np.ndarray:
+    """log2 P(bin | same offender) / P(bin | unrelated), smoothed."""
+    k = len(GAP_EDGES)
+    same = np.bincount(same_bins[same_bins >= 0], minlength=k) + 0.5
+    unrel = np.bincount(unrelated_bins[unrelated_bins >= 0], minlength=k) + 0.5
+    return np.log2((same / same.sum()) / (unrel / unrel.sum()))
+
+
+def field_bits(tables: dict, fields: tuple[str, ...], a_codes: dict, b_codes: dict,
+               gap_bits: np.ndarray | None = None) -> np.ndarray:
+    """(n_pairs, n_fields [+1 for time]) evidence. Codes broadcast: a scalar query
+    against many. With gap_bits, a final column holds the time evidence (0 when
+    either date is unknown or no day codes were given)."""
+    cols = [tables[f][a_codes[f], b_codes[f]] for f in fields]
+    if gap_bits is not None:
+        if DAYS in a_codes and DAYS in b_codes:
+            bins = gap_bins(a_codes[DAYS], b_codes[DAYS])
+            cols.append(np.where(bins >= 0, np.asarray(gap_bits)[np.clip(bins, 0, None)], 0.0))
+        else:
+            cols.append(np.zeros(np.broadcast(cols[0]).shape))
+    return np.stack(cols, axis=-1)
 
 
 def agreement_count(fields: tuple[str, ...], vocab: dict, a_codes: dict, b_codes: dict) -> np.ndarray:

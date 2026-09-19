@@ -3,343 +3,570 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Linkage — analyst view</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%232a78d6'/%3E%3C/svg%3E">
+<title>Cross-Jurisdiction Linkage</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%231c5cab'/%3E%3Cpath d='M4 8h8M8 4v8' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
 <style>
   :root {
     color-scheme: light;
-    --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
-    --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10);
-    --support: #2a78d6; --oppose: #e34948; --neutral: #f0efec; --accent: #2a78d6;
-    --good: #006300; --warn-bg: #fff4d6;
+    --page: #f4f5f7; --surface: #ffffff; --surface-2: #f9f9f7; --ink: #0b0b0b; --ink-2: #474641; --muted: #75736d;
+    --line: #e1e0d9; --line-2: #c3c2b7; --ring: rgba(11,11,11,0.10);
+    --brand: #1c5cab; --brand-ink: #ffffff; --accent: #2a78d6; --accent-soft: #e8f1fc;
+    --strong: #1c5cab; --possible: #3987e5; --weak: #86b6ef; --tier-ink: #ffffff; --weak-ink: #0d366b;
+    --support: #2a78d6; --oppose: #e34948; --oppose-soft: #fdecec; --support-soft: #e8f1fc;
+    --good: #006300; --good-soft: #e6f4e6; --caution-soft: #fff4d6; --caution-ink: #6b4a00;
+    --shadow: 0 1px 2px rgba(0,0,0,.05), 0 2px 8px rgba(0,0,0,.04);
   }
   @media (prefers-color-scheme: dark) {
     :root:where(:not([data-theme="light"])) {
       color-scheme: dark;
-      --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
-      --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
-      --support: #3987e5; --oppose: #e66767; --neutral: #383835; --accent: #3987e5;
-      --good: #0ca30c; --warn-bg: #3a2f10;
+      --page: #0d0d0d; --surface: #1a1a19; --surface-2: #222220; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #95938c;
+      --line: #2c2c2a; --line-2: #383835; --ring: rgba(255,255,255,0.10);
+      --brand: #184f95; --accent: #3987e5; --accent-soft: #16273d;
+      --strong: #6da7ec; --possible: #3987e5; --weak: #256abf; --tier-ink: #0b0b0b; --weak-ink: #ffffff;
+      --support: #3987e5; --oppose: #e66767; --oppose-soft: #3a1f1f; --support-soft: #16273d;
+      --good: #0ca30c; --good-soft: #13301a; --caution-soft: #3a2f10; --caution-ink: #f2d38a;
+      --shadow: none;
     }
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--page); color: var(--ink);
-         font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  header { padding: 16px 20px 12px; border-bottom: 1px solid var(--ring); background: var(--surface); }
-  h1 { font-size: 17px; margin: 0 0 4px; font-weight: 600; }
-  .banner { color: var(--ink-2); font-size: 12.5px; }
-  .banner b { color: var(--ink); }
-  main { display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: 16px; padding: 16px 20px; }
-  @media (max-width: 860px) { main { grid-template-columns: 1fr; padding: 12px 16px; } }
-  .card { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 14px; }
-  .card + .card { margin-top: 14px; }
-  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-2); margin: 0 0 10px; font-weight: 600; }
-  input[type=text] { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--axis);
-                     background: var(--page); color: var(--ink); font: inherit; font-variant-numeric: tabular-nums; }
-  button { font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--axis);
-           background: var(--surface); color: var(--ink); padding: 6px 10px; }
-  button:hover { border-color: var(--ink-2); }
-  button:focus-visible, input:focus-visible, tr:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .demo-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-  .demo-list button { font-size: 12px; padding: 4px 8px; font-variant-numeric: tabular-nums; }
-  .note { color: var(--muted); font-size: 12px; margin-top: 8px; }
-  dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 0; font-size: 13px; }
-  dt { color: var(--ink-2); }
-  dd { margin: 0; overflow-wrap: anywhere; }
-  .prov { font-size: 11px; border-radius: 99px; padding: 0 6px; margin-left: 6px; border: 1px solid var(--ring); color: var(--ink-2); }
-  .prov.llm { border-color: var(--accent); color: var(--accent); }
-  .gap { color: var(--muted); font-style: italic; }
-  .scope { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
-  .scope button[aria-pressed=true] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { text-align: left; font-weight: 500; color: var(--ink-2); font-size: 12px; padding: 6px 8px; border-bottom: 1px solid var(--grid); }
-  td { padding: 7px 8px; border-bottom: 1px solid var(--grid); vertical-align: top; }
-  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  tbody tr { cursor: pointer; }
-  tbody tr:hover, tbody tr[aria-selected=true] { background: var(--neutral); }
-  .chip { display: inline-block; font-size: 11.5px; padding: 1px 7px; border-radius: 99px; margin: 1px 3px 1px 0;
-          border: 1px solid var(--ring); white-space: nowrap; }
-  .chip .sw { display: inline-block; width: 7px; height: 7px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
-  .xstate { font-size: 11px; font-weight: 600; color: var(--accent); margin-left: 4px; }
-  .truth { font-size: 11px; color: var(--good); font-weight: 600; }
-  .context { font-size: 12.5px; color: var(--ink-2); margin: 4px 0 10px; }
-  .weak { background: var(--warn-bg); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; margin-bottom: 10px; }
-  .list + .list { margin-top: 22px; }
-  .fb { display: flex; gap: 6px; }
-  .fb button { font-size: 12px; padding: 3px 8px; }
-  .fb .done { font-size: 12px; color: var(--good); }
-  #detail svg { width: 100%; max-width: 640px; height: auto; display: block; overflow: visible; }
-  .id { text-transform: none; font-variant-numeric: tabular-nums; letter-spacing: 0; }
-  #tooltip { position: fixed; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--ring);
-             border-radius: 8px; padding: 6px 9px; font-size: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.12); display: none; max-width: 280px; z-index: 5; }
+  body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  a { color: var(--accent); }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* app bar */
+  .bar { background: var(--brand); color: var(--brand-ink); }
+  .bar-inner { max-width: 1180px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: .01em; }
+  .logo small { display: block; font-weight: 400; font-size: 12px; opacity: .85; }
+  .mark { width: 30px; height: 30px; border-radius: 7px; background: rgba(255,255,255,.16); display: grid; place-items: center; }
+  nav { display: flex; gap: 4px; margin-left: auto; }
+  nav a { color: var(--brand-ink); text-decoration: none; padding: 7px 14px; border-radius: 8px; font-weight: 500; opacity: .88; }
+  nav a[aria-current=page] { background: rgba(255,255,255,.18); opacity: 1; }
+  .pill-synth { font-size: 12px; background: rgba(255,255,255,.18); padding: 3px 10px; border-radius: 99px; }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 22px 20px 60px; }
+  @media (max-width: 700px) { main, .bar-inner { padding-left: 16px; padding-right: 16px; } nav { margin-left: 0; } }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 0 0 12px; }
+  h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+  .lede { color: var(--ink-2); margin: 0 0 18px; max-width: 780px; }
+  .card { background: var(--surface); border: 1px solid var(--ring); border-radius: 12px; padding: 18px; box-shadow: var(--shadow); }
+  .stack > * + * { margin-top: 12px; }
   .muted { color: var(--muted); }
-  .empty { color: var(--muted); padding: 20px 0; text-align: center; }
-  details summary { cursor: pointer; color: var(--ink-2); font-size: 12.5px; margin-top: 10px; }
-  .narr { font-size: 12.5px; color: var(--ink-2); white-space: pre-wrap; margin-top: 6px; }
+  .small { font-size: 13px; }
+
+  /* filters */
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; margin-bottom: 14px; }
+  .filters label { display: grid; gap: 4px; font-size: 12.5px; color: var(--ink-2); font-weight: 500; }
+  select, input[type=search], textarea { background: var(--surface); border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 10px; min-width: 170px; }
+  .check { display: flex !important; align-items: center; gap: 8px; grid-auto-flow: column; padding-bottom: 8px; }
+  .notice { border-radius: 10px; padding: 12px 14px; font-size: 14px; margin-bottom: 14px; }
+  .notice.info { background: var(--accent-soft); }
+  .notice.caution { background: var(--caution-soft); color: var(--caution-ink); }
+
+  /* tier badge */
+  .tier { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; padding: 3px 10px; border-radius: 99px; white-space: nowrap; }
+  .tier.strong { background: var(--strong); color: var(--tier-ink); }
+  .tier.possible { background: var(--possible); color: var(--tier-ink); }
+  .tier.weak { background: var(--weak); color: var(--weak-ink); }
+  .dots { display: inline-flex; gap: 2px; }
+  .dots i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .35; }
+  .dots i.on { opacity: 1; }
+  .rarity { font-size: 13px; color: var(--ink-2); }
+
+  /* lead cards */
+  .leads { display: grid; gap: 12px; }
+  .lead { background: var(--surface); border: 1px solid var(--ring); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow);
+          display: grid; grid-template-columns: 1fr auto; gap: 10px 18px; cursor: pointer; }
+  .lead:hover { border-color: var(--line-2); }
+  .lead-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .crime { font-weight: 600; }
+  .pair { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; grid-column: 1 / -1; }
+  .place { background: var(--surface-2); border: 1px solid var(--line); border-radius: 9px; padding: 8px 12px; min-width: 0; }
+  .place b { display: block; font-size: 15px; }
+  .place span { font-size: 12.5px; color: var(--muted); }
+  .gap { text-align: center; font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+  .gap svg { display: block; margin: 0 auto 2px; }
+  @media (max-width: 640px) { .pair { grid-template-columns: 1fr; } .gap { text-align: left; } .gap svg { display: none; } }
+  .reasons-inline { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; background: var(--support-soft); border-radius: 99px; padding: 3px 10px; }
+  .chip.time { background: var(--surface-2); border: 1px solid var(--line); }
+  .xstate { font-size: 12px; font-weight: 600; color: var(--accent); border: 1px solid var(--accent); border-radius: 99px; padding: 1px 8px; }
+  .truth { font-size: 12px; font-weight: 600; color: var(--good); background: var(--good-soft); border-radius: 99px; padding: 2px 9px; }
+  .btn { background: var(--surface); border: 1px solid var(--line-2); border-radius: 8px; padding: 7px 14px; font-weight: 500; }
+  .btn:hover { border-color: var(--ink-2); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .lanes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 6px; }
+  .lane { text-align: left; background: var(--surface); border: 1px solid var(--line-2); border-radius: 10px; padding: 10px 14px; display: grid; gap: 2px; }
+  .lane span { font-size: 12.5px; color: var(--muted); }
+  .lane[aria-selected=true] { border: 2px solid var(--accent); background: var(--accent-soft); padding: 9px 13px; }
+  .lane-help { margin: 4px 0 14px; }
+  @media (max-width: 640px) { .lanes { grid-template-columns: 1fr; } }
+  .pager { display: flex; gap: 10px; align-items: center; justify-content: center; margin-top: 16px; }
+
+  /* search */
+  .searchbox { display: flex; gap: 10px; }
+  .searchbox input { flex: 1; font-size: 17px; padding: 12px 14px; }
+  .results { display: grid; gap: 8px; margin-top: 14px; }
+  .result { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 10px 14px;
+            background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; cursor: pointer; flex-wrap: wrap; }
+  .result:hover { border-color: var(--line-2); }
+  .examples { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+  /* case + compare */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
+  .fir { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 14px; margin: 0; }
+  .fir dt { color: var(--muted); }
+  .fir dd { margin: 0; overflow-wrap: anywhere; }
+  .firhead { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin-bottom: 10px; flex-wrap: wrap; }
+  .firhead b { font-size: 17px; }
+  .verdict { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .verdict .big { font-size: 20px; font-weight: 700; }
+  .explain { color: var(--ink-2); margin: 8px 0 0; max-width: 820px; }
+  .timeline { margin-top: 14px; }
+  .reason { display: grid; grid-template-columns: 26px 1fr 150px; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+  .reason:first-of-type { border-top: 0; }
+  .reason .ico { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+  .ico.shared { background: var(--support-soft); color: var(--support); }
+  .ico.different { background: var(--oppose-soft); color: var(--oppose); }
+  .ico.timing { background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line); }
+  .reason .what { font-weight: 600; }
+  .reason .why { font-size: 13px; color: var(--muted); }
+  .weight { font-size: 12px; color: var(--muted); text-align: right; }
+  .weight .track { height: 8px; background: var(--surface-2); border-radius: 4px; position: relative; margin-bottom: 3px; border: 1px solid var(--line); }
+  .weight .fill { position: absolute; top: -1px; bottom: -1px; border-radius: 4px; }
+  .notrec { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .narr { white-space: pre-wrap; font-size: 13.5px; color: var(--ink-2); background: var(--surface-2); border-radius: 8px; padding: 10px 12px; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .actions textarea { flex: 1 1 260px; min-height: 40px; }
+  .saved { color: var(--good); font-weight: 600; }
+  .shortlist { display: grid; gap: 10px; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .tabs button { border: 1px solid var(--line-2); background: var(--surface); border-radius: 99px; padding: 6px 14px; }
+  .tabs button[aria-pressed=true] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+  .back { display: inline-block; margin-bottom: 12px; text-decoration: none; }
+  .howto { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .stat { font-size: 28px; font-weight: 700; }
+  .empty { text-align: center; color: var(--muted); padding: 40px 0; }
+
+  @media print {
+    .bar, nav, .actions, .back, .noprint { display: none !important; }
+    body { background: #fff; color: #000; }
+    .card, .lead { box-shadow: none; border-color: #bbb; break-inside: avoid; }
+    main { padding: 0; }
+  }
 </style>
 </head>
 <body>
-<header>
-  <h1>Cross-jurisdiction linkage — analyst view</h1>
-  <div class="banner"><b>Synthetic data.</b> Ranks candidate cases by behavioural similarity. It never identifies a
-    person and never states a probability — a shortlist for a human to review.</div>
-</header>
-<main>
-  <section>
-    <div class="card">
-      <h2>Open a case</h2>
-      <input id="caseInput" type="text" placeholder="case id (16 hex characters)" aria-label="Case id" spellcheck="false">
-      <div class="demo-list" id="demoList" aria-label="Example cases"></div>
-      <div class="note" id="demoNote"></div>
+<div class="bar">
+  <div class="bar-inner">
+    <div class="logo">
+      <div class="mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="2"><circle cx="4" cy="9" r="2.5"/><circle cx="14" cy="4" r="2.5"/><circle cx="14" cy="14" r="2.5"/><path d="M6.3 8l5.4-3M6.3 10l5.4 3"/></svg></div>
+      <div>Cross-Jurisdiction Linkage<small>Property-crime MO analysis for investigators</small></div>
     </div>
-    <div class="card" id="caseCard" hidden>
-      <h2>Case</h2>
-      <dl id="caseFields"></dl>
-      <details><summary>Narrative</summary><div class="narr" id="narrative"></div></details>
-    </div>
-  </section>
-  <section>
-    <div class="card">
-      <div class="scope" role="group" aria-label="Scope">
-        <button id="scopeSame" aria-pressed="true">Same crime type</button>
-        <button id="scopeAll" aria-pressed="false">Widen to all property crime</button>
-      </div>
-      <div id="lists"><div class="empty">Open a case to see its shortlist.</div></div>
-    </div>
-    <div class="card" id="detail" hidden>
-      <h2 id="detailTitle">Why this candidate</h2>
-      <div id="totalChart"></div>
-      <div id="contribChart"></div>
-      <details open><summary>Table view</summary><table id="contribTable"></table></details>
-    </div>
-  </section>
-</main>
-<div id="tooltip" role="tooltip"></div>
+    <span class="pill-synth" title="All cases in this demo are synthetic">Synthetic demo data</span>
+    <nav aria-label="Main">
+      <a href="#/leads" data-nav="leads">Leads</a>
+      <a href="#/search" data-nav="search">Find a case</a>
+      <a href="#/about" data-nav="about">How it works</a>
+    </nav>
+  </div>
+</div>
+<main id="view" aria-live="polite"></main>
+
 <script>
 const API = window.API_BASE || "/api";
-const TOKENS = { "__MISSING__": "blank in record", "__ABSENT__": "no such column", "__UNKNOWABLE__": "window too wide" };
-const state = { caseId: null, scope: "same", meta: null, lists: null, selected: null };
-const $ = id => document.getElementById(id);
-const human = f => f.replace(/_/g, " ");
-const fmtBits = b => (b > 0 ? "+" : b < 0 ? "−" : "") + Math.abs(b).toFixed(2);
-const tip = $("tooltip");
+const $ = s => document.querySelector(s);
+const STATES = { MH: "Maharashtra", MP: "Madhya Pradesh", KA: "Karnataka", TG: "Telangana" };
+const CRIMES = { BURGLARY_RESIDENTIAL: "House burglary", BURGLARY_COMMERCIAL: "Shop / commercial burglary",
+  VEHICLE_THEFT: "Vehicle theft", SNATCHING: "Chain snatching", ATM_TAMPERING: "ATM tampering" };
+const CRIME_CASES = { BURGLARY_RESIDENTIAL: "house burglaries", BURGLARY_COMMERCIAL: "commercial burglaries",
+  VEHICLE_THEFT: "vehicle thefts", SNATCHING: "chain snatchings", ATM_TAMPERING: "ATM tampering cases",
+  CROSS_TYPE: "property crimes" };
+const FIELDS = { time_band: "Time of day", group_size_est: "Number of offenders", tools: "Tools used",
+  counter_forensic: "Identity concealment", target_selection: "How the target was chosen", property_taken: "Property stolen",
+  approach_mode: "Arrived by", exit_mode: "Escaped by", entry_point: "Point of entry", entry_method: "Method of entry",
+  premise: "Type of premises", occupancy: "Occupancy at the time", search_pattern: "How the place was searched",
+  vehicle_class: "Vehicle stolen", ignition_method: "How the vehicle was started", location_type: "Where it was parked",
+  vehicle_used: "Snatchers' vehicle", victim_activity: "What the victim was doing", escape_direction: "Escape route",
+  machine_type: "ATM type", attack_method: "How the ATM was attacked", alarm_defeated: "Alarm", days_apart: "Time between offences" };
+const VALUES = { "1": "one person", "2-3": "2–3 people", "4+": "4 or more people", none: "none",
+  cctv_disabled: "CCTV disabled", face_covered: "faces covered", insider_info: "inside information", no_force: "no forced entry",
+  lock_broken: "lock broken", forced_open: "door or window forced", grill_cut: "grill cut", duplicate_key: "duplicate key",
+  wall_breach: "hole made in wall", handle_lock_broken: "handle lock broken", direct_wiring: "wires joined",
+  key_left: "key left in vehicle", towed_or_lifted: "towed or lifted", two_wheeler: "two-wheeler", four_wheeler: "four-wheeler",
+  on_foot: "on foot", early_morning: "early morning", residential_parking: "residential parking",
+  public_parking: "public parking", transit_hub: "railway or bus station", riding_pillion: "riding pillion",
+  waiting_for_transport: "waiting for transport", morning_walk: "on a morning walk", main_road: "main road",
+  offsite_kiosk: "off-site kiosk", white_label: "white-label ATM", onsite_branch: "bank-branch ATM", cash_trap: "cash trap",
+  gas_cutting: "gas cutting", physical_forcing: "forced open", not_defeated: "left working", defeated: "disabled",
+  independent_house: "independent house", mixed_use: "shop-cum-residence", row_house: "row house",
+  temporarily_away: "occupants out", vacant_extended: "locked for days", closed_overnight: "closed for the night",
+  closed_extended: "closed for holidays", occupied: "occupied", gas_cutter: "gas cutter" };
+const TOKENS = { "__MISSING__": "not recorded", "__ABSENT__": "not recorded", "__UNKNOWABLE__": "not known" };
+let META = null;
 
-function el(tag, attrs = {}, ...children) {
-  const node = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) {
-    if (k === "class") node.className = v; else if (k === "text") node.textContent = v;
-    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v); else node.setAttribute(k, v);
+// ---------- helpers ----------
+function h(tag, attrs = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v === false || v == null) continue;
+    if (k === "class") n.className = v; else if (k === "text") n.textContent = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v === true ? "" : v);
   }
-  for (const c of children) if (c != null) node.append(c);
-  return node;
+  for (const c of kids.flat(Infinity)) if (c != null && c !== false) n.append(c instanceof Node ? c : String(c));
+  return n;
 }
-function valueText(v) {
-  if (v === null || v === undefined) return el("span", { class: "gap", text: "—" });
-  if (TOKENS[v]) return el("span", { class: "gap", text: TOKENS[v] });
-  if (v === "") return el("span", { text: "none" });
-  return el("span", { text: String(v).split(";").map(human).join(", ") });
+const val = v => v == null ? "—" : TOKENS[v] || String(v).split(";").filter(Boolean).map(x => VALUES[x] || x.replace(/_/g, " ")).join(", ") || "none";
+const field = f => FIELDS[f] || f.replace(/_/g, " ");
+const crime = c => CRIMES[c] || String(c || "").replace(/_/g, " ").toLowerCase();
+const state = s => STATES[s] || s;
+const date = d => d ? new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—";
+function gapText(days) {
+  if (days == null) return "time unknown";
+  if (days < 1) return "same day";
+  if (days < 14) return `${days} day${days === 1 ? "" : "s"}`;
+  if (days < 60) return `${Math.round(days / 7)} weeks`;
+  if (days < 730) return `${Math.round(days / 30.4)} months`;
+  return `${(days / 365).toFixed(1)} years`;
 }
-async function getJSON(path, opts) {
+const pct = s => s < 0.01 ? "under 1%" : `${Math.round(s * 100)}%`;
+function daysBetween(a, b) { return a && b ? Math.round(Math.abs(new Date(a) - new Date(b)) / 864e5) : null; }
+function sig2(n) { if (n < 100) return n.toLocaleString("en-IN"); const p = 10 ** (Math.floor(Math.log10(n)) - 1); return (Math.round(n / p) * p).toLocaleString("en-IN"); }
+function rarityText(x) { return x.rarer_than_measured ? `rarer than 1 in ${sig2(x.one_in)} unrelated cases` : `about 1 in ${sig2(x.one_in)} unrelated cases look this alike`; }
+function strengthWord(b) {
+  const a = Math.abs(b), dir = b > 0 ? "supports" : "weakens";
+  return a < 0.05 ? "no effect" : a >= 2 ? `strongly ${dir}` : a >= 0.75 ? dir : `slightly ${dir}`;
+}
+function tierBadge(x) {
+  const lit = { strong: 3, possible: 2, weak: 1 }[x.tier] || 1;
+  return h("span", { class: `tier ${x.tier}` }, h("span", { class: "dots", "aria-hidden": "true" },
+    [1, 2, 3].map(i => h("i", { class: i <= lit ? "on" : "" }))), x.tier_label);
+}
+async function api(path, opts) {
   const r = await fetch(API + path, opts);
   const body = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(body.error || r.statusText);
   return body;
 }
-
-async function init() {
-  state.meta = await getJSON("/meta");
-  const list = $("demoList");
-  for (const d of state.meta.demo_cases) {
-    list.append(el("button", { onclick: () => openCase(d.case_id), title: `${human(d.crime_type)} · ${d.state_code}` },
-      `${d.case_id.slice(0, 6)}… ${d.state_code}`));
-  }
-  $("demoNote").textContent = `Examples: ${state.meta.demo_cases_note}.` +
-    (state.meta.ground_truth_marks ? " Demo mode marks synthetic ground-truth links." : "");
-  $("caseInput").addEventListener("keydown", e => { if (e.key === "Enter") openCase(e.target.value.trim()); });
-  $("scopeSame").onclick = () => setScope("same");
-  $("scopeAll").onclick = () => setScope("all");
+function reasonPhrase(r, crimeType) {
+  if (r.kind === "timing") return `${gapText(r.days)} apart`;
+  const v = val(r.shared_value ?? r.value);
+  return `${field(r.field)}: ${v}` + (r.share != null ? ` (${pct(r.share)} of ${CRIME_CASES[crimeType] || "cases"})` : "");
 }
+const view = $("#view");
+function render(...nodes) { view.replaceChildren(...nodes); window.scrollTo(0, 0); }
+function setNav(name) { document.querySelectorAll("nav a").forEach(a => a.setAttribute("aria-current", a.dataset.nav === name ? "page" : "false")); }
+function loading(text = "Loading…") { render(h("div", { class: "empty", text })); }
+function fail(e) { render(h("div", { class: "empty", text: "Something went wrong: " + e.message })); }
 
-function setScope(scope) {
-  state.scope = scope;
-  $("scopeSame").setAttribute("aria-pressed", scope === "same");
-  $("scopeAll").setAttribute("aria-pressed", scope === "all");
-  if (state.caseId) loadLinks();
-}
+// ---------- leads ----------
+const LANES = [
+  ["same_district", "Same district", "Different FIRs in one district — often different police stations."],
+  ["same_state", "Other districts, same state", "Matches that cross district lines inside a state."],
+  ["cross_state", "Other states", "Matches across state borders — the hardest to confirm."]];
+const leadState = { lane: "same_district", state: "", district: "", crime_type: "", offset: 0 };
+async function showLeads() {
+  setNav("leads");
+  const q = new URLSearchParams({ limit: "20", offset: String(leadState.offset), lane: leadState.lane });
+  for (const k of ["state", "district", "crime_type"]) if (leadState[k]) q.set(k, leadState[k]);
+  loading();
+  let data;
+  try { data = await api(`/leads?${q}`); } catch (e) { return fail(e); }
+  const reset = patch => { Object.assign(leadState, patch, { offset: 0 }); showLeads(); };
 
-async function openCase(caseId) {
-  if (!/^[0-9a-f]{16}$/.test(caseId)) { $("lists").replaceChildren(el("div", { class: "empty", text: "A case id is 16 hex characters." })); return; }
-  $("caseInput").value = caseId;
-  try {
-    const c = await getJSON(`/cases/${caseId}`);
-    state.caseId = caseId;
-    renderCase(c);
-    await loadLinks();
-  } catch (e) { $("lists").replaceChildren(el("div", { class: "empty", text: e.message })); }
-}
+  const stateSel = h("select", { onchange: e => reset({ state: e.target.value, district: "" }) },
+    h("option", { value: "" }, "All states"), Object.keys(META.places).map(s => h("option", { value: s, selected: leadState.state === s }, state(s))));
+  const districts = leadState.state ? META.places[leadState.state] : Object.values(META.places).flat().sort();
+  const distSel = h("select", { onchange: e => reset({ district: e.target.value }) },
+    h("option", { value: "" }, "All districts"), districts.map(d => h("option", { value: d, selected: leadState.district === d }, d)));
+  const crimeSel = h("select", { onchange: e => reset({ crime_type: e.target.value }) },
+    h("option", { value: "" }, "All crime types"), META.crime_types.map(c => h("option", { value: c, selected: leadState.crime_type === c }, crime(c))));
 
-function renderCase(c) {
-  $("caseCard").hidden = false;
-  const dl = $("caseFields"); dl.replaceChildren();
-  const row = (k, v, prov) => {
-    const dd = el("dd", {}, v instanceof Node ? v : valueText(v));
-    if (prov) dd.append(el("span", { class: "prov" + (prov === "llm_extracted" ? " llm" : ""), text: prov === "llm_extracted" ? "LLM-extracted" : "recorded" }));
-    dl.append(el("dt", { text: k }), dd);
-  };
-  row("Crime type", human(c.crime_type));
-  row("Where", `${c.district}, ${c.state_code} · ${c.police_station}`);
-  row("FIR", c.fir_no);
-  row("Window", `${(c.occurred_from || "").replace("T", " ").slice(0, 16)} → ${(c.occurred_to || "").replace("T", " ").slice(0, 16)}`);
-  const prov = c.field_provenance || {};
-  const fields = ["time_band", "group_size_est", "tools", "counter_forensic", "target_selection", "property_taken",
-    "approach_mode", "exit_mode", "entry_point", "entry_method", "premise", "occupancy", "search_pattern",
-    "vehicle_class", "ignition_method", "location_type", "vehicle_used", "victim_activity", "escape_direction",
-    "machine_type", "attack_method", "alarm_defeated"];
-  for (const f of fields) if (c[f] !== null && c[f] !== undefined) row(human(f), c[f], prov[f]);
-  if (c.needs_extraction) dl.append(el("dt", { text: "MO" }), el("dd", { class: "gap", text: "free text, pending extraction" }));
-  $("narrative").textContent = [c.mo_description, c.narrative_text].filter(Boolean).join("\n\n");
-}
+  const lanes = h("div", { class: "lanes", role: "tablist", "aria-label": "Where the two FIRs are" },
+    LANES.map(([id, label]) => h("button", { role: "tab", "aria-selected": String(leadState.lane === id), class: "lane",
+      onclick: () => reset({ lane: id }) }, h("b", {}, label), h("span", {}, `${(data.lanes[id] || 0).toLocaleString("en-IN")} leads`))));
 
-async function loadLinks() {
-  $("lists").replaceChildren(el("div", { class: "empty", text: "Scoring…" }));
-  const r = await getJSON(`/cases/${state.caseId}/links?scope=${state.scope}&limit=10`);
-  state.lists = r.lists;
-  const query = await getJSON(`/cases/${state.caseId}`);
-  const wrap = $("lists"); wrap.replaceChildren();
-  wrap.append(renderList("Same crime type", r.lists.same_type, query, false));
-  if (r.lists.cross_type) wrap.append(renderList("Other property crime types", r.lists.cross_type, query, true));
-  $("detail").hidden = true;
-}
-
-function renderList(title, list, query, cross) {
-  const box = el("div", { class: "list" });
-  box.append(el("h2", { text: `${title} · ${list.pool_size.toLocaleString()} cases scored` }));
-  const t = list.typical_true_link_bits || {};
-  box.append(el("div", { class: "context", text:
-    `A typical true link in this pool scores ${fmtBits(t.median ?? 0)} bits (90th percentile ${fmtBits(t.p90 ?? 0)}); ` +
-    `certainty would need about ${fmtBits(list.breakeven_bits ?? 0)}. Use this list as leads, not conclusions.` }));
-  if (cross) box.append(el("div", { class: "weak", text:
-    "Cross-type candidates score on the 8 person-level fields only, against a weaker prior. Keyword search on IPC " +
-    "sections cannot surface these at all — treat them as leads to check, never as links." }));
-  const table = el("table");
-  table.append(el("thead", {}, el("tr", {},
-    el("th", { class: "num", text: "Rank" }), el("th", { class: "num", text: "Evidence" }),
-    el("th", { text: "Driving fields" }), el("th", { text: "Where / when" }), el("th", { text: "Review" }))));
-  const body = el("tbody");
-  for (const item of list.items) {
-    const tr = el("tr", { tabindex: "0", "aria-selected": "false" });
-    const drivers = el("td");
-    for (const c of item.contributions.slice(0, 3)) {
-      drivers.append(el("span", { class: "chip" },
-        el("span", { class: "sw", style: `background: var(${c.bits >= 0 ? "--support" : "--oppose"})` }),
-        `${human(c.field)} ${fmtBits(c.bits)}`));
+  const lq = META.lead_quality, lane = LANES.find(l => l[0] === leadState.lane);
+  const quality = lq && lq[leadState.lane];
+  let notice = null;
+  if (quality && quality.leads) {
+    if (quality.true_links) {
+      notice = h("div", { class: "notice info" },
+        h("b", {}, `In testing, ${quality.true_links} of ${quality.leads} leads like these were real serial links`),
+        ` — about ${sig2(Math.round(quality.true_link_rate / lq.chance_rate))}× better than reviewing case pairs at random. Each lead is a reason to look, not a finding.`);
+    } else {
+      notice = h("div", { class: "notice caution" },
+        h("b", {}, `Low confidence. In testing, none of ${quality.leads} leads like these were real links. `),
+        "Serial offenders mostly work within one state, so two FIRs from different states that look alike are usually coincidence. ",
+        "These are shown because no keyword search could connect them at all — check them only when something else points the same way.");
     }
-    const where = el("td", {}, `${item.district}, ${item.state_code}`);
-    if (item.state_code !== query.state_code) where.append(el("span", { class: "xstate", text: "other state" }));
-    where.append(el("div", { class: "muted", text: (item.registered_at || "").slice(0, 10) + (cross ? ` · ${human(item.crime_type)}` : "") }));
-    if (item.ground_truth_link) where.append(el("div", { class: "truth", text: "✓ true link (synthetic ground truth)" }));
-    const fb = el("td", {}, feedbackButtons(item.case_id));
-    tr.append(el("td", { class: "num", text: `${item.rank} of ${list.pool_size.toLocaleString()}` }),
-              el("td", { class: "num", text: `${fmtBits(item.bits)} bits` }), drivers, where, fb);
-    const select = () => {
-      body.querySelectorAll("tr").forEach(r => r.setAttribute("aria-selected", "false"));
-      tr.setAttribute("aria-selected", "true");
-      renderDetail(item, list, query);
-    };
-    tr.addEventListener("click", e => { if (!e.target.closest("button")) select(); });
-    tr.addEventListener("keydown", e => { if (e.key === "Enter") select(); });
-    body.append(tr);
   }
-  table.append(body);
-  box.append(table);
-  return box;
+
+  const list = h("div", { class: "leads" });
+  if (!data.items.length) list.append(h("div", { class: "empty", text: "No leads match these filters." }));
+  for (const l of data.items) list.append(leadCard(l));
+
+  render(
+    h("h1", {}, "Leads to review"),
+    h("p", { class: "lede" }, "Pairs of FIRs whose modus operandi and timing match more closely than unrelated cases almost ever do. ",
+      "The system found them by comparing every FIR with every other — nobody had to suspect them first."),
+    lanes,
+    h("p", { class: "muted small lane-help" }, lane[2]),
+    h("div", { class: "filters" },
+      h("label", {}, "State", stateSel), h("label", {}, "District", distSel), h("label", {}, "Crime type", crimeSel)),
+    notice,
+    h("p", { class: "muted small" }, `${data.total.toLocaleString("en-IN")} leads · strongest first`),
+    list,
+    h("div", { class: "pager" },
+      h("button", { class: "btn", disabled: leadState.offset === 0, onclick: () => { leadState.offset = Math.max(0, leadState.offset - 20); showLeads(); } }, "← Previous"),
+      h("span", { class: "muted small" }, `${data.total ? data.offset + 1 : 0}–${Math.min(data.offset + 20, data.total)} of ${data.total}`),
+      h("button", { class: "btn", disabled: data.offset + 20 >= data.total, onclick: () => { leadState.offset += 20; showLeads(); } }, "Next →")));
+}
+function place(district, st, when) {
+  return h("div", { class: "place" }, h("b", {}, `${district}, ${state(st)}`), h("span", {}, date(when)));
+}
+function gapNode(days) {
+  return h("div", { class: "gap" }, svgArrow(), days == null ? "time unknown" : gapText(days) + " apart");
+}
+function svgArrow() {
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("width", "54"); s.setAttribute("height", "12"); s.setAttribute("aria-hidden", "true");
+  s.innerHTML = '<path d="M2 6h50M46 2l6 4-6 4M8 2 2 6l6 4" fill="none" stroke="currentColor" stroke-width="1.5"/>';
+  return s;
+}
+function leadCard(l) {
+  const days = daysBetween(l.date_a, l.date_b);
+  const open = () => { location.hash = `#/compare/${l.a}/${l.b}`; };
+  return h("article", { class: "lead", tabindex: "0", onclick: open, onkeydown: e => { if (e.key === "Enter") open(); } },
+    h("div", { class: "lead-top" }, tierBadge(l), h("span", { class: "crime" }, crime(l.crime_type)),
+      l.cross_state ? h("span", { class: "xstate" }, "Across states") : l.same_station === false ? h("span", { class: "xstate" }, "Different police stations") : null,
+      l.ground_truth_link ? h("span", { class: "truth" }, "✓ true link (synthetic truth)") : null),
+    h("div", { class: "rarity" }, rarityText(l)),
+    h("div", { class: "pair" }, place(l.district_a, l.state_a, l.date_a), gapNode(days), place(l.district_b, l.state_b, l.date_b)),
+    h("div", { class: "reasons-inline" },
+      h("span", { class: "muted small" }, "Both FIRs:"),
+      l.top_reasons.map(r => h("span", { class: "chip" }, reasonPhrase(r, l.crime_type)))));
 }
 
-function feedbackButtons(otherId) {
-  const box = el("div", { class: "fb" });
-  const send = async verdict => {
+// ---------- search ----------
+async function showSearch(q = "") {
+  setNav("search");
+  const input = h("input", { type: "search", value: q, placeholder: "FIR number, police station or district — e.g. Nashik, MH-PUN-03", "aria-label": "Search cases" });
+  const results = h("div", { class: "results" });
+  const go = async () => {
+    const text = input.value.trim();
+    if (text.length < 2) { results.replaceChildren(h("div", { class: "muted", text: "Type at least 2 characters." })); return; }
+    results.replaceChildren(h("div", { class: "muted", text: "Searching…" }));
     try {
-      await getJSON(`/links/${state.caseId}__${otherId}/feedback`, { method: "POST",
-        headers: { "content-type": "application/json" }, body: JSON.stringify({ verdict }) });
-      box.replaceChildren(el("span", { class: "done", text: verdict === "confirmed" ? "confirmed" : "rejected" }));
-    } catch (e) { box.replaceChildren(el("span", { class: "muted", text: e.message })); }
+      const r = await api(`/search?q=${encodeURIComponent(text)}&limit=30`);
+      results.replaceChildren(...(r.items.length ? r.items.map(resultRow) : [h("div", { class: "muted", text: "No cases found." })]));
+    } catch (e) { results.replaceChildren(h("div", { class: "muted", text: e.message })); }
   };
-  box.append(el("button", { onclick: () => send("confirmed"), "aria-label": "Confirm link" }, "Confirm"),
-             el("button", { onclick: () => send("rejected"), "aria-label": "Reject link" }, "Reject"));
-  return box;
+  input.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+  render(
+    h("h1", {}, "Find a case"),
+    h("p", { class: "lede" }, "Open any FIR to see which cases elsewhere look like the same offender's work."),
+    h("div", { class: "card" },
+      h("div", { class: "searchbox" }, input, h("button", { class: "btn primary", onclick: go }, "Search")),
+      h("div", { class: "examples" }, h("span", { class: "muted small" }, "Or try an example:"),
+        META.demo_cases.slice(0, 6).map(d => h("button", { class: "btn small", onclick: () => { location.hash = `#/case/${d.case_id}`; } },
+          `${crime(d.crime_type)} · ${state(d.state_code)}`))),
+      h("p", { class: "muted small" }, "Examples are a random sample of test cases, not picked for how well they score.")),
+    results);
+  if (q) go(); else input.focus();
+}
+function resultRow(c) {
+  return h("div", { class: "result", tabindex: "0", onclick: () => { location.hash = `#/case/${c.case_id}`; },
+                    onkeydown: e => { if (e.key === "Enter") location.hash = `#/case/${c.case_id}`; } },
+    h("div", {}, h("b", {}, c.fir_no), " ", h("span", { class: "muted" }, `· ${crime(c.crime_type)}`)),
+    h("div", { class: "muted small" }, `${c.police_station} · ${c.district}, ${state(c.state_code)} · ${date(c.occurred_from)}`));
 }
 
-// ---- detail: total vs break-even, then per-field contributions ----------------
-const NS = "http://www.w3.org/2000/svg";
-function svg(tag, attrs = {}, text) {
-  const n = document.createElementNS(NS, tag);
-  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
-  if (text !== undefined) n.textContent = text;
-  return n;
+// ---------- case ----------
+async function showCase(id, tab = "same") {
+  setNav("search");
+  loading("Comparing with every case in the pool…");
+  let c, links;
+  try { [c, links] = await Promise.all([api(`/cases/${id}`), api(`/cases/${id}/links?scope=all&limit=10`)]); } catch (e) { return fail(e); }
+  const lists = links.lists;
+  const tabs = h("div", { class: "tabs", role: "group" },
+    h("button", { "aria-pressed": String(tab === "same"), onclick: () => showCase(id, "same") }, `Same crime type (${lists.same_type.pool_size.toLocaleString("en-IN")} FIRs checked)`),
+    h("button", { "aria-pressed": String(tab === "cross"), onclick: () => showCase(id, "cross") }, "Other property crimes"));
+  const list = tab === "same" ? lists.same_type : lists.cross_type;
+  const box = h("div", { class: "shortlist" });
+  if (tab === "cross") box.append(h("div", { class: "notice caution" },
+    "These compare only the offender's personal habits (time, group size, concealment, travel), because a different crime type has a different MO. They are weak leads — useful because keyword search on IPC sections can never connect different offences."));
+  for (const item of list.items) box.append(candidateCard(c, item));
+  render(
+    h("a", { class: "back", href: "#/search" }, "← Find another case"),
+    firCard(c, "This case"),
+    h("div", { style: "height:18px" }),
+    h("h2", {}, "Cases that may be linked"),
+    h("p", { class: "muted small" }, `Ranked out of every ${crime(c.crime_type).toLowerCase()} FIR on record, in every district and state. Open any lead to compare the two FIRs side by side.`),
+    lists.same_type.items.some(i => i.cross_state) ? h("p", { class: "notice caution small" },
+      "Location is deliberately not used to rank, so matches from other states appear here. In testing they were rarely the same offender — matches in the same district were far more often real.") : null,
+    tabs, box);
 }
-function hover(node, html) {
-  node.addEventListener("mousemove", e => { tip.innerHTML = html; tip.style.display = "block";
-    tip.style.left = Math.min(e.clientX + 14, innerWidth - 290) + "px"; tip.style.top = (e.clientY + 14) + "px"; });
-  node.addEventListener("mouseleave", () => { tip.style.display = "none"; });
+function candidateCard(c, item) {
+  const open = () => { location.hash = `#/compare/${c.case_id}/${item.case_id}`; };
+  const shared = item.reasons.filter(r => r.kind === "shared").slice(0, 3);
+  return h("article", { class: "lead", tabindex: "0", onclick: open, onkeydown: e => { if (e.key === "Enter") open(); } },
+    h("div", { class: "lead-top" }, h("b", {}, `#${item.rank}`), tierBadge(item), h("span", { class: "crime" }, crime(item.crime_type)),
+      item.cross_state ? h("span", { class: "xstate" }, "Other state") : null,
+      item.ground_truth_link ? h("span", { class: "truth" }, "✓ true link (synthetic truth)") : null),
+    h("div", { class: "rarity" }, rarityText(item)),
+    h("div", { class: "pair" }, place(c.district, c.state_code, c.occurred_from), gapNode(daysBetween(c.occurred_from, item.occurred_from)),
+      place(item.district, item.state_code, item.occurred_from)),
+    h("div", { class: "reasons-inline" }, h("span", { class: "muted small" }, "Both FIRs:"),
+      shared.map(r => h("span", { class: "chip" }, reasonPhrase(r, item.crime_type === c.crime_type ? c.crime_type : "CROSS_TYPE")))));
 }
-const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const shown = v => v === null || v === undefined ? "—" : TOKENS[v] || (v === "" ? "none" : String(v).split(";").map(human).join(", "));
-
-function renderDetail(item, list, query) {
-  $("detail").hidden = false;
-  $("detailTitle").replaceChildren(`Why rank ${item.rank}: `, el("span", { class: "id", text: item.case_id }));
-  const W = 640, breakeven = Math.max(list.breakeven_bits || 1, 1);
-
-  // total evidence against what certainty would need
-  const total = svg("svg", { viewBox: `0 0 ${W} 58`, role: "img",
-    "aria-label": `Total evidence ${fmtBits(item.bits)} bits against a break-even of ${fmtBits(breakeven)} bits` });
-  const x0 = 12, x1 = W - 12, scale = (x1 - x0) / (breakeven * 1.08);
-  total.append(svg("rect", { x: x0, y: 22, width: x1 - x0, height: 12, rx: 6, fill: "var(--neutral)" }));
-  const filled = Math.max(0, Math.min(item.bits, breakeven * 1.08));
-  if (filled > 0) total.append(svg("rect", { x: x0, y: 22, width: filled * scale, height: 12, rx: 6, fill: "var(--support)" }));
-  const bx = x0 + breakeven * scale;
-  total.append(svg("line", { x1: bx, x2: bx, y1: 16, y2: 40, stroke: "var(--ink-2)", "stroke-width": 2, "stroke-dasharray": "3 3" }));
-  total.append(svg("text", { x: x0, y: 13, fill: "var(--ink)", "font-size": 12.5 },
-    `${fmtBits(item.bits)} bits of evidence`));
-  total.append(svg("text", { x: bx, y: 54, fill: "var(--ink-2)", "font-size": 11.5, "text-anchor": "end" },
-    `break-even ${fmtBits(breakeven)} · ${Math.max(0, breakeven - item.bits).toFixed(1)} bits short`));
-  $("totalChart").replaceChildren(total);
-
-  // per-field contributions: supporting right, opposing left
-  const rows = item.contributions;
-  const rowH = 26, top = 8, labelW = 150, H = top + rows.length * rowH + 8;
-  const chart = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Evidence contributed by each field" });
-  const maxAbs = Math.max(1, ...rows.map(r => Math.abs(r.bits)));
-  const mid = labelW + (W - labelW) / 2, half = (W - labelW) / 2 - 44;
-  chart.append(svg("line", { x1: mid, x2: mid, y1: 0, y2: H, stroke: "var(--axis)", "stroke-width": 1 }));
-  rows.forEach((r, i) => {
-    const y = top + i * rowH;
-    const w = Math.abs(r.bits) / maxAbs * half;
-    const g = svg("g");
-    g.append(svg("rect", { x: 0, y, width: W, height: rowH, fill: "transparent" }));   // hit target
-    g.append(svg("text", { x: labelW - 10, y: y + 17, "text-anchor": "end", fill: "var(--ink)", "font-size": 12.5 }, human(r.field)));
-    g.append(svg("rect", { x: r.bits >= 0 ? mid : mid - w, y: y + 6, width: Math.max(w, 1.5), height: rowH - 12, rx: 3,
-                           fill: r.bits >= 0 ? "var(--support)" : "var(--oppose)" }));
-    g.append(svg("text", { x: r.bits >= 0 ? mid + w + 6 : mid - w - 6, y: y + 17, "font-size": 12,
-                           "text-anchor": r.bits >= 0 ? "start" : "end", fill: "var(--ink-2)" }, fmtBits(r.bits)));
-    hover(g, `<b>${esc(human(r.field))}</b><br>this case: ${esc(shown(r.value))}<br>candidate: ${esc(shown(r.other_value))}` +
-             `<br>${esc(fmtBits(r.bits))} bits ${r.bits >= 0 ? "(agreement, weighted by rarity)" : "(disagreement)"}`);
-    chart.append(g);
-  });
-  chart.append(svg("text", { x: mid + 6, y: H - 1, "font-size": 11, fill: "var(--muted)" }, "supports →"));
-  chart.append(svg("text", { x: mid - 6, y: H - 1, "font-size": 11, fill: "var(--muted)", "text-anchor": "end" }, "← opposes"));
-  $("contribChart").replaceChildren(chart);
-
-  const table = $("contribTable"); table.replaceChildren();
-  table.append(el("thead", {}, el("tr", {}, el("th", { text: "Field" }), el("th", { text: "This case" }),
-    el("th", { text: "Candidate" }), el("th", { class: "num", text: "Bits" }))));
-  const tb = el("tbody");
-  for (const r of rows) tb.append(el("tr", {}, el("td", { text: human(r.field) }), el("td", { text: shown(r.value) }),
-    el("td", { text: shown(r.other_value) }), el("td", { class: "num", text: fmtBits(r.bits) })));
-  table.append(tb);
+function firCard(c, title) {
+  const rows = [["FIR no.", c.fir_no], ["Police station", c.police_station], ["District", `${c.district}, ${state(c.state_code)}`],
+    ["Offence", crime(c.crime_type)], ["Occurred", `${date(c.occurred_from)} – ${date(c.occurred_to)}`], ["Registered", date(c.registered_at)]];
+  return h("section", { class: "card" },
+    h("div", { class: "firhead" }, h("b", {}, title), h("span", { class: "muted small" }, c.case_id)),
+    h("dl", { class: "fir" }, rows.map(([k, v]) => [h("dt", {}, k), h("dd", {}, v ?? "—")])),
+    c.needs_extraction ? h("p", { class: "notice caution small" }, "This state records MO only as free text; structured details are pending extraction.") : null);
 }
 
-init().catch(e => { $("lists").replaceChildren(el("div", { class: "empty", text: "API unavailable: " + e.message })); });
+// ---------- compare ----------
+async function showCompare(a, b) {
+  setNav("search");
+  loading();
+  let p;
+  try { p = await api(`/pairs/${a}__${b}`); } catch (e) { return fail(e); }
+  const crimeType = p.same_type ? p.case_a.crime_type : "CROSS_TYPE";
+  const timing = p.reasons.find(r => r.kind === "timing");
+  const shared = p.reasons.filter(r => r.kind === "shared");
+  const different = p.reasons.filter(r => r.kind === "different");
+  const notRec = p.reasons.filter(r => r.kind === "not_recorded");
+  const maxAbs = Math.max(1, ...p.reasons.map(r => Math.abs(r.bits)));
+
+  const reasonRow = (r) => {
+    let icon, what, why;
+    if (r.kind === "timing") {
+      icon = h("div", { class: "ico timing", "aria-hidden": "true" }, "⏱");
+      what = `${gapText(r.days)} apart`;
+      why = r.bits > 0.5 ? "Serial offences usually come in bursts — a short gap supports a link."
+          : r.bits < -0.5 ? "A long gap makes the same offender less likely." : "The gap neither supports nor weakens a link.";
+    } else if (r.kind === "shared") {
+      icon = h("div", { class: "ico shared", "aria-hidden": "true" }, "✓");
+      what = `${val(r.shared_value ?? r.value)}`;
+      const of = CRIME_CASES[crimeType];
+      why = `${field(r.field)} — same in both FIRs. ` + (r.share == null ? "" :
+        r.share < 0.01 ? `Fewer than 1 in 100 ${of} have this, so it is a telling detail.` :
+        r.share < 0.2 ? `Only ${pct(r.share)} of ${of} have this, so it is a telling detail.` :
+        r.share < 0.5 ? `${pct(r.share)} of ${of} have this.` :
+        `Common — ${pct(r.share)} of ${of} have this, so it counts for little.`);
+    } else {
+      icon = h("div", { class: "ico different", "aria-hidden": "true" }, "✕");
+      what = `${val(r.value)} vs ${val(r.other_value)}`;
+      why = `${field(r.field)} — different in the two FIRs.`;
+    }
+    const w = Math.abs(r.bits) / maxAbs * 50;
+    const fill = r.bits >= 0 ? `left:50%;width:${w}%;background:var(--support)` : `left:${50 - w}%;width:${w}%;background:var(--oppose)`;
+    return h("div", { class: "reason" }, icon, h("div", {}, h("div", { class: "what" }, what), h("div", { class: "why" }, why)),
+      h("div", { class: "weight", title: `${r.bits >= 0 ? "+" : ""}${r.bits.toFixed(2)} evidence` },
+        h("div", { class: "track" }, h("div", { class: "fill", style: fill })), strengthWord(r.bits)));
+  };
+
+  const note = h("textarea", { placeholder: "Note for the case file (optional)", "aria-label": "Note" });
+  const status = h("span", {});
+  const decide = async verdict => {
+    try {
+      await api(`/links/${a}__${b}/feedback`, { method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ verdict, note: note.value }) });
+      status.replaceChildren(h("span", { class: "saved" }, { confirmed: "Recorded: linked", rejected: "Recorded: not linked", investigate: "Recorded: needs investigation" }[verdict]));
+    } catch (e) { status.textContent = e.message; }
+  };
+  const narrative = c => h("div", { class: "narr" }, [c.mo_description, c.narrative_text].filter(Boolean).join("\n\n") || "No narrative.");
+
+  render(
+    h("a", { class: "back", href: "javascript:history.back()" }, "← Back"),
+    h("section", { class: "card" },
+      h("div", { class: "verdict" }, tierBadge(p), h("span", { class: "big" }, p.same_type ? crime(p.case_a.crime_type) : `${crime(p.case_a.crime_type)} ↔ ${crime(p.case_b.crime_type)}`),
+        p.cross_state ? h("span", { class: "xstate" }, "Across states") : null,
+        p.ground_truth_link === true ? h("span", { class: "truth" }, "✓ true link (synthetic truth)") : null,
+        p.ground_truth_link === false ? h("span", { class: "muted small" }, "not a true link in the synthetic truth") : null),
+      h("p", { class: "explain" }, h("b", {}, `${rarityText(p)[0].toUpperCase()}${rarityText(p).slice(1)}.`),
+        ` The evidence comes from ${shared.length} shared detail${shared.length === 1 ? "" : "s"}` +
+        (timing ? ` and the ${gapText(timing.days)} between them` : "") +
+        `${different.length ? `, set against ${different.length} difference${different.length === 1 ? "" : "s"}` : ""}. `,
+        "This is a reason to investigate, not proof — confirm through the FIRs, witnesses and recovered property."),
+      p.same_type ? null : h("p", { class: "notice caution small" }, "Different crime types: only the offender's personal habits are compared, so this is a weak lead by design.")),
+    h("div", { style: "height:16px" }),
+    h("div", { class: "grid2" }, firCard(p.case_a, "FIR A"), firCard(p.case_b, "FIR B")),
+    h("div", { style: "height:16px" }),
+    h("section", { class: "card" },
+      h("h3", {}, "Why these may be the same offender"),
+      timing ? reasonRow(timing) : null,
+      shared.map(reasonRow),
+      different.length ? [h("div", { style: "height:10px" }), h("h3", {}, "Where they differ"), different.map(reasonRow)] : null,
+      notRec.length ? h("p", { class: "notrec" }, `Not recorded in one of the FIRs, so not used: ${notRec.map(r => field(r.field).toLowerCase()).join(", ")}.`) : null),
+    h("div", { style: "height:16px" }),
+    h("section", { class: "grid2" }, h("div", { class: "card stack" }, h("h3", {}, "FIR A — narrative"), narrative(p.case_a)),
+      h("div", { class: "card stack" }, h("h3", {}, "FIR B — narrative"), narrative(p.case_b))),
+    h("div", { style: "height:16px" }),
+    h("section", { class: "card stack" }, h("h3", {}, "Record your assessment"),
+      h("div", { class: "actions" }, note,
+        h("button", { class: "btn primary", onclick: () => decide("confirmed") }, "Linked"),
+        h("button", { class: "btn", onclick: () => decide("investigate") }, "Needs investigation"),
+        h("button", { class: "btn", onclick: () => decide("rejected") }, "Not linked"),
+        h("button", { class: "btn", onclick: () => window.print() }, "Print report"), status),
+      h("p", { class: "muted small" }, "Every lookup and decision is logged with the officer and time for audit.")));
+}
+
+// ---------- about ----------
+function showAbout() {
+  setNav("about");
+  const ms = META.model_summary || {}, lq = META.lead_quality;
+  const stat = (big, text) => h("div", { class: "card" }, h("div", { class: "stat" }, big), h("div", { class: "muted small" }, text));
+  render(
+    h("h1", {}, "How it works"),
+    h("p", { class: "lede" }, "Police record the modus operandi of every property crime. Offenders repeat their habits — how they enter, what tools they carry, when they strike. ",
+      "This system compares every FIR's MO against every other FIR of the same kind, across all districts and states, and brings the most similar pairs to an analyst."),
+    h("div", { class: "howto" },
+      h("div", { class: "card" }, h("h3", {}, "1 · Rare habits count most"), h("p", {}, "Two FIRs that both say \"entered by breaking the lock\" prove little — most burglars do. Both saying \"entered through the roof\" or \"disabled the CCTV\" is far more telling. Each shared detail is weighted by how rare it is.")),
+      h("div", { class: "card" }, h("h3", {}, "2 · Timing matters"), h("p", {}, "Serial offenders strike in bursts. Two similar FIRs three weeks apart are more telling than two years apart.")),
+      h("div", { class: "card" }, h("h3", {}, "3 · Strength you can read"), h("p", {}, "Every lead says how often unrelated FIRs look this alike — \"about 1 in 25,000\". That is measured on hundreds of thousands of random unrelated pairs, not guessed.")),
+      h("div", { class: "card" }, h("h3", {}, "4 · A human decides"), h("p", {}, "The system never names a person and never claims a link. It narrows thousands of FIRs to a handful worth reading; officers confirm or reject, and every decision is logged."))),
+    h("div", { style: "height:22px" }),
+    h("h2", {}, "How well it works (synthetic test data)"),
+    h("div", { class: "howto" },
+      ms.same_type ? stat(`${Math.round(ms.same_type.hit_at_10 * 100)}%`, "of cases have a true linked FIR in their top 10 — out of about 15,000 of the same crime type") : null,
+      lq && lq.same_district && lq.same_district.leads ? stat(`${lq.same_district.true_links} of ${lq.same_district.leads}`, "same-district leads in the inbox were real serial links, found with nobody asking") : null,
+      lq && lq.same_state && lq.same_state.leads ? stat(`${lq.same_state.true_links} of ${lq.same_state.leads}`, "leads across districts of one state were real links") : null,
+      lq && lq.cross_state && lq.cross_state.leads ? stat(`${lq.cross_state.true_links} of ${lq.cross_state.leads}`, "cross-state leads were real — so they are marked low confidence, not hidden") : null,
+      ms.cross_type ? stat(`${(ms.cross_type.hit_at_10 * 100).toFixed(1)}%`, "for links between different crime types — weak, but keyword search on IPC sections finds none at all") : null),
+    h("p", { class: "muted small" }, "Measured on offenders held out from training. The data is synthetic: these numbers show the method works on data built to resemble FIRs, not how it will perform on real records."),
+    h("div", { style: "height:14px" }),
+    h("div", { class: "card" }, h("h3", {}, "Safeguards"),
+      h("ul", {}, h("li", {}, "No caste, religion or community field exists anywhere in the system."),
+        h("li", {}, "Personal details are kept out of matching entirely; matching sees only how the crime was committed."),
+        h("li", {}, "Location is never used to score a match — which is what lets links across states surface at all."),
+        h("li", {}, "Scores are never shown as probabilities, because a strong-looking number invites false certainty."))));
+}
+
+// ---------- router ----------
+async function route() {
+  const parts = location.hash.replace(/^#\/?/, "").split("/");
+  try {
+    if (parts[0] === "case" && parts[1]) return showCase(parts[1]);
+    if (parts[0] === "compare" && parts[2]) return showCompare(parts[1], parts[2]);
+    if (parts[0] === "search") return showSearch(decodeURIComponent(parts[1] || ""));
+    if (parts[0] === "about") return showAbout();
+    return showLeads();
+  } catch (e) { fail(e); }
+}
+(async () => {
+  try { META = await api("/meta"); } catch (e) { return fail(e); }
+  window.addEventListener("hashchange", route);
+  route();
+})();
 </script>
 </body>
 </html>

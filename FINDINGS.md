@@ -308,12 +308,114 @@ a guide written by the same author make extraction easier than real FIRs.
 
 ---
 
+## 10. Time between offences doubles same-type linkage — on the generator's own assumption
+
+The scorer now carries one more piece of evidence: days between the two
+offences, binned at 30 / 90 / 180 / 365 / 730 days, weighted
+log2 P(gap | same offender) / P(gap | unrelated) on training offenders, then
+passed through the same logistic correction as the MO fields (its
+coefficient lands near 1, so the learned weight is used almost as-is).
+
+Learned weights (bits), same for every pool within ±0.5:
+
+| gap | < 30 d | 30–90 | 90–180 | 180–365 | 365–730 | > 2 y |
+|---|---|---|---|---|---|---|
+| house burglary | +2.97 | +1.71 | +0.51 | +0.08 | −0.61 | −3.67 |
+| vehicle theft | +2.97 | +1.85 | +0.93 | +0.06 | −1.04 | −4.19 |
+
+Held-out offenders, full pool, sharing-1 corpus
+(`results/post_core_fix/eval.json` → `results/with_time/eval.json`):
+
+| | hit@10 | recall@10 | P@10 | PR-AUC |
+|---|---|---|---|---|
+| same-type, MO only | 0.128 | 0.062 | 0.016 | 0.041 |
+| **same-type, MO + time** | **0.235** | **0.120** | **0.030** | **0.083** |
+| cross-type, MO only | 0.013 | 0.006 | 0.001 | 0.003 |
+| **cross-type, MO + time** | **0.029** | **0.015** | **0.003** | **0.008** |
+
+Median evidence on a true same-type link rose from 0.0–1.5 bits to
++0.8–2.9 bits depending on pool, and cross-type from 0.0 to +1.2
+(`results/{post_core_fix,with_time}/evidence_distribution.json`).
+
+**Caveat, and it is a large one.** The gain comes straight from the
+generator's gap model (`config/corpus.yaml` `gap_days`: 70% of gaps mean 20
+days). The scorer learned back an assumption we wrote. Offending *is* bursty
+in the literature, so the direction is defensible, but the size of this gain
+must be re-measured on real FIRs before it is quoted as a property of the
+method. Say "time roughly doubles linkage on synthetic data", never "doubles
+linkage".
+
+**It works against cross-state links.** 35% of serial offenders relocate to a
+neighbouring state after 90–365 dormant days, so the gap that marks a
+relocation is exactly the gap the time weight penalises. On held-out true
+pairs of the same crime type:
+
+| true pairs | n | median evidence | median time part | time is negative |
+|---|---|---|---|---|
+| same state | 1,683 | +2.15 | +1.84 | 9% |
+| different states | 547 | +0.03 | −0.59 | 55% |
+
+A relocation-aware gap model (a separate gap curve when the two FIRs are in
+different states) is the principled fix; it was not built, because it
+conditions the score on location — see §11.
+
+## 11. Leads inbox: strength as rarity, organised by where the FIRs are
+
+**Strength is stated as rarity, not probability.** For each pool the bundle
+scores 200,000 random unrelated pairs and keeps their percentiles plus the
+exact top 1%. A lead's strength is "about 1 in N unrelated pairs look this
+alike"; tiers are strong ≥ 1 in 10,000, worth checking ≥ 1 in 1,000, weak
+otherwise. Beyond the sample the UI says "rarer than 1 in 200,000" instead
+of extrapolating.
+
+**The inbox.** Every case is scored against its whole same-type pool; its
+top 3 matches become candidates, rarer than 1 in 1,000 are kept, mutual
+matches (each is in the other's top 3) first, then rarest. 5,000 are kept.
+Quality is measured only on pairs where both offenders were held out of
+training (`data/serve/meta.json` `lead_quality`):
+
+| lane | held-out leads | real links | vs random pair |
+|---|---|---|---|
+| same district | 36 | 22 (61%) | ~16,000× |
+| other district, same state | 100 | 12 (12%) | ~3,100× |
+| **other state** | **172** | **0** | — |
+| all | 308 | 34 (11%) | ~2,900× |
+
+Chance: a random same-type pair is a true link 1 in 25,942.
+
+**Location stays out of the score and organises the inbox instead.** The
+score is location-blind on purpose, so that a match across a state line can
+surface at all. The cost shows in the table: 73.5% of same-type pairs cross a
+state line and most true links do not, so among high-scoring pairs the
+cross-state ones are overwhelmingly coincidence (3 real out of 3,064 in the
+whole inbox). Mixing them into one list put noise at the top. The inbox now
+has three lanes, defaults to same district, and states each lane's measured
+record next to it; the cross-state lane is labelled low confidence rather
+than hidden. The case shortlist stays one location-blind ranking with the
+same warning.
+
+Two things we did not do, and why. Adding a same-state evidence term would
+lift precision sharply but bury exactly the cross-state links the project
+exists for. Filtering cross-state leads out would hide a lane that no keyword
+search can reach. Both trade the pitch for a number.
+
+**Where the top of the house-burglary lane goes wrong.** Several of the
+strongest false leads share shutter entry, "closed for holidays" and shop
+premises — commercial MO values in the residential pool. Pairs of
+misclassified FIRs look alike because they are misclassified, not because
+one offender did both. On real data this is the IPC 380/454/457 confusion;
+flagging "MO atypical for the recorded crime type" as its own finding would
+be more useful than a link.
+
+---
+
 ## Where things are
 
 | | |
 |---|---|
 | `pre-core-fix` tag | corpus + results with core habits drawn per type (sharing = 0) |
 | `results/pre_core_fix/` | eval, oracle eval, weights, evidence distribution |
+| `results/with_time/` | weights, eval and evidence distribution with the time evidence (current model) |
 | `results/sweep/` | repeat_rate × cross_type_sharing grid, one file per point |
 | `data/final/` | the 45k corpus (sharing = 0; see manifest `derived`) |
 | `config/tau_selection.json` | how τ = 0.75 was chosen, including two discarded sweeps |

@@ -5,9 +5,14 @@ feeds it real requests locally. The same code both places.
     GET  /                                       the analyst UI (ui/index.html)
     GET  /health
     GET  /meta                                   corpus context, demo cases
+    GET  /leads?lane&state&district&crime_type&tier&cross_state&limit&offset
+                                                 proactive leads inbox, rarest first; lane is
+                                                 same_district | same_state | cross_state
+    GET  /search?q=&limit                        FIR number, police station, district or case id
     GET  /cases/{id}                             canonical record, no PII
     GET  /cases/{id}/links?scope=same|all&limit  ranked shortlist
-    POST /links/{id_a}__{id_b}/feedback          {"verdict": "confirmed"|"rejected", "note": "..."}
+    GET  /pairs/{id_a}__{id_b}                   side-by-side comparison with reasons
+    POST /links/{id_a}__{id_b}/feedback          {"verdict": "confirmed"|"rejected"|"investigate", "note": "..."}
 
 Every shortlist request is audited: who, which case, which scope, when.
 Responses never carry a probability (CLAUDE.md rule 4). The UI calls /api/...;
@@ -32,7 +37,8 @@ from handlers.store import load_bundle, open_store
 from linkage.serve import Shortlister
 
 CASE = r"([0-9a-f]{16})"
-VERDICTS = ("confirmed", "rejected")
+VERDICTS = ("confirmed", "rejected", "investigate")
+SEARCH_FIELDS = ("fir_no", "police_station", "district", "case_id")
 UI_PAGE = Path(__file__).resolve().parent.parent / "ui" / "index.html"
 _APP: dict = {}
 
@@ -45,7 +51,13 @@ def _app() -> dict:
                                           bundle["codes"], bundle["meta"], bundle["cases"],
                                           bundle["truth_groups"] if demo else None)
         _APP["cases"] = bundle["cases"]
-        _APP["meta"] = {**bundle["meta"], "ground_truth_marks": demo}
+        _APP["leads"] = bundle["leads"] if demo else [
+            {k: v for k, v in lead.items() if k != "ground_truth_link"} for lead in bundle["leads"]]
+        _APP["truth"] = bundle["truth_groups"] if demo else None
+        meta = {**bundle["meta"], "ground_truth_marks": demo}
+        if not demo:
+            meta.pop("lead_quality", None)
+        _APP["meta"] = meta
         _APP["store"] = open_store(os.environ.get("STORE", "local:data/serve/state"))
     return _APP
 
@@ -95,6 +107,49 @@ def handler(event: dict, context=None) -> dict:
         app = _app()
         if method == "GET" and path == "/meta":
             return _response(200, app["meta"])
+
+        if method == "GET" and path == "/leads":
+            limit, offset = int(query.get("limit", "25")), int(query.get("offset", "0"))
+            if not 1 <= limit <= 100 or offset < 0:
+                return _response(400, {"error": "limit must be 1-100, offset >= 0"})
+            state, district = query.get("state"), query.get("district")
+            rows = [l for l in app["leads"]
+                    if (not state or state in (l["state_a"], l["state_b"]))
+                    and (not district or district in (l["district_a"], l["district_b"]))
+                    and (not query.get("crime_type") or l["crime_type"] == query["crime_type"])
+                    and (not query.get("tier") or l["tier"] == query["tier"])
+                    and (query.get("cross_state") != "1" or l["cross_state"])]
+            lanes: dict = {}
+            for l in rows:
+                lanes[l["lane"]] = lanes.get(l["lane"], 0) + 1
+            if query.get("lane"):
+                rows = [l for l in rows if l["lane"] == query["lane"]]
+            page = rows[offset:offset + limit]
+            if app["truth"] is not None:
+                truth = app["truth"]
+                page = [{**l, "ground_truth_link": truth.get(l["a"]) is not None
+                         and truth.get(l["a"]) == truth.get(l["b"])} for l in page]
+            return _response(200, {"total": len(rows), "offset": offset, "lanes": lanes, "items": page})
+
+        if method == "GET" and path == "/search":
+            text = (query.get("q") or "").strip().lower()
+            if len(text) < 2:
+                return _response(400, {"error": "search needs at least 2 characters"})
+            limit = min(int(query.get("limit", "20")), 50)
+            hits = []
+            for c in app["cases"].values():
+                if any(text in str(c.get(k) or "").lower() for k in SEARCH_FIELDS):
+                    hits.append({k: c.get(k) for k in ("case_id", "fir_no", "crime_type", "state_code",
+                                                      "district", "police_station", "occurred_from")})
+                    if len(hits) >= limit:
+                        break
+            return _response(200, {"items": hits})
+
+        if method == "GET" and (m := re.fullmatch(f"/pairs/{CASE}__{CASE}", path)):
+            result = app["shortlister"].pair(m.group(1), m.group(2))
+            app["store"].record_audit({"actor_id": _actor(event), "timestamp": _now(), "action": "compare",
+                                       "case_id": m.group(1), "other_case_id": m.group(2)})
+            return _response(200, result)
 
         if method == "GET" and (m := re.fullmatch(f"/cases/{CASE}", path)):
             case = app["cases"].get(m.group(1))

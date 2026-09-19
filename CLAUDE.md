@@ -34,10 +34,12 @@ These are easy to violate by accident and each one breaks something real.
    ~0.27% and that reads as broken. Render rank, bits, and the driving
    features: `rank 2 of 10,482 · +5.85 bits · roof entry, disabled CCTV`.
    **+5.85 is a STRONG match, not a typical one** — it is the spec's
-   constructed example and sits in the top 0.5–11% of true pairs depending on
-   crime type. Measured medians are +0.0 to +1.5 bits, p90 +3.0 to +6.5
-   (`results/pre_core_fix/evidence_distribution.json`). Never quote +5.85 as
-   what a link scores; quote it as a strong case beside the typical range.
+   constructed example and sits in the top 5–21% of same-type true pairs
+   (MO + time) depending on crime type. Measured medians are +0.8 to +2.9
+   bits, p90 +4.8 to +7.5 (`results/with_time/evidence_distribution.json`).
+   Never quote +5.85 as what a link scores; quote it as a strong case beside
+   the typical range. The UI states strength as rarity ("about 1 in N
+   unrelated pairs look this alike"), measured on random unrelated pairs.
 
 5. **No protected attributes as features.** No caste, religion, community,
    or any proxy for them. Not in the schema, not in the generator, not in

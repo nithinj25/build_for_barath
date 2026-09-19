@@ -33,12 +33,20 @@ def load(normalised_path, truth_path, oracle_extraction: bool = False) -> pd.Dat
     if df["offender_id"].isna().any():
         raise ValueError(f"{int(df['offender_id'].isna().sum())} normalised records have no ground truth")
     df["needs_extraction"] = df["needs_extraction"].astype(bool)
+    df[features.DAYS] = day_numbers(df["occurred_from"])
     if oracle_extraction:
         pending = df["needs_extraction"]
         for f in MO_NON_DERIVED:
             df.loc[pending, f] = df.loc[pending, f"rec_{f}"]
         df = df.drop(columns=[f"rec_{f}" for f in MO_NON_DERIVED])
     return df[df["crime_type"].notna()].reset_index(drop=True)
+
+
+def day_numbers(dates) -> np.ndarray:
+    """Whole days since 1970-01-01 for the time evidence; -1 where unknown."""
+    d = pd.to_datetime(pd.Series(dates), errors="coerce").dt.normalize()
+    days = (d - pd.Timestamp("1970-01-01")).dt.days
+    return days.fillna(-1).astype(np.int64).to_numpy()
 
 
 def split_of(offender_ids: pd.Series, seed: int) -> np.ndarray:

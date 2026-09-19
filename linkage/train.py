@@ -48,15 +48,20 @@ def train(df, seed: int, oracle_extraction: bool) -> dict:
 
         vocab = {f: dataset.vocab_for(df, f) for f in fields}
         codes = {f: features.encode(df[f].tolist(), f, vocab[f]) for f in fields}
+        codes[features.DAYS] = df[features.DAYS].to_numpy()
         u = {f: features.fit_u(codes[f][rows], f, vocab[f]) for f in fields}
         alpha = {f: features.fit_alpha(codes[f][pos[:, 0]], codes[f][pos[:, 1]], u[f], f, vocab[f]) for f in fields}
         tables = {f: features.weight_table(u[f], alpha[f], f) for f in fields}
 
-        def bits(pairs):
-            return features.field_bits(tables, fields, {f: codes[f][pairs[:, 0]] for f in fields},
-                                       {f: codes[f][pairs[:, 1]] for f in fields})
-
         neg = dataset.negative_pairs(df, pool, NEG_PER_POS * len(pos), rng)
+        days = codes[features.DAYS]
+        gap_bits = features.fit_gap_bits(features.gap_bins(days[pos[:, 0]], days[pos[:, 1]]),
+                                         features.gap_bins(days[neg[:, 0]], days[neg[:, 1]]))
+
+        def bits(pairs):
+            return features.field_bits(tables, fields, {k: v[pairs[:, 0]] for k, v in codes.items()},
+                                       {k: v[pairs[:, 1]] for k, v in codes.items()}, gap_bits)
+
         X = np.vstack([bits(pos), bits(neg)])
         y = np.r_[np.ones(len(pos)), np.zeros(len(neg))]
         lr = LogisticRegression(max_iter=2000).fit(X, y)
@@ -75,12 +80,13 @@ def train(df, seed: int, oracle_extraction: bool) -> dict:
             "vocab": vocab,
             "u": {f: np.round(u[f], 6).tolist() for f in fields},
             "alpha": {f: round(alpha[f], 6) for f in fields},
+            "time": {"edges": list(features.GAP_EDGES), "bits": np.round(gap_bits, 6).tolist()},
             "lr": {"coef": np.round(lr.coef_[0], 6).tolist(), "intercept": round(float(lr.intercept_[0]), 6)},
             "isotonic": {"x": np.round(iso.X_thresholds_, 6).tolist(), "y": np.round(iso.y_thresholds_, 8).tolist()},
             "training": {"cases": int(len(rows)), "train_positives": int(len(pos)),
                          "calib_positives": int(len(cal_pos)), "negatives_per_positive": NEG_PER_POS},
         }
-        coef = dict(zip(fields, lr.coef_[0] / np.log(2)))
+        coef = dict(zip([*fields, "days_apart"], lr.coef_[0] / np.log(2)))
         top = sorted(coef.items(), key=lambda kv: -abs(kv[1] - 1))[:3]
         print(f"  {pool}: {len(rows)} cases, {len(pos)} train positives; "
               f"coef/ln2 furthest from 1: {', '.join(f'{k} {v:.2f}' for k, v in top)}")

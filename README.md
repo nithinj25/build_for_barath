@@ -32,21 +32,39 @@ ranking each query against **every** case in its pool — no blocking, so a rank
 is literally out of the whole pool. Corpus: 45,000 synthetic cases,
 `repeat_rate` 0.5.
 
-| | hit@10 | recall@10 | PR-AUC | vs random |
-|---|---|---|---|---|
-| same-type | 0.128 | 0.062 | 0.041 | 22–96× |
-| cross-type | 0.013 | 0.006 | 0.003 | ≈17× |
+| | hit@10 | recall@10 | PR-AUC |
+|---|---|---|---|
+| same-type, MO + time between offences | **0.235** | 0.120 | 0.083 |
+| same-type, MO only | 0.128 | 0.062 | 0.041 |
+| cross-type, MO + time | 0.029 | 0.015 | 0.008 |
+
+Time roughly doubles same-type linkage — on synthetic data whose gaps we
+generated to be bursty, so the size of that gain must be re-measured on real
+FIRs ([FINDINGS §10](FINDINGS.md)).
+
+**Leads inbox** (pairs found with nobody asking, held-out offenders only):
+
+| where the two FIRs are | real links among the leads |
+|---|---|
+| same district | 22 of 36 |
+| other districts, same state | 12 of 100 |
+| other states | 0 of 172 — shown, labelled low confidence |
+
+A random same-type pair is a real link 1 in 25,942. The score never uses
+location, so cross-state matches can surface; most turn out to be
+coincidence, and the UI says so ([FINDINGS §11](FINDINGS.md)).
 
 **Accuracy is not the metric and would be misleading.** True links are ~1 in
 50,000 pairs, so "no link" everywhere scores 99.998% accurate. This is a
 ranker: the question is whether an offender's other crimes surface near the
 top of an analyst's list. Typically a true partner lands in the top ~2% of the
-pool; 12.8% of the time it reaches the top 10.
+pool; 23.5% of the time it reaches the top 10 out of ~15,000.
 
-Evidence per link is small: the median true pair carries **+0.0 to +1.5 bits**
+Evidence per link is small: the median true pair carries **+0.8 to +2.9 bits**
 against a prior of −12 to −17 bits. The spec's +5.85 bit example is a *strong*
-match (top 0.5–11%), not a typical one. MO evidence alone cannot clear that
-prior — by design, the system ranks and a human decides.
+match (top 5–21% of same-type true pairs with time evidence), not a typical
+one. The evidence alone cannot clear that prior — by design, the system ranks
+and a human decides.
 
 How much of this is the corpus rather than the method? That is what the sweep
 answers: at `repeat_rate` 0.9 the same scorer reaches hit@10 0.502. No
@@ -66,10 +84,13 @@ python -m linkage.bundle --out data/serve --with-ground-truth   # package the co
 python scripts/serve_local.py --demo                            # http://127.0.0.1:8000
 ```
 
-The analyst view: open a case, read its ranked shortlist (rank of the whole
-pool, bits of evidence against the pool's typical range, driving fields,
-"other state" flags), widen to other crime types, and open a candidate to see
-each field's contribution against the break-even line. `/api/*` is served by
+The analyst view: a leads inbox split by where the two FIRs are, each lane
+with its tested record; search by FIR number, police station or district; a
+case's ranked shortlist with a strength tier ("about 1 in 40,000 unrelated
+cases look this alike") and the shared habits that drive it; and a
+side-by-side comparison of two FIRs that lists every reason — timing, shared
+habits and how common each is, differences, what was not recorded — with
+Linked / Needs investigation / Not linked and a printable report. `/api/*` is served by
 `handlers/api.py` — the same handler Lambda runs. `--demo` marks synthetic
 ground-truth links; leave it off to see what an analyst would.
 

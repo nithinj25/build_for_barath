@@ -48,7 +48,10 @@ def evaluate_pool(df, scorer: Scorer, pool: str, test_mask: np.ndarray, rng, max
         return None
     spec = scorer.pools[pool]
     fields = spec["fields"]
-    codes = scorer.encode(pool, {f: df[f].tolist() for f in fields})
+    columns = {f: df[f].tolist() for f in fields}
+    if features.DAYS in df:
+        columns[features.DAYS] = df[features.DAYS].tolist()
+    codes = scorer.encode(pool, columns)
     rows = dataset.pool_rows(df, pool)
     types, offenders = df["crime_type"].to_numpy(), df["offender_id"].to_numpy()
     serial = df["is_serial"].to_numpy()
@@ -69,8 +72,8 @@ def evaluate_pool(df, scorer: Scorer, pool: str, test_mask: np.ndarray, rng, max
     for q in queries:
         cand = candidates(q)
         partners = offenders[cand] == offenders[q]
-        a = {f: codes[f][q] for f in fields}
-        b = {f: codes[f][cand] for f in fields}
+        a = {k: v[q] for k, v in codes.items()}
+        b = {k: v[cand] for k, v in codes.items()}
         fb = scorer.field_bits(pool, a, b)
         scores = {"agreement_count": features.agreement_count(fields, spec["vocab"], a, b),
                   "fs": fb.sum(axis=1), "fs_lr": scorer.evidence(pool, fb)}
