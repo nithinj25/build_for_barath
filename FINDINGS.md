@@ -475,13 +475,67 @@ the flag.
 
 ---
 
+## 14. Ranking improvements: what helped, what was discarded
+
+All numbers: held-out test offenders, full pool, 1,318 same-type queries
+(`results/ranked/eval.json`); strengths picked on CALIB offenders only
+(`python -m linkage.tune`, grid in `weights.json` `rank.calib_pr_auc`).
+
+| ranking | hit@10 | PR-AUC | queries whose cross-state partner is in the top 10 |
+|---|---|---|---|
+| MO + time evidence (§10) | 0.235 | 0.083 | 16 / 495 |
+| **+ distinctiveness — the default** | **0.262** | **0.087** | 17 / 495 |
+| **+ place — "nearby first", officer's choice** | **0.457** | **0.161** | **3 / 495** |
+
+**Distinctiveness (hub correction), shipped as default.** Some FIRs have MO so
+generic that they sit near the top of many lists. r(case) = mean of its top-10
+evidence in its pool (no labels); a pair moves by −β·((r_a + r_b)/2 − mean r),
+β = 0.25. No cost to cross-state links. In the inbox the same-district lane
+went from 20.9% to 24.0% real (estimator from §11); series stayed at ~1 in 5.
+Shown to the analyst as a reason: "one of these FIRs resembles many others".
+
+**Place, shipped as an opt-in "nearby first".** log2 P(where | same offender)
+÷ P(where | random pair) on train offenders: same station +3.23, same
+district +3.37, same state +0.51, another state −2.23 bits; β = 1.0. It nearly
+doubles hit@10 and buries cross-state links (16 → 3 of 495). Neighbouring and
+distant states are merged into one bin because the generator only relocates
+offenders to neighbours — kept apart, distant states learn −11 bits, a
+generator artefact. The geography, like the timing (§10), is the generator's
+own assumption (47% of true pairs share a district) and must be re-measured on
+real FIRs. It stays out of the default because location-blindness is what lets
+cross-jurisdiction links surface; the UI states both modes' numbers next to
+the switch.
+
+**Hard-negative training, discarded.** Retraining the logistic correction on
+each training query's 20 highest-scoring non-partners flipped every
+coefficient negative and took hit@10 to 0.000. A query's nearest non-partners
+agree with it more than its true partners do (typical top-10 evidence +5.8
+bits vs a median true link of +1.5), so on these features "more agreement"
+genuinely means "less likely the same offender" among close look-alikes. What
+separates a true partner from a look-alike is not in the MO fields.
+
+**Burglary family pool, measured, not yet shipped.** Scoring house and
+commercial burglaries against each other on the full burglary field set (the
+spec's intent; today they meet only in the cross-type pool on core fields):
+for held-out burglary queries, an other-type partner reached the top 10 in
+0.079 of 139 queries instead of 0.000, same-type unchanged (0.292), any
+burglary partner 0.260 → 0.272. Worth doing; it changes the pool structure
+across train, evaluate, bundle and serve.
+
+**Not tried: relocation-aware timing.** A separate gap curve for cross-state
+pairs would stop penalising the relocation gap (§10), but it conditions the
+score on location.
+
+---
+
 ## Where things are
 
 | | |
 |---|---|
 | `pre-core-fix` tag | corpus + results with core habits drawn per type (sharing = 0) |
 | `results/pre_core_fix/` | eval, oracle eval, weights, evidence distribution |
-| `results/with_time/` | weights, eval and evidence distribution with the time evidence (current model) |
+| `results/ranked/` | current model: with_time weights + tuned ranking (`rank`), eval with blind / nearby rows |
+| `results/with_time/` | weights, eval and evidence distribution with the time evidence |
 | `results/sweep/` | repeat_rate × cross_type_sharing grid, one file per point |
 | `data/final/` | the 45k corpus (sharing = 0; see manifest `derived`) |
 | `config/tau_selection.json` | how τ = 0.75 was chosen, including two discarded sweeps |

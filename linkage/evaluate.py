@@ -15,8 +15,11 @@ Reported per pool, then same-type and cross-type separately (never blended):
                under the real imbalance, unlike AUC on sampled pairs
   first rank   median rank of the best-ranked true partner
 Baselines: random ranking, agreement_count (shared fields), fs (raw
-Fellegi-Sunter bits). The model is fs_lr. Retrieval recall@50 is separate and
-needs narrative embeddings (not yet available).
+Fellegi-Sunter bits). The evidence model is fs_lr. With a tuned ranking
+(weights "rank", from linkage.tune) two more rows: blind = fs_lr +
+distinctiveness (the default ranking) and nearby = blind + place (an officer's
+"nearby first"). Each model also reports how many queries with a cross-state
+partner found one in the top 10 — the cost of using place.
 """
 from __future__ import annotations
 
@@ -28,7 +31,7 @@ from pathlib import Path
 
 import numpy as np
 
-from linkage import dataset, features
+from linkage import dataset, features, rank
 from linkage.score import Scorer
 
 TOP = 10
@@ -43,7 +46,8 @@ def _query_metrics(scores: np.ndarray, partners: np.ndarray, tie: np.ndarray) ->
             "ap": float(np.mean(np.arange(1, len(ranks) + 1) / ranks)), "first_rank": int(ranks[0])}
 
 
-def evaluate_pool(df, scorer: Scorer, pool: str, test_mask: np.ndarray, rng, max_queries: int) -> dict | None:
+def evaluate_pool(df, scorer: Scorer, pool: str, test_mask: np.ndarray, rng, max_queries: int,
+                  ranker: rank.Ranker | None = None) -> dict | None:
     if pool not in scorer.pools:
         return None
     spec = scorer.pools[pool]
@@ -67,7 +71,10 @@ def evaluate_pool(df, scorer: Scorer, pool: str, test_mask: np.ndarray, rng, max
     if sampled:
         queries = rng.choice(queries, size=max_queries, replace=False)
 
-    per_model = {m: [] for m in MODELS}
+    models = MODELS + (("blind", "nearby") if ranker is not None and pool != features.CROSS else ())
+    per_model = {m: [] for m in models}
+    states = df["state_code"].to_numpy()
+    cross_found, cross_queries = {m: 0 for m in models}, 0
     random_precision, n_candidates, true_evidence = [], [], []
     for q in queries:
         cand = candidates(q)
@@ -77,9 +84,17 @@ def evaluate_pool(df, scorer: Scorer, pool: str, test_mask: np.ndarray, rng, max
         fb = scorer.field_bits(pool, a, b)
         scores = {"agreement_count": features.agreement_count(fields, spec["vocab"], a, b),
                   "fs": fb.sum(axis=1), "fs_lr": scorer.evidence(pool, fb)}
+        if "blind" in models:
+            near = ranker.terms(pool, q, cand, "nearby")
+            scores["blind"] = scores["fs_lr"] + near["distinctiveness"]
+            scores["nearby"] = scores["blind"] + near["place"]
         tie = rng.random(len(cand))
-        for m in MODELS:
+        far = partners & (states[cand] != states[q])
+        cross_queries += bool(far.any())
+        for m in models:
             per_model[m].append(_query_metrics(scores[m], partners, tie))
+            if far.any():
+                cross_found[m] += bool(far[np.lexsort((tie, -scores[m]))[:TOP]].any())
         random_precision.append(partners.sum() / len(cand))       # expected P@10 of a random ranking
         n_candidates.append(len(cand))
         true_evidence.extend(scores["fs_lr"][partners].tolist())
@@ -98,7 +113,8 @@ def evaluate_pool(df, scorer: Scorer, pool: str, test_mask: np.ndarray, rng, max
             "prior_bits": round(log2(len(all_off) / (total - len(all_off))), 3) if len(all_off) else None,
             "mean_true_pair_evidence_bits": round(float(np.mean(true_evidence)), 3),
             "random": {"precision_at_10": round(float(np.mean(random_precision)), 6)},
-            **{m: summary(per_model[m]) for m in MODELS}}
+            "cross_state_partner_in_top10": {m: [cross_found[m], cross_queries] for m in models},
+            **{m: summary(per_model[m]) for m in models}}
 
 
 def _pooled(results: dict, pools: list[str]) -> dict | None:
@@ -107,7 +123,7 @@ def _pooled(results: dict, pools: list[str]) -> dict | None:
         return None
     n = sum(p["queries"] for p in parts)
     out = {"queries": n}
-    for m in MODELS:
+    for m in [m for m in (*MODELS, "blind", "nearby") if all(m in p for p in parts)]:
         out[m] = {k: round(sum(p[m][k] * p["queries"] for p in parts) / n, 4)
                   for k in ("hit_at_10", "recall_at_10", "precision_at_10", "pr_auc")}
     return out
@@ -129,12 +145,25 @@ def main(argv: list[str] | None = None) -> int:
     test = dataset.split_of(df["offender_id"], weights["seed"]) == "test"
     rng = np.random.default_rng(weights["seed"] + 1)
 
-    results = {pool: evaluate_pool(df, scorer, pool, test, rng, args.max_queries) for pool in features.pools()}
+    ranker = None
+    if weights.get("rank"):
+        types = df["crime_type"].to_numpy()
+        codes = {p: scorer.encode(p, {**{f: df[f].tolist() for f in scorer.pools[p]["fields"]},
+                                      features.DAYS: df[features.DAYS].tolist()}) for p in scorer.pools}
+        ranker = rank.Ranker(weights["rank"], rank.hub_scores(scorer, codes, types), types,
+                             df["state_code"].to_numpy(), df["district"].to_numpy(), df["police_station"].to_numpy())
+    results = {pool: evaluate_pool(df, scorer, pool, test, rng, args.max_queries, ranker) for pool in features.pools()}
     same_type = [p for p in features.pools() if p != features.CROSS]
+    cross_found = {}
+    for pool in same_type:
+        for m, (found, total) in (results.get(pool) or {}).get("cross_state_partner_in_top10", {}).items():
+            f0, t0 = cross_found.get(m, (0, 0))
+            cross_found[m] = (f0 + found, t0 + total)
     report = {"weights": str(args.weights), "seed": weights["seed"],
               "oracle_extraction": weights["oracle_extraction"], "split": "test offenders (25%)",
               "same_type": _pooled(results, same_type), "cross_type": results.get(features.CROSS),
-              "pools": results}
+              "same_type_cross_state_partner_in_top10": {m: f"{a}/{b}" for m, (a, b) in cross_found.items()},
+              "rank": weights.get("rank"), "pools": results}
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
@@ -144,16 +173,17 @@ def main(argv: list[str] | None = None) -> int:
     for pool, r in results.items():
         if not r:
             continue
-        for i, m in enumerate(MODELS):
+        for i, m in enumerate(m for m in (*MODELS, "blind", "nearby") if m in r):
             s = r[m]
             head = f"{pool:<22}{r['queries']:>8}{r['mean_candidates']:>7}{r['prior_bits']:>8}" if i == 0 else " " * 45
             print(f"{head}  {m:<16}{s['hit_at_10']:>7.3f}{s['recall_at_10']:>8.3f}{s['precision_at_10']:>7.3f}"
                   f"{s['pr_auc']:>8.3f}{s['median_first_rank']:>7}")
     for label, r in (("SAME-TYPE (pooled)", report["same_type"]), ("CROSS-TYPE", report["cross_type"])):
-        if r:
-            s = r["fs_lr"]
-            print(f"\n{label}: fs_lr hit@10 {s['hit_at_10']:.3f}  recall@10 {s['recall_at_10']:.3f}  "
+        for m in [m for m in ("fs_lr", "blind", "nearby") if r and m in r]:
+            s = r[m]
+            print(f"\n{label}: {m} hit@10 {s['hit_at_10']:.3f}  recall@10 {s['recall_at_10']:.3f}  "
                   f"P@10 {s['precision_at_10']:.3f}  PR-AUC {s['pr_auc']:.3f}  ({r['queries']} queries)")
+    print("\nsame-type queries whose cross-state partner is in the top 10:", report["same_type_cross_state_partner_in_top10"])
     print(f"\nwrote {args.out}")
     return 0
 

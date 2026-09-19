@@ -34,9 +34,15 @@ is literally out of the whole pool. Corpus: 45,000 synthetic cases,
 
 | | hit@10 | recall@10 | PR-AUC |
 |---|---|---|---|
-| same-type, MO + time between offences | **0.235** | 0.120 | 0.083 |
+| same-type, default ranking (MO + time + distinctiveness) | **0.262** | 0.132 | 0.087 |
+| same-type, "nearby first" (officer's choice, adds place) | **0.457** | 0.249 | 0.161 |
+| same-type, MO + time evidence only | 0.235 | 0.120 | 0.083 |
 | same-type, MO only | 0.128 | 0.062 | 0.041 |
 | cross-type, MO + time | 0.029 | 0.015 | 0.008 |
+
+"Nearby first" nearly doubles precision but finds a cross-state partner for
+3 of 495 cases instead of 17, so the default stays location-blind and the
+switch states both numbers ([FINDINGS §14](FINDINGS.md)).
 
 Time roughly doubles same-type linkage — on synthetic data whose gaps we
 generated to be bursty, so the size of that gain must be re-measured on real
@@ -47,18 +53,18 @@ the scorer never saw):
 
 | where the two FIRs are | leads | real links |
 |---|---|---|
-| same district | 433 | about 1 in 5 (20.9%) |
-| other districts, same state | 1,485 | about 1 in 27 (3.8%) |
-| other states | 3,082 | ~0 — shown, labelled low confidence |
+| same district | 432 | about 1 in 4 (24.0%) |
+| other districts, same state | 1,498 | about 1 in 29 (3.5%) |
+| other states | 3,070 | ~0 — shown, labelled low confidence |
 
 A random same-type pair is a real link 1 in 25,942, so the same-district lane
-is ~5,400× better than chance. The score never uses location, so cross-state
+is ~6,200× better than chance. The score never uses location, so cross-state
 matches can surface; most turn out to be coincidence, and the UI says so
 ([FINDINGS §11](FINDINGS.md), which also corrects an earlier, inflated
 version of these numbers).
 
 **Possible series** — groups of FIRs chained by strong same-state links, with
-a map and a timeline: 182 series, 102 spanning districts; about 1 in 5 FIR
+a map and a timeline: 197 series, 118 spanning districts; about 1 in 5 FIR
 pairs inside a series are one offender, so each link is shown separately
 ([§12](FINDINGS.md)). **Crime-type checks** — FIRs whose MO reads like the
 other burglary type: 714 flagged, 97% truly misfiled, 73% of all misfiled
@@ -68,7 +74,7 @@ FIRs found, with no labels ([§13](FINDINGS.md)).
 50,000 pairs, so "no link" everywhere scores 99.998% accurate. This is a
 ranker: the question is whether an offender's other crimes surface near the
 top of an analyst's list. Typically a true partner lands in the top ~2% of the
-pool; 23.5% of the time it reaches the top 10 out of ~15,000.
+pool; 26% of the time it reaches the top 10 out of ~15,000 (46% with "nearby first").
 
 Evidence per link is small: the median true pair carries **+0.8 to +2.9 bits**
 against a prior of −12 to −17 bits. The spec's +5.85 bit example is a *strong*
@@ -134,6 +140,7 @@ python scripts/preflight.py                  # pre-deployment checks
 python -m linkage.generate --seed 7 --n-cases 45000 --cross-type-sharing 1 --out data/mine/
 python -m linkage.normalise --feeds data/mine/feeds --out data/mine_normalised.parquet --check data/mine/truth.parquet
 python -m linkage.train    --normalised data/mine_normalised.parquet --truth data/mine/truth.parquet --out model/weights.json
+python -m linkage.tune     --normalised data/mine_normalised.parquet --truth data/mine/truth.parquet --weights model/weights.json --out model/weights.json
 python -m linkage.evaluate --normalised data/mine_normalised.parquet --truth data/mine/truth.parquet --weights model/weights.json --out results/mine.json
 ```
 

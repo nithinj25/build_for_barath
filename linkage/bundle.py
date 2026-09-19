@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from linkage import dataset, features, schema
+from linkage import dataset, features, rank, schema
 from linkage.score import Scorer
 
 DISPLAY = ("case_id", "state_code", "district", "police_station", "fir_no", "crime_type",
@@ -60,13 +60,17 @@ SERIES_NEAR_ONE_IN, SERIES_FAR_ONE_IN, SERIES_MIN_SIZE = 10_000, 200_000, 3
 TYPE_CHECK_MIN_BITS = 2.0
 
 
-def random_pair_rarity(scorer: Scorer, codes: dict, types: np.ndarray, seed: int) -> dict:
-    """Evidence of random UNRELATED-by-construction pairs per pool: the reference
-    for "1 in N unrelated pairs look this alike". Stored as a coarse body
-    (percentiles 0–99) plus the exact top 1%, where leads live."""
+def random_pair_rarity(scorer: Scorer, codes: dict, types: np.ndarray, seed: int,
+                       ranker: rank.Ranker | None = None, mode: str = "blind") -> dict:
+    """Scores of random UNRELATED-by-construction pairs per pool: the reference
+    for "1 in N unrelated pairs look this alike". Scored exactly as the ranking
+    scores (evidence + distinctiveness, + place in "nearby" mode). Stored as a
+    coarse body (percentiles 0–99) plus the exact top 1%, where leads live."""
     rng = np.random.default_rng(seed)
     out = {}
     for pool, spec in scorer.pools.items():
+        if mode == "nearby" and pool == features.CROSS:
+            continue
         rows = np.arange(len(types)) if pool == features.CROSS else np.flatnonzero(types == pool)
         pairs = rows[rng.integers(0, len(rows), size=(RANDOM_PAIRS * 2, 2))]
         keep = pairs[:, 0] != pairs[:, 1]
@@ -75,7 +79,11 @@ def random_pair_rarity(scorer: Scorer, codes: dict, types: np.ndarray, seed: int
         pairs = pairs[keep][:RANDOM_PAIRS]
         bits = scorer.field_bits(pool, {k: v[pairs[:, 0]] for k, v in codes[pool].items()},
                                  {k: v[pairs[:, 1]] for k, v in codes[pool].items()})
-        ev = np.sort(scorer.evidence(pool, bits))
+        ev = scorer.evidence(pool, bits)
+        if ranker is not None:
+            terms = ranker.pair_terms(pool, pairs[:, 0], pairs[:, 1], mode)
+            ev = ev + terms["distinctiveness"] + terms["place"]
+        ev = np.sort(ev)
         out[pool] = {"n": int(len(ev)), "body": np.round(np.percentile(ev, np.arange(100)), 4).tolist(),
                      "tail": np.round(ev[int(len(ev) * 0.99):], 4).tolist()}
     return out
@@ -105,6 +113,7 @@ def top_matches(short, per_case: int = LEADS_PER_CASE) -> dict:
         cand_codes = {k: v[rows] for k, v in codes[pool].items()}
         for q in rows:
             ev = scorer.evidence(pool, scorer.field_bits(pool, {k: v[q] for k, v in codes[pool].items()}, cand_codes))
+            ev = ev + short.ranker.terms(pool, q, rows, "blind")["distinctiveness"]
             ev[rows == q] = -np.inf
             for j in np.argpartition(-ev, per_case)[:per_case]:
                 key = (min(q, rows[j]), max(q, rows[j]))
@@ -355,7 +364,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--weights", type=Path, default=Path("model/weights.json"))
     ap.add_argument("--extractions", type=Path, default=None)
     ap.add_argument("--truth", type=Path, default=Path("data/final_sharing1/truth.parquet"))
-    ap.add_argument("--eval", type=Path, default=Path("results/with_time/eval.json"))
+    ap.add_argument("--eval", type=Path, default=Path("results/ranked/eval.json"))
     ap.add_argument("--evidence", type=Path, default=Path("results/with_time/evidence_distribution.json"))
     ap.add_argument("--with-ground-truth", action="store_true", help="enable demo-mode true-link marks")
     ap.add_argument("--out", type=Path, required=True)
@@ -409,14 +418,27 @@ def main(argv: list[str] | None = None) -> int:
     for key, codes in arrays.items():
         pool, field = key.split("|", 1)
         codes_by_pool.setdefault(pool, {})[field] = codes.astype(np.int64)
-    rarity = random_pair_rarity(scorer, codes_by_pool, types, weights["seed"])
-    for pool, r in rarity.items():
-        pools_meta[pool]["random_pairs"] = r
+    hub_r = rank.hub_scores(scorer, codes_by_pool, types) if weights.get("rank") else None
+    if hub_r is not None:
+        np.savez_compressed(out / "extras.npz", hub_r=hub_r.astype(np.float32))
+    places = [df[c].to_numpy() for c in ("state_code", "district", "police_station")]
+    ranker = rank.Ranker(weights.get("rank"), hub_r, types, *places)
+    for mode, key in (("blind", "random_pairs"), ("nearby", "random_pairs_nearby")):
+        if mode == "nearby" and not weights.get("rank"):
+            continue
+        for pool, r in random_pair_rarity(scorer, codes_by_pool, types, weights["seed"], ranker, mode).items():
+            pools_meta[pool][key] = r
 
     places: dict = {}
     for s, d in zip(df["state_code"], df["district"]):
         places.setdefault(s, set()).add(d)
-    summary = {k: evaluation[k]["fs_lr"] for k in ("same_type", "cross_type") if evaluation.get(k)}
+    # the default ranking ("blind": evidence + distinctiveness) when the weights carry one
+    default = "blind" if evaluation.get("same_type", {}).get("blind") else "fs_lr"
+    summary = {k: evaluation[k][default if k == "same_type" else "fs_lr"] for k in ("same_type", "cross_type") if evaluation.get(k)}
+    if evaluation.get("same_type", {}).get("nearby"):
+        summary["nearby"] = evaluation["same_type"]["nearby"]
+        summary["evidence_only"] = evaluation["same_type"]["fs_lr"]
+        summary["cross_state_partner_in_top10"] = evaluation.get("same_type_cross_state_partner_in_top10")
     meta = {"built_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "synthetic": True,
             "cases": len(df), "weights_seed": weights["seed"], "extracted_cases": applied,
             "extraction_source": str(args.extractions) if args.extractions else None,
@@ -429,7 +451,7 @@ def main(argv: list[str] | None = None) -> int:
             "ground_truth_available": bool(args.with_ground_truth)}
 
     from linkage.serve import Shortlister
-    short = Shortlister(weights, df["case_id"].tolist(), types.tolist(), codes_by_pool, meta, cases)
+    short = Shortlister(weights, df["case_id"].tolist(), types.tolist(), codes_by_pool, meta, cases, hub_r=hub_r)
     matches = top_matches(short)
     checks = type_checks(short)
     doubtful = {c["case_id"] for c in checks}

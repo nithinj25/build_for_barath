@@ -1,0 +1,506 @@
+{
+  "weights": "results\\ranked\\weights.json",
+  "seed": 7,
+  "oracle_extraction": false,
+  "split": "test offenders (25%)",
+  "same_type": {
+    "queries": 1318,
+    "agreement_count": {
+      "hit_at_10": 0.0751,
+      "recall_at_10": 0.0342,
+      "precision_at_10": 0.0088,
+      "pr_auc": 0.0185
+    },
+    "fs": {
+      "hit_at_10": 0.2306,
+      "recall_at_10": 0.1196,
+      "precision_at_10": 0.03,
+      "pr_auc": 0.0817
+    },
+    "fs_lr": {
+      "hit_at_10": 0.2352,
+      "recall_at_10": 0.1201,
+      "precision_at_10": 0.0296,
+      "pr_auc": 0.0828
+    },
+    "blind": {
+      "hit_at_10": 0.2618,
+      "recall_at_10": 0.1319,
+      "precision_at_10": 0.0328,
+      "pr_auc": 0.0869
+    },
+    "nearby": {
+      "hit_at_10": 0.4567,
+      "recall_at_10": 0.2489,
+      "precision_at_10": 0.0673,
+      "pr_auc": 0.1611
+    }
+  },
+  "cross_type": {
+    "queries": 1005,
+    "queries_sampled": false,
+    "mean_candidates": 33917,
+    "prior_bits": -16.87,
+    "mean_true_pair_evidence_bits": 1.156,
+    "random": {
+      "precision_at_10": 7.8e-05
+    },
+    "cross_state_partner_in_top10": {
+      "agreement_count": [
+        0,
+        300
+      ],
+      "fs": [
+        0,
+        300
+      ],
+      "fs_lr": [
+        0,
+        300
+      ]
+    },
+    "agreement_count": {
+      "hit_at_10": 0.005,
+      "recall_at_10": 0.0029,
+      "precision_at_10": 0.0006,
+      "pr_auc": 0.0014,
+      "median_first_rank": 4906
+    },
+    "fs": {
+      "hit_at_10": 0.0289,
+      "recall_at_10": 0.0164,
+      "precision_at_10": 0.0032,
+      "pr_auc": 0.0083,
+      "median_first_rank": 970
+    },
+    "fs_lr": {
+      "hit_at_10": 0.0289,
+      "recall_at_10": 0.0146,
+      "precision_at_10": 0.0032,
+      "pr_auc": 0.0075,
+      "median_first_rank": 1044
+    }
+  },
+  "same_type_cross_state_partner_in_top10": {
+    "agreement_count": "19/495",
+    "fs": "17/495",
+    "fs_lr": "16/495",
+    "blind": "17/495",
+    "nearby": "3/495"
+  },
+  "rank": {
+    "hub_beta": 0.25,
+    "hub_k": 10,
+    "geo_beta": 1.0,
+    "geo_bins": [
+      "same_station",
+      "same_district",
+      "same_state",
+      "other_state"
+    ],
+    "geo_bits": [
+      3.2333,
+      3.3712,
+      0.5144,
+      -2.2279
+    ],
+    "tuned_on": "calib offenders, pooled same-type PR-AUC",
+    "calib_pr_auc": {
+      "hub": {
+        "0.0": 0.085,
+        "0.15": 0.0898,
+        "0.25": 0.09,
+        "0.35": 0.09,
+        "0.5": 0.0894
+      },
+      "geo": {
+        "0.25": 0.1297,
+        "0.5": 0.1547,
+        "0.75": 0.1633,
+        "1.0": 0.1653
+      }
+    }
+  },
+  "pools": {
+    "BURGLARY_RESIDENTIAL": {
+      "queries": 293,
+      "queries_sampled": false,
+      "mean_candidates": 12564,
+      "prior_bits": -15.096,
+      "mean_true_pair_evidence_bits": 2.145,
+      "random": {
+        "precision_at_10": 0.000275
+      },
+      "cross_state_partner_in_top10": {
+        "agreement_count": [
+          1,
+          79
+        ],
+        "fs": [
+          2,
+          79
+        ],
+        "fs_lr": [
+          2,
+          79
+        ],
+        "blind": [
+          2,
+          79
+        ],
+        "nearby": [
+          0,
+          79
+        ]
+      },
+      "agreement_count": {
+        "hit_at_10": 0.1126,
+        "recall_at_10": 0.0465,
+        "precision_at_10": 0.014,
+        "pr_auc": 0.0214,
+        "median_first_rank": 480
+      },
+      "fs": {
+        "hit_at_10": 0.2662,
+        "recall_at_10": 0.15,
+        "precision_at_10": 0.0382,
+        "pr_auc": 0.1005,
+        "median_first_rank": 78
+      },
+      "fs_lr": {
+        "hit_at_10": 0.2628,
+        "recall_at_10": 0.1429,
+        "precision_at_10": 0.0355,
+        "pr_auc": 0.1002,
+        "median_first_rank": 84
+      },
+      "blind": {
+        "hit_at_10": 0.3038,
+        "recall_at_10": 0.1572,
+        "precision_at_10": 0.0406,
+        "pr_auc": 0.1054,
+        "median_first_rank": 48
+      },
+      "nearby": {
+        "hit_at_10": 0.4573,
+        "recall_at_10": 0.261,
+        "precision_at_10": 0.0747,
+        "pr_auc": 0.1899,
+        "median_first_rank": 14
+      }
+    },
+    "BURGLARY_COMMERCIAL": {
+      "queries": 90,
+      "queries_sampled": false,
+      "mean_candidates": 5032,
+      "prior_bits": -13.858,
+      "mean_true_pair_evidence_bits": 3.403,
+      "random": {
+        "precision_at_10": 0.000433
+      },
+      "cross_state_partner_in_top10": {
+        "agreement_count": [
+          5,
+          21
+        ],
+        "fs": [
+          6,
+          21
+        ],
+        "fs_lr": [
+          6,
+          21
+        ],
+        "blind": [
+          6,
+          21
+        ],
+        "nearby": [
+          2,
+          21
+        ]
+      },
+      "agreement_count": {
+        "hit_at_10": 0.2111,
+        "recall_at_10": 0.1444,
+        "precision_at_10": 0.0244,
+        "pr_auc": 0.0779,
+        "median_first_rank": 113
+      },
+      "fs": {
+        "hit_at_10": 0.4,
+        "recall_at_10": 0.2909,
+        "precision_at_10": 0.0489,
+        "pr_auc": 0.2142,
+        "median_first_rank": 23
+      },
+      "fs_lr": {
+        "hit_at_10": 0.4111,
+        "recall_at_10": 0.3085,
+        "precision_at_10": 0.05,
+        "pr_auc": 0.222,
+        "median_first_rank": 20
+      },
+      "blind": {
+        "hit_at_10": 0.4556,
+        "recall_at_10": 0.3307,
+        "precision_at_10": 0.0544,
+        "pr_auc": 0.2293,
+        "median_first_rank": 14
+      },
+      "nearby": {
+        "hit_at_10": 0.6,
+        "recall_at_10": 0.457,
+        "precision_at_10": 0.0956,
+        "pr_auc": 0.3153,
+        "median_first_rank": 4
+      }
+    },
+    "VEHICLE_THEFT": {
+      "queries": 528,
+      "queries_sampled": false,
+      "mean_candidates": 15482,
+      "prior_bits": -15.064,
+      "mean_true_pair_evidence_bits": 1.514,
+      "random": {
+        "precision_at_10": 0.000227
+      },
+      "cross_state_partner_in_top10": {
+        "agreement_count": [
+          7,
+          240
+        ],
+        "fs": [
+          2,
+          240
+        ],
+        "fs_lr": [
+          2,
+          240
+        ],
+        "blind": [
+          2,
+          240
+        ],
+        "nearby": [
+          0,
+          240
+        ]
+      },
+      "agreement_count": {
+        "hit_at_10": 0.0379,
+        "recall_at_10": 0.0147,
+        "precision_at_10": 0.0044,
+        "pr_auc": 0.0103,
+        "median_first_rank": 827
+      },
+      "fs": {
+        "hit_at_10": 0.1572,
+        "recall_at_10": 0.0646,
+        "precision_at_10": 0.0191,
+        "pr_auc": 0.0486,
+        "median_first_rank": 123
+      },
+      "fs_lr": {
+        "hit_at_10": 0.1648,
+        "recall_at_10": 0.068,
+        "precision_at_10": 0.0191,
+        "pr_auc": 0.049,
+        "median_first_rank": 119
+      },
+      "blind": {
+        "hit_at_10": 0.1837,
+        "recall_at_10": 0.077,
+        "precision_at_10": 0.0212,
+        "pr_auc": 0.0515,
+        "median_first_rank": 85
+      },
+      "nearby": {
+        "hit_at_10": 0.4053,
+        "recall_at_10": 0.1915,
+        "precision_at_10": 0.054,
+        "pr_auc": 0.1084,
+        "median_first_rank": 22
+      }
+    },
+    "SNATCHING": {
+      "queries": 266,
+      "queries_sampled": false,
+      "mean_candidates": 8006,
+      "prior_bits": -14.192,
+      "mean_true_pair_evidence_bits": 1.379,
+      "random": {
+        "precision_at_10": 0.00036
+      },
+      "cross_state_partner_in_top10": {
+        "agreement_count": [
+          3,
+          89
+        ],
+        "fs": [
+          5,
+          89
+        ],
+        "fs_lr": [
+          3,
+          89
+        ],
+        "blind": [
+          4,
+          89
+        ],
+        "nearby": [
+          1,
+          89
+        ]
+      },
+      "agreement_count": {
+        "hit_at_10": 0.0602,
+        "recall_at_10": 0.0227,
+        "precision_at_10": 0.006,
+        "pr_auc": 0.0108,
+        "median_first_rank": 516
+      },
+      "fs": {
+        "hit_at_10": 0.2218,
+        "recall_at_10": 0.1276,
+        "precision_at_10": 0.0241,
+        "pr_auc": 0.0723,
+        "median_first_rank": 125
+      },
+      "fs_lr": {
+        "hit_at_10": 0.218,
+        "recall_at_10": 0.122,
+        "precision_at_10": 0.0233,
+        "pr_auc": 0.0736,
+        "median_first_rank": 124
+      },
+      "blind": {
+        "hit_at_10": 0.2444,
+        "recall_at_10": 0.1333,
+        "precision_at_10": 0.0263,
+        "pr_auc": 0.0775,
+        "median_first_rank": 126
+      },
+      "nearby": {
+        "hit_at_10": 0.4286,
+        "recall_at_10": 0.2487,
+        "precision_at_10": 0.0526,
+        "pr_auc": 0.1592,
+        "median_first_rank": 15
+      }
+    },
+    "ATM_TAMPERING": {
+      "queries": 141,
+      "queries_sampled": false,
+      "mean_candidates": 3444,
+      "prior_bits": -12.16,
+      "mean_true_pair_evidence_bits": 1.506,
+      "random": {
+        "precision_at_10": 0.001301
+      },
+      "cross_state_partner_in_top10": {
+        "agreement_count": [
+          3,
+          66
+        ],
+        "fs": [
+          2,
+          66
+        ],
+        "fs_lr": [
+          3,
+          66
+        ],
+        "blind": [
+          3,
+          66
+        ],
+        "nearby": [
+          0,
+          66
+        ]
+      },
+      "agreement_count": {
+        "hit_at_10": 0.078,
+        "recall_at_10": 0.0333,
+        "precision_at_10": 0.0099,
+        "pr_auc": 0.0202,
+        "median_first_rank": 172
+      },
+      "fs": {
+        "hit_at_10": 0.3404,
+        "recall_at_10": 0.1379,
+        "precision_at_10": 0.0525,
+        "pr_auc": 0.1,
+        "median_first_rank": 29
+      },
+      "fs_lr": {
+        "hit_at_10": 0.3617,
+        "recall_at_10": 0.1444,
+        "precision_at_10": 0.0553,
+        "pr_auc": 0.1013,
+        "median_first_rank": 34
+      },
+      "blind": {
+        "hit_at_10": 0.3759,
+        "recall_at_10": 0.155,
+        "precision_at_10": 0.0582,
+        "pr_auc": 0.1082,
+        "median_first_rank": 20
+      },
+      "nearby": {
+        "hit_at_10": 0.6099,
+        "recall_at_10": 0.3058,
+        "precision_at_10": 0.1113,
+        "pr_auc": 0.2038,
+        "median_first_rank": 6
+      }
+    },
+    "CROSS_TYPE": {
+      "queries": 1005,
+      "queries_sampled": false,
+      "mean_candidates": 33917,
+      "prior_bits": -16.87,
+      "mean_true_pair_evidence_bits": 1.156,
+      "random": {
+        "precision_at_10": 7.8e-05
+      },
+      "cross_state_partner_in_top10": {
+        "agreement_count": [
+          0,
+          300
+        ],
+        "fs": [
+          0,
+          300
+        ],
+        "fs_lr": [
+          0,
+          300
+        ]
+      },
+      "agreement_count": {
+        "hit_at_10": 0.005,
+        "recall_at_10": 0.0029,
+        "precision_at_10": 0.0006,
+        "pr_auc": 0.0014,
+        "median_first_rank": 4906
+      },
+      "fs": {
+        "hit_at_10": 0.0289,
+        "recall_at_10": 0.0164,
+        "precision_at_10": 0.0032,
+        "pr_auc": 0.0083,
+        "median_first_rank": 970
+      },
+      "fs_lr": {
+        "hit_at_10": 0.0289,
+        "recall_at_10": 0.0146,
+        "precision_at_10": 0.0032,
+        "pr_auc": 0.0075,
+        "median_first_rank": 1044
+      }
+    }
+  }
+}

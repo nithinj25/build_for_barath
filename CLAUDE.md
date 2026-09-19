@@ -65,6 +65,8 @@ linkage/        pure functions, no AWS imports
   normalise.py  feed rows → canonical records via adapters/ (no per-state code)
   features.py   pair featurisation, Fellegi-Sunter weights (numpy only)
   score.py      inference from exported coefficients (numpy only)
+  rank.py       default ranking (distinctiveness) and opt-in "nearby first" (place); numpy only
+  tune.py       local: picks the ranking strengths on CALIB offenders
   dataset.py    local: normalised records + labels, offender split, pairs
   generate/     synthetic corpus with ground-truth offender IDs
     sample.py     truth: style tilt → θ → values, series, geography, clocks
@@ -120,6 +122,7 @@ python -m linkage.sweep --out results/sweep         # repeat_rate × cross_type_
 python scripts/plot_sweep.py results/sweep          # headline figure + summary.csv
 python -m linkage.normalise --feeds data/final/feeds --out data/final_normalised.parquet --check data/final/truth.parquet
 python -m linkage.train --normalised data/final_sharing1_normalised.parquet --truth data/final_sharing1/truth.parquet --out data/weights.json
+python -m linkage.tune --weights data/weights.json --out data/weights.json   # ranking strengths on CALIB offenders
 python -m linkage.evaluate --normalised data/final_sharing1_normalised.parquet --truth data/final_sharing1/truth.parquet --weights data/weights.json --out data/eval.json
 python -m linkage.bundle --out data/serve --with-ground-truth   # serve bundle for the API
 python scripts/serve_local.py --demo               # UI + API locally on :8000, same handler as Lambda

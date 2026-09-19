@@ -18,8 +18,8 @@ data" once, early, and mean it.
 
 Open the page. It lands on **Leads → Same district**.
 
-- Point at the blue line: *about 1 in 5 leads like these was a real serial
-  link in testing — ~5,400× better than picking case pairs at random.*
+- Point at the blue line: *about 1 in 4 leads like these was a real serial
+  link in testing — ~6,200× better than picking case pairs at random.*
 - Lead #1: house burglary, Mysuru, **different police stations**, 3 weeks
   apart. Both FIRs: gas cutter (4% of house burglaries), faces covered,
   inside information.
@@ -27,7 +27,7 @@ Open the page. It lands on **Leads → Same district**.
   matches — no keyword search can reach them — but in testing they were
   almost never real, and the screen says so.*
 
-## 1:00 — Why the system thinks so (40 s)
+## 1:00 — Why the system thinks so (25 s)
 
 Click lead #1 (FIRs `b9612100ef5bc0ff` ↔ `5f14011fad04a685`).
 
@@ -39,13 +39,21 @@ Click lead #1 (FIRs `b9612100ef5bc0ff` ↔ `5f14011fad04a685`).
 - Type an officer name, click **Needs investigation**, show it land in the
   decision history. **Print report**.
 
+## 1:25 — Location-blind vs nearby first (15 s)
+
+Open any case (**Find a case** → an example), flip **Nearby first** and read
+the line under the switch: *it nearly doubles how often the true partner is
+in the top 10 (26% → 46%) but finds a cross-state partner for 3 cases instead
+of 17. The officer chooses; the default stays location-blind, because that
+is the point of this system.*
+
 ## 1:40 — Possible series (35 s)
 
 **Series** → open the chain-snatching series across **Kolhapur, Nashik and Thane**
-(id `ac0b5f9d7a`, or filter State = Maharashtra, Crime type = Chain
+(id `2ca66ef385`, or filter State = Maharashtra, Crime type = Chain
 snatching).
 
-- Map and timeline: five FIRs, three districts, one MO.
+- Map and timeline: six FIRs, three districts, one MO.
 - Be straight about it: *this one is clean — all one offender. Across all
   series, about 1 in 5 FIR pairs inside a series are the same offender, so
   every link is shown separately with its own strength.*
@@ -74,8 +82,9 @@ but warehouse premises, shutter entry, closed for the night.
 ## If asked
 
 - **"How accurate is it?"** Accuracy is the wrong measure — a true link is
-  1 in ~26,000 pairs, so "never linked" is 99.996% accurate. For 23.5% of
-  cases the true partner is in the top 10 of ~15,000 FIRs of that type.
+  1 in ~26,000 pairs, so "never linked" is 99.996% accurate. For 26% of
+  cases the true partner is in the top 10 of ~15,000 FIRs of that type
+  (46% with "nearby first").
 - **"Is this real data?"** No. Synthetic, generated to resemble FIRs from
   four states. The method's numbers must be re-measured on real records;
   the timing gain in particular comes from how we generated the data.

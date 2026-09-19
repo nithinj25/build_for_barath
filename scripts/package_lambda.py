@@ -21,8 +21,8 @@ ROOT = Path(__file__).resolve().parent.parent
 APP, LAYER = ROOT / "build/app", ROOT / "build/layer"
 MODULES = ["handlers/__init__.py", "handlers/api.py", "handlers/store.py",
            "linkage/__init__.py", "linkage/schema.py", "linkage/features.py",
-           "linkage/score.py", "linkage/serve.py", "ui/index.html"]
-BUNDLE_FILES = ["weights.json", "index.json", "codes.npz", "cases.json.gz", "meta.json", "truth_groups.json", "leads.json.gz", "series.json.gz", "checks.json.gz"]
+           "linkage/score.py", "linkage/serve.py", "linkage/rank.py", "ui/index.html"]
+BUNDLE_FILES = ["weights.json", "index.json", "codes.npz", "cases.json.gz", "meta.json", "truth_groups.json", "leads.json.gz", "series.json.gz", "checks.json.gz", "extras.npz"]
 NUMPY = "numpy==1.26.4"            # the version every local test and check ran against
 LAMBDA_UNZIPPED_LIMIT_MB = 250
 
@@ -45,7 +45,7 @@ def main() -> int:
     for name in BUNDLE_FILES:
         if (args.bundle / name).exists():
             shutil.copy2(args.bundle / name, APP / "bundle" / name)
-        elif name not in ("truth_groups.json", "leads.json.gz", "series.json.gz", "checks.json.gz"):
+        elif name not in ("truth_groups.json", "leads.json.gz", "series.json.gz", "checks.json.gz", "extras.npz"):
             print(f"missing bundle file {name} — run python -m linkage.bundle first")
             return 1
 
@@ -60,7 +60,29 @@ def main() -> int:
     print(f"build/app   {app_mb:6.1f} MB  ({len(MODULES)} source files + bundle)")
     print(f"build/layer {layer_mb:6.1f} MB  ({NUMPY}, linux arm64)")
     print(f"unzipped total {app_mb + layer_mb:.1f} MB of Lambda's {LAMBDA_UNZIPPED_LIMIT_MB} MB limit")
+    if not smoke_test():
+        return 1
     return 0 if app_mb + layer_mb < LAMBDA_UNZIPPED_LIMIT_MB else 1
+
+
+SMOKE = """
+import os, sys, tempfile
+sys.path.insert(0, ".")
+os.environ.update(BUNDLE_URI="bundle", STORE="local:" + tempfile.mkdtemp())
+from handlers import api
+for path in ("/api/meta", "/api/leads", "/api/series"):
+    r = api.handler({"rawPath": path, "requestContext": {"http": {"method": "GET"}}})
+    assert r["statusCode"] == 200, (path, r["statusCode"], r["body"][:200])
+print("staged app answers /meta, /leads, /series")
+"""
+
+
+def smoke_test() -> bool:
+    """Import and call the STAGED app from its own folder, so a module left out
+    of MODULES fails here instead of as a 502 on Lambda."""
+    r = subprocess.run([sys.executable, "-c", SMOKE], cwd=APP, capture_output=True, text=True)
+    print(r.stdout.strip() or r.stderr.strip().splitlines()[-1])
+    return r.returncode == 0
 
 
 if __name__ == "__main__":

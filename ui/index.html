@@ -159,6 +159,11 @@
   .tabs button { border: 1px solid var(--line-2); background: var(--surface); border-radius: 99px; padding: 6px 14px; }
   .tabs button[aria-pressed=true] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
   .back { display: inline-block; margin-bottom: 12px; text-decoration: none; }
+  .modes { display: inline-flex; border: 1px solid var(--line-2); border-radius: 10px; overflow: hidden; margin-bottom: 6px; }
+  .modes button { border: 0; background: var(--surface); padding: 8px 14px; font-weight: 500; }
+  .modes button[aria-pressed=true] { background: var(--accent); color: #fff; }
+  .mode-help { margin: 4px 0 14px; max-width: 820px; }
+  .ico.place, .ico.distinct { background: var(--surface-2); color: var(--ink-2); border: 1px solid var(--line); }
   .howto { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
   .stat { font-size: 28px; font-weight: 700; }
   .empty { text-align: center; color: var(--muted); padding: 40px 0; }
@@ -364,7 +369,22 @@ const HI = {
   "strongly weakens": "काफ़ी कमज़ोर करता है", "weakens": "कमज़ोर करता है", "slightly weakens": "थोड़ा कमज़ोर करता है",
   "Where they differ": "कहाँ अलग हैं", "Not recorded in one of the FIRs, so not used: {list}.": "किसी एक एफआईआर में दर्ज नहीं, इसलिए उपयोग नहीं हुआ: {list}।",
   "FIR A — narrative": "एफआईआर A — विवरण", "FIR B — narrative": "एफआईआर B — विवरण", "No narrative.": "कोई विवरण नहीं।",
-  ". ": "। ",
+  ". ": "। ", "Ranking": "क्रम", "Location-blind": "स्थान-निरपेक्ष", "Nearby first": "पास वाले पहले",
+  "Nearby first: FIRs from the same station, district and state move up. In testing a true linked FIR was in the top 10 for {a} of cases (location-blind: {b}) — but a partner in another state was found for only {c} of {n} cases (location-blind: {d}).":
+    "पास वाले पहले: एक ही थाने, ज़िले और राज्य की एफआईआर ऊपर आती हैं। परीक्षण में {a} मामलों में असली जुड़ी एफआईआर शीर्ष 10 में आई (स्थान-निरपेक्ष: {b}) — पर दूसरे राज्य का साथी {n} में से केवल {c} मामलों में मिला (स्थान-निरपेक्ष: {d})।",
+  "Location-blind: where the FIRs were registered plays no part, so matches across districts and states surface. In testing a true linked FIR was in the top 10 for {a} of cases.":
+    "स्थान-निरपेक्ष: एफआईआर कहाँ दर्ज हुई इसका कोई असर नहीं, इसलिए ज़िलों और राज्यों के पार के मिलान सामने आते हैं। परीक्षण में {a} मामलों में असली जुड़ी एफआईआर शीर्ष 10 में आई।",
+  "Same police station": "एक ही थाना", "Same district, different police station": "एक ही ज़िला, अलग थाना",
+  "Same state, different district": "एक ही राज्य, अलग ज़िला", "Different states": "अलग-अलग राज्य",
+  "Counted because you chose nearby first: in testing, linked FIRs were far more often close together than unrelated ones.":
+    "इसे इसलिए गिना गया क्योंकि आपने \"पास वाले पहले\" चुना: परीक्षण में जुड़ी एफआईआर असंबंधित एफआईआर की तुलना में कहीं ज़्यादा पास-पास थीं।",
+  "One of these FIRs resembles many others": "इनमें से एक एफआईआर कई अन्य से मिलती है", "Both FIRs are unusual": "दोनों एफआईआर असामान्य हैं",
+  "A FIR whose MO matches many FIRs makes any one match with it less telling.": "जिस एफआईआर की कार्यप्रणाली कई एफआईआर से मिलती है, उससे कोई एक मिलान कम अहम होता है।",
+  "Neither FIR resembles many others, so a match between them is more telling.": "कोई भी एफआईआर कई अन्य से नहीं मिलती, इसलिए इनका आपसी मिलान ज़्यादा अहम है।",
+  "How distinctive these FIRs are": "ये एफआईआर कितनी विशिष्ट हैं",
+  "with \"nearby first\" — at the cost of most links across state borders": "\"पास वाले पहले\" के साथ — पर राज्य-सीमा पार के ज़्यादातर संबंधों की क़ीमत पर",
+  "Location is not used unless an officer picks \"nearby first\"; the default ranking is location-blind, which is what lets links across states surface at all.":
+    "जब तक अधिकारी \"पास वाले पहले\" न चुनें, स्थान का उपयोग नहीं होता; डिफ़ॉल्ट क्रम स्थान-निरपेक्ष है, इसी से राज्यों के पार संबंध सामने आ पाते हैं।",
   "FIR text is shown as recorded.": "एफआईआर का पाठ जैसा दर्ज है वैसा दिखाया गया है।",
   "Record your assessment": "अपना आकलन दर्ज करें", "Officer name (demo — not verified)": "अधिकारी का नाम (डेमो — सत्यापित नहीं)",
   "Note for the case file (optional)": "केस फ़ाइल के लिए टिप्पणी (वैकल्पिक)", "Linked": "जुड़े हैं", "Needs investigation": "जाँच ज़रूरी",
@@ -801,19 +821,33 @@ function caseNotices(c) {
     c.series_id ? h("div", { class: "notice info small" }, t("Part of a possible series of {n} FIRs.", { n: c.series_size }),
       h("a", { class: "btn small", href: `#/series/${c.series_id}` }, t("View series"))) : null];
 }
-async function showCase(id, tab = "same") {
+function modeHelp(mode) {
+  const ms = META.model_summary || {}, x = ms.cross_state_partner_in_top10 || {};
+  const pctOf = s => s ? `${Math.round(s.hit_at_10 * 100)}%` : "—";
+  const cross = k => x[k] ? x[k].split("/")[0] : "—", total = x.blind ? x.blind.split("/")[1] : "—";
+  return mode === "nearby"
+    ? t("Nearby first: FIRs from the same station, district and state move up. In testing a true linked FIR was in the top 10 for {a} of cases (location-blind: {b}) — but a partner in another state was found for only {c} of {n} cases (location-blind: {d}).",
+        { a: pctOf(ms.nearby), b: pctOf(ms.same_type), c: cross("nearby"), n: total, d: cross("blind") })
+    : t("Location-blind: where the FIRs were registered plays no part, so matches across districts and states surface. In testing a true linked FIR was in the top 10 for {a} of cases.",
+        { a: pctOf(ms.same_type) });
+}
+async function showCase(id, tab = "same", mode = "blind") {
   setNav("search");
   loading("Comparing with every case in the pool…");
   let c, links;
-  try { [c, links] = await Promise.all([api(`/cases/${id}`), api(`/cases/${id}/links?scope=all&limit=10`)]); } catch (e) { return fail(e); }
+  try { [c, links] = await Promise.all([api(`/cases/${id}`), api(`/cases/${id}/links?scope=all&limit=10&rank=${mode}`)]); } catch (e) { return fail(e); }
   const lists = links.lists;
   const tabs = h("div", { class: "tabs", role: "group" },
-    h("button", { "aria-pressed": String(tab === "same"), onclick: () => showCase(id, "same") }, t("Same crime type ({n} FIRs checked)", { n: num(lists.same_type.pool_size) })),
-    h("button", { "aria-pressed": String(tab === "cross"), onclick: () => showCase(id, "cross") }, t("Other property crimes")));
+    h("button", { "aria-pressed": String(tab === "same"), onclick: () => showCase(id, "same", mode) }, t("Same crime type ({n} FIRs checked)", { n: num(lists.same_type.pool_size) })),
+    h("button", { "aria-pressed": String(tab === "cross"), onclick: () => showCase(id, "cross", mode) }, t("Other property crimes")));
+  const modes = tab === "same" ? [h("div", { class: "modes", role: "group", "aria-label": t("Ranking") },
+      [["blind", "Location-blind"], ["nearby", "Nearby first"]].map(([m, label]) =>
+        h("button", { "aria-pressed": String(mode === m), onclick: () => { location.hash = `#/case/${id}${m === "nearby" ? "/nearby" : ""}`; } }, t(label)))),
+    h("p", { class: "muted small mode-help" }, modeHelp(mode))] : null;
   const list = tab === "same" ? lists.same_type : lists.cross_type;
   const box = h("div", { class: "shortlist" });
   if (tab === "cross") box.append(h("div", { class: "notice caution" }, t("These compare only the offender's personal habits (time, group size, concealment, travel), because a different crime type has a different MO. They are weak leads — useful because keyword search on IPC sections can never connect different offences.")));
-  for (const item of list.items) box.append(candidateCard(c, item));
+  for (const item of list.items) box.append(candidateCard(c, item, tab === "same" ? mode : "blind"));
   render(
     h("a", { class: "back", href: "#/search" }, t("← Find another case")),
     caseNotices(c),
@@ -821,13 +855,14 @@ async function showCase(id, tab = "same") {
     h("div", { style: "height:18px" }),
     h("h2", {}, t("Cases that may be linked")),
     h("p", { class: "muted small" }, t("Ranked out of every {crime} FIR on record, in every district and state. Open any lead to compare the two FIRs side by side.", { crime: crime(c.crime_type).toLowerCase() })),
-    tab === "same" && lists.same_type.items.some(i => i.cross_state) ? h("p", { class: "notice caution small" },
+    modes,
+    tab === "same" && mode === "blind" && lists.same_type.items.some(i => i.cross_state) ? h("p", { class: "notice caution small" },
       t("Location is deliberately not used to rank, so matches from other states appear here. In testing they were rarely the same offender — matches in the same district were far more often real.")) : null,
     tabs, box);
 }
-function candidateCard(c, item) {
+function candidateCard(c, item, mode = "blind") {
   const shared = item.reasons.filter(r => r.kind === "shared").slice(0, 3);
-  return h("article", { class: "lead", ...openOnClick(() => { location.hash = `#/compare/${c.case_id}/${item.case_id}`; }) },
+  return h("article", { class: "lead", ...openOnClick(() => { location.hash = `#/compare/${c.case_id}/${item.case_id}${mode === "nearby" ? "/nearby" : ""}`; }) },
     h("div", { class: "lead-top" }, h("b", {}, `#${item.rank}`), tierBadge(item), h("span", { class: "crime" }, crime(item.crime_type)),
       item.cross_state ? h("span", { class: "xstate" }, t("Other state")) : null,
       item.ground_truth_link ? h("span", { class: "truth" }, t("✓ true link (synthetic truth)")) : null),
@@ -848,15 +883,17 @@ function firCard(c, title) {
 
 // ---------- compare ----------
 const VERDICT_TEXT = { confirmed: "linked", rejected: "not linked", investigate: "needs investigation" };
-async function showCompare(a, b) {
+async function showCompare(a, b, mode = "blind") {
   setNav("search");
   loading();
   let p, history;
   // The decision history is a convenience: if it cannot be read, the comparison still shows.
-  try { [p, history] = await Promise.all([api(`/pairs/${a}__${b}`), api(`/links/${a}__${b}/feedback`).catch(() => ({ items: [] }))]); } catch (e) { return fail(e); }
+  try { [p, history] = await Promise.all([api(`/pairs/${a}__${b}?rank=${mode}`), api(`/links/${a}__${b}/feedback`).catch(() => ({ items: [] }))]); } catch (e) { return fail(e); }
   const crimeType = p.same_type ? p.case_a.crime_type : "CROSS_TYPE";
   const timing = p.reasons.find(r => r.kind === "timing");
   const shared = p.reasons.filter(r => r.kind === "shared");
+  const placeRow = p.reasons.find(r => r.kind === "place");
+  const distinct = p.reasons.find(r => r.kind === "distinctiveness");
   const different = p.reasons.filter(r => r.kind === "different");
   const notRec = p.reasons.filter(r => r.kind === "not_recorded");
   const maxAbs = Math.max(1, ...p.reasons.map(r => Math.abs(r.bits)));
@@ -876,6 +913,16 @@ async function showCompare(a, b) {
         r.share < 0.01 ? t("Fewer than 1 in 100 {of} have this, so it is a telling detail.", v) :
         r.share < 0.2 ? t("Only {pct} of {of} have this, so it is a telling detail.", v) :
         r.share < 0.5 ? t("{pct} of {of} have this.", v) : t("Common — {pct} of {of} have this, so it counts for little.", v));
+    } else if (r.kind === "place") {
+      icon = h("div", { class: "ico place", "aria-hidden": "true" }, "⌖");
+      what = t({ same_station: "Same police station", same_district: "Same district, different police station",
+                 same_state: "Same state, different district", other_state: "Different states" }[r.where]);
+      why = t("Counted because you chose nearby first: in testing, linked FIRs were far more often close together than unrelated ones.");
+    } else if (r.kind === "distinctiveness") {
+      icon = h("div", { class: "ico distinct", "aria-hidden": "true" }, "≈");
+      what = t(r.bits < 0 ? "One of these FIRs resembles many others" : "Both FIRs are unusual");
+      why = t(r.bits < 0 ? "A FIR whose MO matches many FIRs makes any one match with it less telling."
+                         : "Neither FIR resembles many others, so a match between them is more telling.");
     } else {
       icon = h("div", { class: "ico different", "aria-hidden": "true" }, "✕");
       what = t("{a} vs {b}", { a: val(r.value), b: val(r.other_value) });
@@ -929,8 +976,10 @@ async function showCompare(a, b) {
     h("section", { class: "card" },
       h("h3", {}, t("Why these may be the same offender")),
       timing ? reasonRow(timing) : null,
+      placeRow ? reasonRow(placeRow) : null,
       shared.map(reasonRow),
       different.length ? [h("div", { style: "height:10px" }), h("h3", {}, t("Where they differ")), different.map(reasonRow)] : null,
+      distinct ? [h("div", { style: "height:10px" }), h("h3", {}, t("How distinctive these FIRs are")), reasonRow(distinct)] : null,
       notRec.length ? h("p", { class: "notrec" }, t("Not recorded in one of the FIRs, so not used: {list}.", { list: notRec.map(r => field(r.field).toLowerCase()).join(", ") })) : null),
     h("div", { class: "space" }),
     h("section", { class: "grid2" }, h("div", { class: "card stack" }, h("h3", {}, t("FIR A — narrative")), narrative(p.case_a)),
@@ -967,6 +1016,7 @@ function showAbout() {
     h("h2", {}, t("How well it works (synthetic test data)")),
     h("div", { class: "howto" },
       ms.same_type ? stat(`${Math.round(ms.same_type.hit_at_10 * 100)}%`, t("of cases have a true linked FIR in their top 10 — out of about 15,000 of the same crime type")) : null,
+      ms.nearby ? stat(`${Math.round(ms.nearby.hit_at_10 * 100)}%`, t("with \"nearby first\" — at the cost of most links across state borders")) : null,
       lq && lq.same_district && lq.same_district.rate ? stat(t("1 in {k}", { k: Math.round(1 / lq.same_district.rate) }), t("same-district leads in the inbox was a real serial link, found with nobody asking")) : null,
       lq && lq.same_state && lq.same_state.rate ? stat(t("1 in {k}", { k: Math.round(1 / lq.same_state.rate) }), t("leads across districts of one state was a real link")) : null,
       lq && lq.cross_state && lq.cross_state.n ? stat(`${num(lq.cross_state.true_all_offenders)} / ${num(lq.cross_state.n)}`, t("cross-state leads were real — so they are marked low confidence, not hidden")) : null,
@@ -978,7 +1028,7 @@ function showAbout() {
     h("div", { class: "card" }, h("h3", {}, t("Safeguards")),
       h("ul", {}, ["No caste, religion or community field exists anywhere in the system.",
         "Personal details are kept out of matching entirely; matching sees only how the crime was committed.",
-        "Location is never used to score a match — which is what lets links across states surface at all.",
+        "Location is not used unless an officer picks \"nearby first\"; the default ranking is location-blind, which is what lets links across states surface at all.",
         "Scores are never shown as probabilities, because a strong-looking number invites false certainty.",
         "Officer names on this demo are typed, not verified; a production deployment signs officers in."].map(x => h("li", {}, t(x))))));
 }
@@ -987,8 +1037,8 @@ function showAbout() {
 async function route() {
   const parts = location.hash.replace(/^#\/?/, "").split("/");
   try {
-    if (parts[0] === "case" && parts[1]) return showCase(parts[1]);
-    if (parts[0] === "compare" && parts[2]) return showCompare(parts[1], parts[2]);
+    if (parts[0] === "case" && parts[1]) return showCase(parts[1], "same", parts[2] === "nearby" ? "nearby" : "blind");
+    if (parts[0] === "compare" && parts[2]) return showCompare(parts[1], parts[2], parts[3] === "nearby" ? "nearby" : "blind");
     if (parts[0] === "series" && parts[1]) return showSeries(parts[1]);
     if (parts[0] === "series") return showSeriesList();
     if (parts[0] === "checks") return showChecks();

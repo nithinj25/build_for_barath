@@ -10,8 +10,9 @@ feeds it real requests locally. The same code both places.
                                                  same_district | same_state | cross_state
     GET  /search?q=&limit                        FIR number, police station, district or case id
     GET  /cases/{id}                             canonical record, no PII
-    GET  /cases/{id}/links?scope=same|all&limit  ranked shortlist
-    GET  /pairs/{id_a}__{id_b}                   side-by-side comparison with reasons
+    GET  /cases/{id}/links?scope=same|all&limit&rank=blind|nearby
+                                                 ranked shortlist; "nearby" adds place (officer's choice)
+    GET  /pairs/{id_a}__{id_b}?rank=blind|nearby side-by-side comparison with reasons
     GET  /series?state&district&crime_type&limit&offset   possible series, multi-district first
     GET  /series/{id}                            one series: its FIRs in date order and the links joining them
     GET  /checks?state&district&limit&offset     FIRs whose MO looks like another crime type
@@ -54,7 +55,7 @@ def _app() -> dict:
         demo = os.environ.get("DEMO_GROUND_TRUTH") == "1" and bundle["truth_groups"] is not None
         _APP["shortlister"] = Shortlister(bundle["weights"], bundle["case_ids"], bundle["crime_types"],
                                           bundle["codes"], bundle["meta"], bundle["cases"],
-                                          bundle["truth_groups"] if demo else None)
+                                          bundle["truth_groups"] if demo else None, hub_r=bundle["hub_r"])
         _APP["cases"] = bundle["cases"]
         _APP["leads"] = bundle["leads"] if demo else [
             {k: v for k, v in lead.items() if k != "ground_truth_link"} for lead in bundle["leads"]]
@@ -221,7 +222,7 @@ def handler(event: dict, context=None) -> dict:
             return _response(200, {"items": sorted(items, key=lambda f: f["timestamp"], reverse=True)})
 
         if method == "GET" and (m := re.fullmatch(f"/pairs/{CASE}__{CASE}", path)):
-            result = app["shortlister"].pair(m.group(1), m.group(2))
+            result = app["shortlister"].pair(m.group(1), m.group(2), query.get("rank", "blind"))
             result["case_a"] = _annotate(app, result["case_a"])
             result["case_b"] = _annotate(app, result["case_b"])
             app["store"].record_audit({"actor_id": _actor(event), "timestamp": _now(), "action": "compare",
@@ -237,9 +238,9 @@ def handler(event: dict, context=None) -> dict:
             limit = int(query.get("limit", "10"))
             if not 1 <= limit <= 50:
                 return _response(400, {"error": "limit must be 1-50"})
-            result = app["shortlister"].shortlist(m.group(1), scope, limit)
+            result = app["shortlister"].shortlist(m.group(1), scope, limit, query.get("rank", "blind"))
             app["store"].record_audit({"actor_id": _actor(event), "timestamp": _now(), "action": "shortlist",
-                                       "case_id": m.group(1), "scope": scope})
+                                       "case_id": m.group(1), "scope": scope, "rank": result["rank"]})
             return _response(200, result)
 
         if method == "POST" and (m := re.fullmatch(f"/links/{CASE}__{CASE}/feedback", path)):

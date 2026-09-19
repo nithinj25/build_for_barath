@@ -67,10 +67,27 @@ def test_reasons_lead_with_timing_and_say_how_common_a_shared_habit_is(call, cas
     for item in body["lists"]["same_type"]["items"]:
         kinds = [r["kind"] for r in item["reasons"]]
         assert kinds[0] == "timing"
-        assert kinds == sorted(kinds, key=["timing", "shared", "different", "not_recorded"].index)
+        assert kinds == sorted(kinds, key=["timing", "place", "shared", "different", "distinctiveness", "not_recorded"].index)
         for r in item["reasons"]:
             if r["kind"] == "shared" and r.get("share") is not None:
                 assert 0 < r["share"] <= 1
+
+
+def test_default_ranking_never_uses_place_and_nearby_says_it_does(call, case_id):
+    _, blind = call("GET", f"/cases/{case_id}/links", {"scope": "same", "limit": "10"})
+    _, near = call("GET", f"/cases/{case_id}/links", {"scope": "same", "limit": "10", "rank": "nearby"})
+    assert blind["rank"] == "blind" and near["rank"] == "nearby"
+    blind_items, near_items = blind["lists"]["same_type"]["items"], near["lists"]["same_type"]["items"]
+    assert all(r["kind"] != "place" for i in blind_items for r in i["reasons"])
+    assert any(r["kind"] == "place" for i in near_items for r in i["reasons"])
+    for items in (blind_items, near_items):                                  # reasons add up to the ranked score
+        assert all(a["bits"] >= b["bits"] for a, b in zip(items, items[1:]))
+        for i in items:
+            assert sum(r["bits"] for r in i["reasons"]) == pytest.approx(i["bits"], abs=0.05)
+    other = near_items[0]["case_id"]
+    _, pair = call("GET", f"/pairs/{case_id}__{other}", {"rank": "nearby"})
+    assert pair["bits"] == pytest.approx(near_items[0]["bits"], abs=0.01)
+    assert call("GET", f"/cases/{case_id}/links", {"rank": "everywhere"})[0] == 400
 
 
 def test_same_scope_returns_only_same_type(call, case_id):
