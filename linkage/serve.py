@@ -18,11 +18,11 @@ pools comparable in one inbox.
 """
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 
 import numpy as np
 
-from linkage import features, rank, schema
+from linkage import checks, features, rank, schema
 from linkage.score import Scorer
 
 SAME, CROSS = "same_type", "cross_type"
@@ -88,11 +88,11 @@ class Shortlister:
     def _pool_for(self, a: int, b: int) -> str:
         return str(self.types[a]) if self.types[a] == self.types[b] else features.CROSS
 
-    def _reasons(self, pool: str, a: int, b: int, bits_row: np.ndarray, terms: dict | None = None) -> list[dict]:
+    def _reasons(self, pool: str, case_a: dict, case_b: dict, bits_row: np.ndarray, terms: dict | None = None) -> list[dict]:
+        """Every field's contribution for one pair, as reasons that add up to the score.
+        Takes the two FIR records, so a newly entered FIR is explained the same way."""
         spec = self.scorer.pools[pool]
         contrib = self.scorer.contributions(pool, bits_row)
-        case_a = self.cases.get(self.case_ids[a], {})
-        case_b = self.cases.get(self.case_ids[b], {})
         out = []
         names = self.scorer.evidence_names(pool)
         if len(names) > len(spec["fields"]):
@@ -174,7 +174,8 @@ class Shortlister:
         items = []
         for rank_, j in enumerate(top, 1):
             c = int(cand[j])
-            reasons = self._reasons(pool, q, c, bits[j], {k: v[j] for k, v in terms.items()})
+            reasons = self._reasons(pool, self.cases.get(self.case_ids[q], {}), self.cases.get(self.case_ids[c], {}),
+                                    bits[j], {k: v[j] for k, v in terms.items()})
             items.append({"rank": rank_, **self._summary(c), **self._strength(pool, total[j], mode if pool != features.CROSS else "blind"),
                           "cross_state": self.cases.get(self.case_ids[c], {}).get("state_code")
                           != self.cases.get(self.case_ids[q], {}).get("state_code"),
@@ -201,9 +202,66 @@ class Shortlister:
                 "case_a": ca, "case_b": cb, **self._strength(pool, float(total[0]), mode),
                 "cross_state": ca.get("state_code") != cb.get("state_code"),
                 "days_apart": _days_apart(ca.get("occurred_from"), cb.get("occurred_from")),
-                "reasons": self._reasons(pool, a, b, bits[0], {k: v[0] for k, v in terms.items()}),
+                "reasons": self._reasons(pool, ca, cb, bits[0], {k: v[0] for k, v in terms.items()}),
                 "breakeven_bits": self.meta["pools"].get(pool, {}).get("breakeven_bits"),
                 **self._truth(a, b)}
+
+
+    # --- a FIR that is not in the corpus ----------------------------------------------
+
+    def match_record(self, record: dict, mode: str = "blind", limit: int = 10, exclude: str | None = None) -> dict:
+        """Shortlists for a newly entered FIR, scored exactly as a stored one:
+        against every FIR of its type (and, core habits only, of other types).
+        `exclude` hides one stored case — the demo re-enters a test FIR as new."""
+        if mode not in rank.MODES:
+            raise ValueError(f"rank must be one of {list(rank.MODES)}")
+        crime_type = record.get("crime_type")
+        if crime_type not in self.scorer.pools:
+            raise ValueError("unknown crime type")
+        days = _day_number(record.get("occurred_from"))
+        where = (record.get("state_code"), record.get("district"), record.get("police_station"))
+        keep = np.ones(len(self.case_ids), dtype=bool)
+        if exclude in self.index:
+            keep[self.index[exclude]] = False
+        lists, r_new = {}, 0.0
+        for key, pool, mask, m in ((SAME, crime_type, self.types == crime_type, mode),
+                                   (CROSS, features.CROSS, self.types != crime_type, "blind")):
+            if pool not in self.scorer.pools:
+                continue
+            spec = self.scorer.pools[pool]
+            q = {k: v[0] for k, v in self.scorer.encode(pool, {**{f: [record.get(f)] for f in spec["fields"]},
+                                                               features.DAYS: [days]}).items()}
+            cand = np.flatnonzero(mask & keep)
+            bits = self.scorer.field_bits(pool, q, {k: v[cand] for k, v in self.codes[pool].items()})
+            evidence = self.scorer.evidence(pool, bits)
+            if key == SAME:          # the new FIR's own typical top-10 evidence, as for stored FIRs
+                k = min(rank.HUB_K, len(evidence) - 1)
+                r_new = float(-np.mean(np.partition(-evidence, k)[:k]))
+            terms = self.ranker.terms_for(pool, r_new, where, cand, m)
+            total = evidence + terms["distinctiveness"] + terms["place"]
+            take = min(limit, len(cand))
+            top = np.argpartition(-total, take - 1)[:take]
+            top = top[np.lexsort((cand[top], -total[top]))]
+            items = []
+            for rank_, j in enumerate(top, 1):
+                c = int(cand[j])
+                case_c = self.cases.get(self.case_ids[c], {})
+                items.append({"rank": rank_, **self._summary(c), **self._strength(pool, total[j], m),
+                              "cross_state": case_c.get("state_code") != record.get("state_code"),
+                              "reasons": self._reasons(pool, record, case_c, bits[j], {n: v[j] for n, v in terms.items()}),
+                              **({"ground_truth_link": self.truth_groups.get(self.case_ids[c]) is not None and
+                                  self.truth_groups.get(self.case_ids[c]) == self.truth_groups.get(exclude)}
+                                 if self.truth_groups is not None and exclude else {})})
+            lists[key] = {"pool": pool, "pool_size": int(len(cand)), "items": items}
+        return {"rank": mode, "type_check": checks.type_check(self.scorer.pools, record, crime_type), "lists": lists}
+
+
+def _day_number(x: str | None) -> int:
+    """Days since 1970-01-01, as linkage.dataset.day_numbers; -1 if unknown."""
+    try:
+        return (datetime.fromisoformat(str(x)).date() - date(1970, 1, 1)).days
+    except (TypeError, ValueError):
+        return -1
 
 
 def _days_apart(x: str | None, y: str | None) -> int | None:

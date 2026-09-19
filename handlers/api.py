@@ -16,6 +16,10 @@ feeds it real requests locally. The same code both places.
     GET  /series?state&district&crime_type&limit&offset   possible series, multi-district first
     GET  /series/{id}                            one series: its FIRs in date order and the links joining them
     GET  /checks?state&district&limit&offset     FIRs whose MO looks like another crime type
+    GET  /form                                   fields and allowed values per crime type, stations per district
+    GET  /form/sample?crime_type                 a held-out test FIR to re-enter as if new (demo)
+    POST /match                                  {"record": {...}, "rank": "blind"|"nearby", "demo_source": id?}
+                                                 shortlists for a newly entered FIR, not stored in the corpus
     GET  /links/{id_a}__{id_b}/feedback          decisions already recorded on this pair
     POST /links/{id_a}__{id_b}/feedback          {"verdict": "confirmed"|"rejected"|"investigate", "note": "..."}
 
@@ -39,6 +43,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from handlers.store import load_bundle, open_store
+from linkage import schema
 from linkage.serve import Shortlister
 
 CASE = r"([0-9a-f]{16})"
@@ -64,6 +69,11 @@ def _app() -> dict:
         _APP["series_by_id"] = {s["id"]: s for s in bundle["series"]}
         _APP["series_of_case"] = {m["case_id"]: s["id"] for s in bundle["series"] for m in s["members"]}
         _APP["checks"] = bundle["checks"]
+        stations: dict = {}
+        for c in bundle["cases"].values():
+            stations.setdefault(c["district"], set()).add(c.get("police_station"))
+        _APP["stations"] = {d: sorted(s for s in v if s) for d, v in stations.items()}
+        _APP["sample_turn"] = 0
         _APP["check_of_case"] = {c["case_id"]: c for c in bundle["checks"]}
         meta = {**bundle["meta"], "ground_truth_marks": demo}
         if not demo:
@@ -116,6 +126,72 @@ def _body(event: dict) -> dict:
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
+
+
+def _form(app: dict) -> dict:
+    pools = app["shortlister"].scorer.pools
+    return {"crime_types": {ct: [{"field": f, "values": pools[ct]["vocab"][f], "tag": f in schema.TAG_FIELDS}
+                                 for f in pools[ct]["fields"]] for ct in schema.CRIME_TYPES if ct in pools},
+            "places": app["meta"]["places"], "stations": app["stations"]}
+
+
+def _new_record(app: dict, raw: dict) -> dict:
+    """A newly entered FIR, checked against the vocabulary; anything unknown is refused."""
+    pools = app["shortlister"].scorer.pools
+    crime_type = raw.get("crime_type")
+    if crime_type not in schema.CRIME_TYPES or crime_type not in pools:
+        raise ValueError("choose a crime type")
+    state, district = raw.get("state_code"), raw.get("district")
+    if district not in app["meta"]["places"].get(state, []):
+        raise ValueError("choose a known state and district")
+    try:
+        occurred = datetime.fromisoformat(str(raw.get("occurred_from"))).isoformat()
+    except ValueError:
+        raise ValueError("enter the date of the offence") from None
+    record = {"crime_type": crime_type, "state_code": state, "district": district, "occurred_from": occurred,
+              "police_station": re.sub(r"[^\w/-]", "", str(raw.get("police_station") or ""))[:24] or None,
+              "fir_no": re.sub(r"[^\w/ -]", "", str(raw.get("fir_no") or ""))[:40] or "New FIR"}
+    fields = raw.get("fields") or {}
+    for f in pools[crime_type]["fields"]:
+        v, vocab = fields.get(f), pools[crime_type]["vocab"][f]
+        if v in (None, "", []):
+            record[f] = None                                 # not recorded: costs and earns nothing
+        elif f in schema.TAG_FIELDS:
+            values = v if isinstance(v, list) else [v]
+            if values == ["none"]:
+                record[f] = ""                               # recorded as none (e.g. no tools): a known empty set
+                continue
+            if not all(x in vocab for x in values):
+                raise ValueError(f"unknown value for {f}")
+            record[f] = ";".join(sorted(values))
+        elif v in vocab:
+            record[f] = v
+        else:
+            raise ValueError(f"unknown value for {f}")
+    return record
+
+
+def _sample(app: dict, crime_type: str | None) -> dict:
+    """A held-out test FIR (from the demo set: it has a true partner) as a new entry."""
+    demo = [d for d in app["meta"]["demo_cases"] if not crime_type or d["crime_type"] == crime_type]
+    if not demo:
+        raise KeyError(crime_type)
+    pick = demo[app["sample_turn"] % len(demo)]
+    app["sample_turn"] += 1
+    case = app["cases"][pick["case_id"]]
+    pools = app["shortlister"].scorer.pools
+    fields = {}
+    for f in pools[case["crime_type"]]["fields"]:
+        v = case.get(f)
+        known = v is not None and v not in schema.TOKENS
+        if f in schema.TAG_FIELDS and known:
+            fields[f] = [x for x in v.split(";") if x] or ["none"]
+        else:
+            fields[f] = v if known else None
+    return {"source_case_id": case["case_id"], "source_fir_no": case["fir_no"],
+            "record": {"crime_type": case["crime_type"], "state_code": case["state_code"], "district": case["district"],
+                       "police_station": case.get("police_station"), "occurred_from": (case.get("occurred_from") or "")[:10],
+                       "fields": fields}}
 
 
 def _annotate(app: dict, case: dict) -> dict:
@@ -208,6 +284,24 @@ def handler(event: dict, context=None) -> dict:
             app["store"].record_audit({"actor_id": _actor(event), "timestamp": _now(), "action": "series",
                                        "series_id": m.group(1)})
             return _response(200, series)
+
+        if method == "GET" and path == "/form":
+            return _response(200, _form(app))
+
+        if method == "GET" and path == "/form/sample":
+            return _response(200, _sample(app, query.get("crime_type")))
+
+        if method == "POST" and path == "/match":
+            body = _body(event)
+            record = _new_record(app, body.get("record") or {})
+            source = body.get("demo_source")
+            if source is not None and source not in app["cases"]:
+                return _response(404, {"error": "unknown case"})
+            result = app["shortlister"].match_record(record, body.get("rank", "blind"), 10, exclude=source)
+            app["store"].record_audit({"actor_id": _actor(event), "timestamp": _now(), "action": "match_new",
+                                       "crime_type": record["crime_type"], "district": record["district"],
+                                       "demo_source": source or ""})
+            return _response(200, {"record": record, **result})
 
         if method == "GET" and path == "/checks":
             rows = _where(app["checks"], query, lambda c: (c["state_code"],), lambda c: (c["district"],))

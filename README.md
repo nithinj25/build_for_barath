@@ -100,8 +100,11 @@ python -m linkage.bundle --out data/serve --with-ground-truth   # package the co
 python scripts/serve_local.py --demo                            # http://127.0.0.1:8000
 ```
 
-The analyst view (English / हिंदी): a leads inbox split by where the two FIRs
-are, each lane with its tested record; possible series on a map and timeline;
+The analyst view (English / हिंदी): a landing page; **check a new FIR** —
+enter its MO and it is scored against every FIR of its type exactly as a
+stored FIR would be (tested: a stored FIR entered as new gets the same top
+matches); a leads inbox split by where the two FIRs are, each lane with its
+tested record; possible series on a map and timeline;
 crime-type checks; search by FIR number, police station or district; a
 case's ranked shortlist with a strength tier ("about 1 in 40,000 unrelated
 cases look this alike") and the shared habits that drive it; and a

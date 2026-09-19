@@ -179,6 +179,49 @@ def test_feedback_history_records_the_typed_officer_name(call, case_id):
     assert history["items"][0]["verdict"] == "investigate"
 
 
+def test_a_new_fir_is_matched_like_a_stored_one(call):
+    _, form = call("GET", "/form")
+    assert set(form["crime_types"]) and form["places"] and form["stations"]
+    _, sample = call("GET", "/form/sample", {"crime_type": "VEHICLE_THEFT"})
+    source = sample["source_case_id"]
+    status, res = call("POST", "/match", body={"record": sample["record"], "demo_source": source})
+    assert status == 200 and res["record"]["crime_type"] == "VEHICLE_THEFT"
+    same = res["lists"]["same_type"]
+    assert source not in {i["case_id"] for i in same["items"]}                # the re-entered original is hidden
+    for items in (same["items"], res["lists"]["cross_type"]["items"]):
+        assert all(a["bits"] >= b["bits"] for a, b in zip(items, items[1:]))
+        for i in items:
+            assert sum(r["bits"] for r in i["reasons"]) == pytest.approx(i["bits"], abs=0.05)
+    assert "probab" not in json.dumps(res).lower()
+    # the stored FIR entered as new scores its candidates exactly as the stored FIR does
+    _, stored = call("GET", f"/cases/{source}/links", {"scope": "same", "limit": "10"})
+    assert [i["case_id"] for i in same["items"]][:3] == [i["case_id"] for i in stored["lists"]["same_type"]["items"]][:3]
+
+
+def test_every_demo_sample_is_accepted_and_keeps_recorded_nones(call):
+    demo = call("GET", "/meta")[1]["demo_cases"]
+    for _ in demo:
+        _, sample = call("GET", "/form/sample")
+        status, res = call("POST", "/match", body={"record": sample["record"], "demo_source": sample["source_case_id"]})
+        assert status == 200, (sample["source_fir_no"], res)
+        _, stored = call("GET", f"/cases/{sample['source_case_id']}")
+        for f in ("tools", "property_taken"):                              # "none recorded" survives the round trip
+            if stored.get(f) == "":
+                assert res["record"][f] == ""
+
+
+@pytest.mark.parametrize("change, error", [
+    ({"crime_type": "ARSON"}, "crime type"),
+    ({"district": "Atlantis"}, "district"),
+    ({"occurred_from": "yesterday"}, "date"),
+    ({"fields": {"ignition_method": "telepathy"}}, "unknown value"),
+])
+def test_a_new_fir_with_unknown_values_is_refused(call, change, error):
+    _, sample = call("GET", "/form/sample", {"crime_type": "VEHICLE_THEFT"})
+    status, body = call("POST", "/match", body={"record": {**sample["record"], **change}})
+    assert status == 400 and error in body["error"]
+
+
 @pytest.mark.parametrize("method, path, query, expected", [
     ("GET", "/cases/0000000000000000", None, 404),
     ("GET", "/cases/not-a-case-id", None, 404),

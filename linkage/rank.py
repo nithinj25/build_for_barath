@@ -71,14 +71,21 @@ class Ranker:
 
     def terms(self, pool: str, q: int, cand: np.ndarray, mode: str = "blind") -> dict:
         """{'distinctiveness': array, 'place': array} in bits, zeros where not used."""
+        r_q = self.r[q] if self.r is not None else 0.0
+        where = tuple(p[q] for p in self.places) if self.places is not None else None
+        return self.terms_for(pool, r_q, where, cand, mode)
+
+    def terms_for(self, pool: str, r_q: float, where_q: tuple | None, cand: np.ndarray, mode: str = "blind") -> dict:
+        """The same terms for a query given by value — a newly entered FIR that is
+        not in the corpus: its r and its (state, district, police station)."""
         n = np.shape(cand)
         hub = np.zeros(n)
         if self.hub_beta and pool in self.mean_r:
-            hub = -self.hub_beta * ((self.r[q] + self.r[cand]) / 2 - self.mean_r[pool])
+            hub = -self.hub_beta * ((r_q + self.r[cand]) / 2 - self.mean_r[pool])
         place = np.zeros(n)
-        if mode == "nearby" and self.places is not None and self.geo_beta:
+        if mode == "nearby" and self.places is not None and self.geo_beta and where_q is not None:
             st, di, ps = self.places
-            place = self.geo_beta * self.geo_bits[geo_bins(st[q], di[q], ps[q], st[cand], di[cand], ps[cand])]
+            place = self.geo_beta * self.geo_bits[geo_bins(*where_q, st[cand], di[cand], ps[cand])]
         return {"distinctiveness": hub, "place": place}
 
     def pair_terms(self, pool: str, a: np.ndarray, b: np.ndarray, mode: str = "blind") -> dict:

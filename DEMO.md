@@ -14,9 +14,25 @@ data" once, early, and mean it.
 > different police station." An officer can search once they suspect a link.
 > This finds the links nobody suspected yet.
 
-## 0:20 — Leads inbox (40 s)
+## 0:20 — Check a new FIR (35 s)
 
-Open the page. It lands on **Leads → Same district**.
+The landing page opens with the lens sweeping the evidence board. Click
+**Check a new FIR** → **Fill with a test FIR** → **Find matching FIRs**.
+
+- *This re-registers a held-out test FIR as if it were being filed now; the
+  original is hidden from the results.* The FIR is compared with every FIR of
+  its type — 3,000 to 15,000 of them — in under a second.
+- Open **Why this match** on the first result: time gap, each shared habit
+  and how common it is, what differs.
+- Flip **Nearby first** and watch the list re-rank. Green marks are the test
+  FIR's real partners (synthetic truth); they won't always be there — the
+  true partner reaches the top 10 for 26% of FIRs (46% with nearby first),
+  and saying so is part of the demo. Click **Fill with a test FIR** again for
+  another one.
+
+## 0:55 — Leads inbox (30 s)
+
+**Leads → Same district**.
 
 - Point at the blue line: *about 1 in 4 leads like these was a real serial
   link in testing — ~6,200× better than picking case pairs at random.*
@@ -27,7 +43,7 @@ Open the page. It lands on **Leads → Same district**.
   matches — no keyword search can reach them — but in testing they were
   almost never real, and the screen says so.*
 
-## 1:00 — Why the system thinks so (25 s)
+## 1:25 — Why the system thinks so (20 s)
 
 Click lead #1 (FIRs `b9612100ef5bc0ff` ↔ `5f14011fad04a685`).
 
@@ -39,7 +55,7 @@ Click lead #1 (FIRs `b9612100ef5bc0ff` ↔ `5f14011fad04a685`).
 - Type an officer name, click **Needs investigation**, show it land in the
   decision history. **Print report**.
 
-## 1:25 — Location-blind vs nearby first (15 s)
+## 1:45 — Location-blind vs nearby first (10 s)
 
 Open any case (**Find a case** → an example), flip **Nearby first** and read
 the line under the switch: *it nearly doubles how often the true partner is
@@ -47,7 +63,7 @@ in the top 10 (26% → 46%) but finds a cross-state partner for 3 cases instead
 of 17. The officer chooses; the default stays location-blind, because that
 is the point of this system.*
 
-## 1:40 — Possible series (35 s)
+## 1:55 — Possible series (25 s)
 
 **Series** → open the chain-snatching series across **Kolhapur, Nashik and Thane**
 (id `2ca66ef385`, or filter State = Maharashtra, Crime type = Chain
@@ -61,7 +77,7 @@ snatching).
 (We picked this series because it is a clean example. Saying so is part of
 the demo.)
 
-## 2:15 — Crime-type checks (20 s)
+## 2:20 — Crime-type checks (15 s)
 
 **Checks** → first card (`MP-IND-02/0059/2021`): recorded as house burglary,
 but warehouse premises, shutter entry, closed for the night.

@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 APP, LAYER = ROOT / "build/app", ROOT / "build/layer"
 MODULES = ["handlers/__init__.py", "handlers/api.py", "handlers/store.py",
            "linkage/__init__.py", "linkage/schema.py", "linkage/features.py",
-           "linkage/score.py", "linkage/serve.py", "linkage/rank.py", "ui/index.html"]
+           "linkage/score.py", "linkage/serve.py", "linkage/rank.py", "linkage/checks.py", "ui/index.html"]
 BUNDLE_FILES = ["weights.json", "index.json", "codes.npz", "cases.json.gz", "meta.json", "truth_groups.json", "leads.json.gz", "series.json.gz", "checks.json.gz", "extras.npz"]
 NUMPY = "numpy==1.26.4"            # the version every local test and check ran against
 LAMBDA_UNZIPPED_LIMIT_MB = 250

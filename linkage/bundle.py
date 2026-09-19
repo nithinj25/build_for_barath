@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from linkage import dataset, features, rank, schema
+from linkage import checks, dataset, features, rank, schema
 from linkage.score import Scorer
 
 DISPLAY = ("case_id", "state_code", "district", "police_station", "fir_no", "crime_type",
@@ -125,7 +125,8 @@ def top_matches(short, per_case: int = LEADS_PER_CASE) -> dict:
 def _shared_reasons(short, pool: str, a: int, b: int, n: int = 3) -> list[dict]:
     codes = short.codes[pool]
     row = short.scorer.field_bits(pool, {k: v[a] for k, v in codes.items()}, {k: v[b] for k, v in codes.items()})
-    shared = [r for r in short._reasons(pool, a, b, row) if r["kind"] == "shared"][:n]
+    ca, cb = short.cases.get(short.case_ids[a], {}), short.cases.get(short.case_ids[b], {})
+    shared = [r for r in short._reasons(pool, ca, cb, row) if r["kind"] == "shared"][:n]
     return [{"field": r["field"], "value": r.get("shared_value"), "share": r.get("share")} for r in shared]
 
 
@@ -242,62 +243,17 @@ def _common_habits(short, pool: str, members: list[int]) -> list[dict]:
 
 def type_checks(short) -> list[dict]:
     """FIRs whose MO looks like another crime type in the same family — e.g. a
-    'house burglary' with shutter entry into a shop closed for the holidays.
-    Sum over the fields both pools score of log2(frequency of the recorded
-    value under the other type / under the recorded type). Uses no labels."""
-    cases, pools = short.cases, short.scorer.pools
+    'house burglary' with shutter entry into a shop closed for the holidays
+    (linkage.checks). Uses no labels."""
     out = []
-    for own in schema.CRIME_TYPES:
-        for other in schema.CRIME_TYPES:
-            if own == other or schema.FAMILY[own] != schema.FAMILY[other] or own not in pools or other not in pools:
-                continue
-            po, pt = pools[own], pools[other]
-            fields = [f for f in po["fields"] if f in pt["fields"] and f not in schema.TAG_FIELDS]
-            for cid in (short.case_ids[i] for i in np.flatnonzero(short.types == own)):
-                c = cases[cid]
-                terms = []
-                for f in fields:
-                    v = c.get(f)
-                    if v is None or v in schema.TOKENS or v not in po["vocab"][f] or v not in pt["vocab"][f]:
-                        continue
-                    uo = max(po["u"][f][po["vocab"][f].index(v)], 1e-4)
-                    ut = max(pt["u"][f][pt["vocab"][f].index(v)], 1e-4)
-                    terms.append((float(np.log2(ut / uo)), f, v, uo, ut))
-                bits = sum(t[0] for t in terms)
-                if bits >= TYPE_CHECK_MIN_BITS:
-                    terms.sort(reverse=True)
-                    out.append({"case_id": cid, "recorded": own, "likely": other, "bits": round(bits, 2),
-                                "state_code": c["state_code"], "district": c["district"], "fir_no": c.get("fir_no"),
-                                "police_station": c.get("police_station"), "occurred_from": c.get("occurred_from"),
-                                "reasons": [{"field": f, "value": v, "share_recorded": round(uo, 3),
-                                             "share_likely": round(ut, 3)} for b, f, v, uo, ut in terms[:3] if b > 0]})
+    for i, cid in enumerate(short.case_ids):
+        c = short.cases[cid]
+        flag = checks.type_check(short.scorer.pools, c, str(short.types[i]), TYPE_CHECK_MIN_BITS)
+        if flag:
+            out.append({"case_id": cid, **flag, "state_code": c["state_code"], "district": c["district"],
+                        "fir_no": c.get("fir_no"), "police_station": c.get("police_station"),
+                        "occurred_from": c.get("occurred_from")})
     return sorted(out, key=lambda r: -r["bits"])
-
-
-def series_quality(series: list[dict], truth: Path, seed: int, normalised: Path) -> dict:
-    """Share of FIR pairs inside a series that are one offender (estimated as in
-    _precision), and how many series are wholly one offender."""
-    df = dataset.load(normalised, truth, oracle_extraction=False)
-    offender = dict(zip(df["case_id"], df["offender_id"]))
-    split = dict(zip(df["offender_id"], dataset.split_of(df["offender_id"], seed)))
-    pairs = []
-    for s in series:
-        ids = [m["case_id"] for m in s["members"]]
-        pairs += [(ids[i], ids[j]) for i in range(len(ids)) for j in range(i + 1, len(ids))]
-    whole = sum(len({offender[m["case_id"]] for m in s["members"]}) == 1 for s in series)
-    return {"series": len(series), "pairs": _precision(pairs, offender, split, _held_out_share(df, seed)),
-            "one_offender_series_all_offenders": whole}
-
-
-def type_check_quality(flags: list[dict], truth: Path) -> dict:
-    """Precision and recall of the misfiling check against the generator's true crime type."""
-    t = pd.read_parquet(truth, columns=["case_id", "crime_type", "rec_crime_type", "ingested"])
-    t = t[t["ingested"]]
-    misfiled = set(t.loc[t["crime_type"] != t["rec_crime_type"], "case_id"])
-    hits = sum(f["case_id"] in misfiled for f in flags)
-    return {"flagged": len(flags), "truly_misfiled": hits, "misfiled_total": len(misfiled),
-            "precision": round(hits / len(flags), 3) if flags else None,
-            "recall": round(hits / len(misfiled), 3) if misfiled else None}
 
 
 def _held_out_share(df: pd.DataFrame, seed: int) -> float:

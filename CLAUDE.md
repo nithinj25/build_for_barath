@@ -67,6 +67,7 @@ linkage/        pure functions, no AWS imports
   score.py      inference from exported coefficients (numpy only)
   rank.py       default ranking (distinctiveness) and opt-in "nearby first" (place); numpy only
   tune.py       local: picks the ranking strengths on CALIB offenders
+  checks.py     crime-type check for one FIR (misfiled burglaries); bundle and API share it
   dataset.py    local: normalised records + labels, offender split, pairs
   generate/     synthetic corpus with ground-truth offender IDs
     sample.py     truth: style tilt → θ → values, series, geography, clocks

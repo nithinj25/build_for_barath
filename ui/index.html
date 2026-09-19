@@ -180,6 +180,41 @@
   table.firs td { padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
   table.firs td.num { font-weight: 700; color: var(--accent); }
 
+
+  /* landing */
+  .hero { background: radial-gradient(120% 140% at 85% 20%, #1d3b66 0%, #0f2240 45%, #0a1628 100%); color: #eef3fb;
+          border-radius: 16px; padding: 40px 40px 36px; display: grid; grid-template-columns: 1.05fr 1fr; gap: 28px; align-items: center; overflow: hidden; }
+  @media (max-width: 900px) { .hero { grid-template-columns: 1fr; padding: 28px 20px; } }
+  .eyebrow { text-transform: uppercase; letter-spacing: .12em; font-size: 12px; font-weight: 600; color: #d6b36a; margin: 0 0 12px; }
+  :lang(hi) .eyebrow { text-transform: none; letter-spacing: .02em; font-size: 13px; }
+  .hero h1 { font-size: 40px; line-height: 1.12; margin: 0 0 14px; letter-spacing: -.01em; }
+  .hero h1 span { display: block; color: #9cc3f5; }
+  @media (max-width: 600px) { .hero h1 { font-size: 30px; } }
+  .hero-lede { color: #c9d6ea; font-size: 16.5px; max-width: 520px; margin: 0 0 22px; }
+  .hero-cta { display: flex; gap: 10px; flex-wrap: wrap; }
+  .cta { display: inline-block; text-decoration: none; font-weight: 600; border-radius: 10px; padding: 11px 18px; }
+  .cta.primary { background: #d6b36a; color: #1a1406; }
+  .cta.ghost { color: #eef3fb; border: 1px solid rgba(238,243,251,.35); }
+  .cta:hover { filter: brightness(1.08); }
+  .hero-note { color: #9fb2cc; font-size: 13px; margin: 18px 0 0; }
+  .board svg { width: 100%; height: auto; display: block; }
+  .strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 18px; }
+  @media (max-width: 900px) { .strip { grid-template-columns: repeat(2, 1fr); } }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 800px) { .steps { grid-template-columns: 1fr; } }
+  .step-n { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 700;
+            background: var(--accent-soft); color: var(--accent); margin-bottom: 8px; }
+  /* new FIR */
+  .formgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px 16px; }
+  .formgrid label { display: grid; gap: 4px; font-size: 13px; color: var(--ink-2); font-weight: 500; align-content: start; }
+  .formgrid select, .formgrid input { min-width: 0; width: 100%; }
+  .tagset { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tagset label { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; background: var(--surface-2);
+                  border: 1px solid var(--line); border-radius: 99px; padding: 4px 10px; color: var(--ink); }
+  details.why { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 8px; }
+  details.why summary { cursor: pointer; color: var(--accent); font-weight: 500; }
+  .actions-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+  @media (prefers-reduced-motion: reduce) { .cta { transition: none; } }
   @media print {
     .bar, nav, .actions, .back, .noprint, .pager { display: none !important; }
     body { background: #fff; color: #000; }
@@ -369,7 +404,43 @@ const HI = {
   "strongly weakens": "काफ़ी कमज़ोर करता है", "weakens": "कमज़ोर करता है", "slightly weakens": "थोड़ा कमज़ोर करता है",
   "Where they differ": "कहाँ अलग हैं", "Not recorded in one of the FIRs, so not used: {list}.": "किसी एक एफआईआर में दर्ज नहीं, इसलिए उपयोग नहीं हुआ: {list}।",
   "FIR A — narrative": "एफआईआर A — विवरण", "FIR B — narrative": "एफआईआर B — विवरण", "No narrative.": "कोई विवरण नहीं।",
-  ". ": "। ", "Ranking": "क्रम", "Location-blind": "स्थान-निरपेक्ष", "Nearby first": "पास वाले पहले",
+  ". ": "। ",
+  "Home": "मुख्य पृष्ठ", "New FIR": "नई एफआईआर",
+  "For crime branches and district police": "अपराध शाखाओं और ज़िला पुलिस के लिए",
+  "Every FIR is a clue.": "हर एफआईआर एक सुराग है।", "Some are the same offender.": "कुछ एक ही अपराधी की होती हैं।",
+  "The system reads the modus operandi of every property-crime FIR across districts and states and puts the matches worth a look in front of your team — with every reason written out.":
+    "सिस्टम ज़िलों और राज्यों की हर संपत्ति-अपराध एफआईआर की कार्यप्रणाली पढ़ता है और देखने लायक मिलान आपकी टीम के सामने रखता है — हर कारण लिखकर।",
+  "Check a new FIR": "नई एफआईआर जाँचें", "Review leads": "सुराग देखें",
+  "Links cases, never people. No caste, religion or community data. An officer decides.":
+    "मामलों को जोड़ता है, लोगों को कभी नहीं। कोई जाति, धर्म या समुदाय डेटा नहीं। निर्णय अधिकारी का।",
+  "FIRs compared, every one against every other": "एफआईआर की तुलना, हर एक की हर दूसरी से",
+  "same-district leads was a real serial link in testing": "एक ही ज़िले के सुरागों में से परीक्षण में वास्तविक शृंखलाबद्ध संबंध निकला",
+  "of cases had their true partner in the top 10 with \"nearby first\"": "मामलों में \"पास वाले पहले\" से असली साथी शीर्ष 10 में आया",
+  "FIRs flagged as probably filed under the wrong crime type": "एफआईआर संभवतः ग़लत अपराध-प्रकार में दर्ज बताई गईं",
+  "How it works, in three steps": "तीन चरणों में यह कैसे काम करता है",
+  "Enter or open an FIR": "एफआईआर दर्ज करें या खोलें",
+  "Type in a new FIR's modus operandi, or open any FIR on record.": "नई एफआईआर की कार्यप्रणाली लिखें, या रिकॉर्ड की कोई भी एफआईआर खोलें।",
+  "Checked against every FIR": "हर एफआईआर से तुलना",
+  "Its MO and timing are compared with every FIR of the same kind in 20 districts across 4 states. Nobody has to suspect a link first.":
+    "इसकी कार्यप्रणाली और समय की तुलना 4 राज्यों के 20 ज़िलों की उसी प्रकार की हर एफआईआर से होती है। पहले किसी को शक होना ज़रूरी नहीं।",
+  "Reasons you can act on": "कारण, जिन पर कार्रवाई हो सके",
+  "Each match says how rare it is and which details agree and differ. An officer marks it linked, not linked or needs investigation.":
+    "हर मिलान बताता है कि वह कितना दुर्लभ है और कौन से विवरण मिलते और अलग हैं। अधिकारी उसे जुड़े, नहीं जुड़े या जाँच ज़रूरी चिह्नित करते हैं।",
+  "All figures are measured on synthetic FIRs built to resemble four states' records. They show the method works; real records must be measured again.":
+    "सभी आँकड़े चार राज्यों के रिकॉर्ड जैसे बनाए गए कृत्रिम एफआईआर पर मापे गए हैं। ये दिखाते हैं कि विधि काम करती है; असली रिकॉर्ड पर फिर से मापना होगा।",
+  "Enter what the FIR records. The system compares it with every FIR of the same kind and lists the ones that look like the same offender's work. Nothing is saved to the records in this demo.":
+    "एफआईआर में जो दर्ज है वह भरें। सिस्टम इसकी तुलना उसी प्रकार की हर एफआईआर से करता है और वे दिखाता है जो उसी अपराधी का काम लगती हैं। इस डेमो में रिकॉर्ड में कुछ सहेजा नहीं जाता।",
+  "The offence": "अपराध", "FIR number (optional)": "एफआईआर संख्या (वैकल्पिक)", "Date of offence": "अपराध की तिथि",
+  "How it was done": "कैसे किया गया", "Leave anything the FIR does not say as \"not recorded\" — it then neither helps nor hurts a match.":
+    "जो एफआईआर में नहीं लिखा उसे \"दर्ज नहीं\" रहने दें — तब वह मिलान में न मदद करता है, न नुकसान।",
+  "Not recorded": "दर्ज नहीं", "Choose…": "चुनें…", "Find matching FIRs": "मिलती एफआईआर खोजें", "Fill with a test FIR": "परीक्षण एफआईआर से भरें",
+  "Clear": "साफ़ करें", "Searching every FIR…": "हर एफआईआर में खोज जारी…",
+  "Filled from test FIR {fir}. It is hidden from the results, as if it were being registered now.": "परीक्षण एफआईआर {fir} से भरा गया। इसे परिणामों से छिपाया गया है, मानो यह अभी दर्ज हो रही हो।",
+  " Its real linked FIRs are marked in green when they appear.": " इसकी असली जुड़ी एफआईआर दिखने पर हरे रंग में चिह्नित होती हैं।",
+  "Compared with {n} {crime} FIRs.": "{n} \"{crime}\" एफआईआर से तुलना की गई।",
+  "Why this match": "यह मिलान क्यों", "Open this FIR": "यह एफआईआर खोलें",
+  "This FIR": "यह एफआईआर", "Matches": "मिलान",
+ "Ranking": "क्रम", "Location-blind": "स्थान-निरपेक्ष", "Nearby first": "पास वाले पहले",
   "Nearby first: FIRs from the same station, district and state move up. In testing a true linked FIR was in the top 10 for {a} of cases (location-blind: {b}) — but a partner in another state was found for only {c} of {n} cases (location-blind: {d}).":
     "पास वाले पहले: एक ही थाने, ज़िले और राज्य की एफआईआर ऊपर आती हैं। परीक्षण में {a} मामलों में असली जुड़ी एफआईआर शीर्ष 10 में आई (स्थान-निरपेक्ष: {b}) — पर दूसरे राज्य का साथी {n} में से केवल {c} मामलों में मिला (स्थान-निरपेक्ष: {d})।",
   "Location-blind: where the FIRs were registered plays no part, so matches across districts and states surface. In testing a true linked FIR was in the top 10 for {a} of cases.":
@@ -488,7 +559,8 @@ async function api(path, opts = {}) {
   return body;
 }
 const view = document.getElementById("view");
-function render(...nodes) { view.replaceChildren(...nodes.flat(Infinity).filter(n => n != null && n !== false)); window.scrollTo(0, 0); }
+function fill(box, ...nodes) { box.replaceChildren(...nodes.flat(Infinity).filter(n => n != null && n !== false)); }
+function render(...nodes) { fill(view, ...nodes); window.scrollTo(0, 0); }
 function loading(text = "Loading…") { render(h("div", { class: "empty", text: t(text) })); }
 function fail(e) { render(h("div", { class: "empty", text: t("Something went wrong: {msg}", { msg: e.message }) })); }
 function openOnClick(go) { return { tabindex: "0", onclick: go, onkeydown: e => { if (e.key === "Enter") go(); } }; }
@@ -497,9 +569,9 @@ function openOnClick(go) { return { tabindex: "0", onclick: go, onkeydown: e => 
 let current = "leads";
 function renderBar() {
   document.documentElement.lang = LANG;
-  const items = [["leads", "Leads"], ["series", "Series"], ["search", "Find a case"], ["checks", "Checks"], ["about", "How it works"]];
+  const items = [["leads", "Leads"], ["series", "Series"], ["search", "Find a case"], ["new", "New FIR"], ["checks", "Checks"], ["about", "How it works"]];
   document.getElementById("bar").replaceChildren(
-    h("div", { class: "logo" },
+    h("a", { class: "logo", href: "#/home", style: "color:inherit;text-decoration:none", "aria-label": t("Home") },
       svgEl('<div class="mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="2"><circle cx="4" cy="9" r="2.5"/><circle cx="14" cy="4" r="2.5"/><circle cx="14" cy="14" r="2.5"/><path d="M6.3 8l5.4-3M6.3 10l5.4 3"/></svg></div>'),
       h("div", {}, t("Cross-Jurisdiction Linkage"), h("small", {}, t("Property-crime MO analysis for investigators")))),
     h("span", { class: "pill-synth", title: t("All cases in this demo are synthetic") }, t("Synthetic demo data")),
@@ -881,6 +953,263 @@ function firCard(c, title) {
     c.needs_extraction ? h("p", { class: "notice caution small" }, t("This state records MO only as free text; structured details are pending extraction.")) : null);
 }
 
+// ---------- reasons ----------
+function reasonRowFor(r, crimeType, maxAbs) {
+  let icon, what, why;
+  if (r.kind === "timing") {
+    icon = h("div", { class: "ico timing", "aria-hidden": "true" }, "⏱");
+    what = t("{gap} apart", { gap: gapText(r.days) });
+    why = t(r.bits > 0.5 ? "Serial offences usually come in bursts — a short gap supports a link."
+          : r.bits < -0.5 ? "A long gap makes the same offender less likely." : "The gap neither supports nor weakens a link.");
+  } else if (r.kind === "shared") {
+    icon = h("div", { class: "ico shared", "aria-hidden": "true" }, "✓");
+    what = val(r.shared_value ?? r.value);
+    const v = { pct: r.share == null ? "" : pct(r.share), of: cases(crimeType) };
+    why = t("{field} — same in both FIRs. ", { field: field(r.field) }) + (r.share == null ? "" :
+      r.share < 0.01 ? t("Fewer than 1 in 100 {of} have this, so it is a telling detail.", v) :
+      r.share < 0.2 ? t("Only {pct} of {of} have this, so it is a telling detail.", v) :
+      r.share < 0.5 ? t("{pct} of {of} have this.", v) : t("Common — {pct} of {of} have this, so it counts for little.", v));
+  } else if (r.kind === "place") {
+    icon = h("div", { class: "ico place", "aria-hidden": "true" }, "⌖");
+    what = t({ same_station: "Same police station", same_district: "Same district, different police station",
+               same_state: "Same state, different district", other_state: "Different states" }[r.where]);
+    why = t("Counted because you chose nearby first: in testing, linked FIRs were far more often close together than unrelated ones.");
+  } else if (r.kind === "distinctiveness") {
+    icon = h("div", { class: "ico distinct", "aria-hidden": "true" }, "≈");
+    what = t(r.bits < 0 ? "One of these FIRs resembles many others" : "Both FIRs are unusual");
+    why = t(r.bits < 0 ? "A FIR whose MO matches many FIRs makes any one match with it less telling."
+                       : "Neither FIR resembles many others, so a match between them is more telling.");
+  } else {
+    icon = h("div", { class: "ico different", "aria-hidden": "true" }, "✕");
+    what = t("{a} vs {b}", { a: val(r.value), b: val(r.other_value) });
+    why = t("{field} — different in the two FIRs.", { field: field(r.field) });
+  }
+  const w = Math.abs(r.bits) / maxAbs * 50;
+  const fill = r.bits >= 0 ? `left:50%;width:${w}%;background:var(--support)` : `left:${50 - w}%;width:${w}%;background:var(--oppose)`;
+  return h("div", { class: "reason" }, icon, h("div", {}, h("div", { class: "what" }, what), h("div", { class: "why" }, why)),
+    h("div", { class: "weight", title: `${r.bits >= 0 ? "+" : ""}${r.bits.toFixed(2)} bits` },
+      h("div", { class: "track" }, h("div", { class: "fill", style: fill })), strengthWord(r.bits)));
+}
+
+
+// ---------- home ----------
+function boardSvg() {
+  // Illustration: case files on an evidence board; the lens lights up the matching MO.
+  const cards = [
+    { x: 30, y: 34, r: -4, fir: "MH-PUN-03/0112", d: "Pune", chip: "roof", link: true },
+    { x: 318, y: 26, r: 3, fir: "KA-BEL-04/0054", d: "Belagavi", chip: "lock_broken" },
+    { x: 176, y: 150, r: -2, fir: "MH-NAS-02/0031", d: "Nashik", chip: "roof", link: true },
+    { x: 372, y: 232, r: 4, fir: "MP-IND-05/0013", d: "Indore", chip: "cctv_disabled" },
+    { x: 44, y: 262, r: 2, fir: "MH-THA-06/0020", d: "Thane", chip: "roof", link: true }];
+  const W = 150, H = 96;
+  const centre = c => [c.x + W / 2, c.y + H / 2];
+  const chipAt = c => [c.x + 16, c.y + 64];
+  const card = (c, hi) => {
+    const lab = esc(val(c.chip)), cw = Math.max(62, lab.length * 6.6 + 18);
+    return `<g transform="rotate(${c.r} ${c.x + W / 2} ${c.y + H / 2})">
+      <rect x="${c.x}" y="${c.y}" width="${W}" height="${H}" rx="6" fill="${hi ? "#fbf7ec" : "#e9e2d0"}" stroke="${hi ? "#d6b36a" : "#b9ae93"}" stroke-width="${hi ? 2 : 1}"/>
+      <rect x="${c.x}" y="${c.y}" width="${W}" height="18" rx="6" fill="${hi ? "#1c5cab" : "#8d9bb1"}"/>
+      <text x="${c.x + 8}" y="${c.y + 13}" font-size="9.5" font-weight="700" fill="#fff" font-family="system-ui,sans-serif">FIR ${c.fir}</text>
+      <text x="${c.x + 8}" y="${c.y + 33}" font-size="10" fill="${hi ? "#1d1d1b" : "#6e6a60"}" font-family="system-ui,sans-serif">${esc(district(c.d))}</text>
+      <rect x="${c.x + 8}" y="${c.y + 40}" width="${W - 40}" height="4" rx="2" fill="${hi ? "#b9b2a0" : "#cfc6b0"}"/>
+      <rect x="${c.x + 8}" y="${c.y + 49}" width="${W - 62}" height="4" rx="2" fill="${hi ? "#b9b2a0" : "#cfc6b0"}"/>
+      <rect x="${c.x + 8}" y="${c.y + 60}" width="${cw}" height="18" rx="9" fill="${hi ? (c.link ? "#d6b36a" : "#c9d9ef") : "#d7cfbb"}"/>
+      <text x="${c.x + 8 + cw / 2}" y="${c.y + 72.5}" font-size="9.5" text-anchor="middle" font-weight="${hi ? 700 : 400}" fill="${hi ? "#1a1406" : "#8a8373"}" font-family="system-ui,sans-serif">${lab}</text>
+    </g>`;
+  };
+  const linked = cards.filter(c => c.link).map(centre);
+  const strings = linked.slice(1).map((p, i) => `<line x1="${linked[i][0]}" y1="${linked[i][1] - 40}" x2="${p[0]}" y2="${p[1] - 40}" stroke="#c0392b" stroke-width="2.2"/>`).join("") +
+    linked.map(p => `<circle cx="${p[0]}" cy="${p[1] - 40}" r="5" fill="#e74c3c" stroke="#7b1f16"/>`).join("");
+  // lens stops on each card's MO chip, lingering on the linked ones
+  const stops = [0, 2, 4, 3, 1, 0].map(i => chipAt(cards[i]).map((v, k) => v + (k ? 0 : 30)));
+  const values = [], times = [];
+  stops.forEach((pt, i) => { const tt = i / (stops.length - 1); values.push(pt, pt); times.push(Math.max(0, tt - (i ? 0.06 : 0)), Math.min(1, tt + (i < stops.length - 1 ? 0.06 : 0))); });
+  const vals = values.slice(1, -1), keyT = times.slice(1, -1);
+  keyT[0] = 0; keyT[keyT.length - 1] = 1;
+  const at = `translate(${vals[0][0]}px, ${vals[0][1]}px)`;
+  const svg = svgEl(`<svg viewBox="0 0 560 390" role="img" aria-label="${esc(t("Every FIR is a clue."))}">
+    <defs>
+      <linearGradient id="bd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a2f52"/><stop offset="1" stop-color="#0e1c34"/></linearGradient>
+      <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M28 0H0V28" fill="none" stroke="#ffffff" stroke-opacity=".05"/></pattern>
+      <clipPath id="lensclip"><circle class="lens-move" r="58" style="transform:${at}"/></clipPath>
+      <radialGradient id="glass" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffffff" stop-opacity=".22"/><stop offset=".6" stop-color="#ffffff" stop-opacity=".04"/><stop offset="1" stop-color="#9cc3f5" stop-opacity=".10"/></radialGradient>
+    </defs>
+    <rect width="560" height="390" rx="14" fill="url(#bd)"/><rect width="560" height="390" rx="14" fill="url(#grid)"/>
+    <g opacity=".72">${cards.map(c => card(c, false)).join("")}${strings}</g>
+    <g clip-path="url(#lensclip)"><rect width="560" height="390" fill="#fffdf6" opacity=".10"/>${cards.map(c => card(c, true)).join("")}${strings}</g>
+    <g class="lens-move" style="transform:${at}">
+      <line x1="41" y1="41" x2="92" y2="92" stroke="#5a4222" stroke-width="15" stroke-linecap="round"/>
+      <line x1="41" y1="41" x2="56" y2="56" stroke="#b08a4a" stroke-width="17" stroke-linecap="round"/>
+      <circle r="58" fill="url(#glass)"/>
+      <circle r="58" fill="none" stroke="#d6b36a" stroke-width="7"/>
+      <circle r="52" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="1.5"/>
+      <path d="M -34 -30 A 45 45 0 0 1 -6 -46" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </svg>`);
+  // Web Animations rather than SMIL: SMIL in script-inserted SVG does not start reliably.
+  svg.lensFrames = vals.map((v, i) => ({ transform: `translate(${v[0]}px, ${v[1]}px)`, offset: keyT[i], easing: "cubic-bezier(.45,0,.25,1)" }));
+  return svg;
+}
+function startLens(svg) {
+  if (!svg || !svg.lensFrames || !svg.isConnected) return;
+  const still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  svg.querySelectorAll(".lens-move").forEach(el => {
+    const a = el.animate(svg.lensFrames, { duration: 16000, iterations: Infinity });
+    if (still) { a.pause(); a.currentTime = 2200; }
+  });
+}
+function showHome() {
+  setNav("home");
+  const ms = META.model_summary || {}, lq = META.lead_quality;
+  const board = h("div", { class: "board" }, boardSvg());
+  const stat = (big, text) => h("div", { class: "card" }, h("div", { class: "stat" }, big), h("div", { class: "muted small" }, text));
+  render(
+    h("section", { class: "hero" },
+      h("div", {},
+        h("p", { class: "eyebrow" }, t("For crime branches and district police")),
+        h("h1", {}, t("Every FIR is a clue."), h("span", {}, t("Some are the same offender."))),
+        h("p", { class: "hero-lede" }, t("The system reads the modus operandi of every property-crime FIR across districts and states and puts the matches worth a look in front of your team — with every reason written out.")),
+        h("div", { class: "hero-cta" },
+          h("a", { class: "cta primary", href: "#/new" }, t("Check a new FIR")),
+          h("a", { class: "cta ghost", href: "#/leads" }, t("Review leads")),
+          h("a", { class: "cta ghost", href: "#/search" }, t("Find a case"))),
+        h("p", { class: "hero-note" }, t("Links cases, never people. No caste, religion or community data. An officer decides."))),
+      board),
+    h("div", { class: "strip" },
+      stat(num(META.cases), t("FIRs compared, every one against every other")),
+      lq && lq.same_district && lq.same_district.rate ? stat(t("1 in {k}", { k: Math.round(1 / lq.same_district.rate) }), t("same-district leads was a real serial link in testing")) : null,
+      ms.nearby ? stat(`${Math.round(ms.nearby.hit_at_10 * 100)}%`, t("of cases had their true partner in the top 10 with \"nearby first\"")) : null,
+      META.checks ? stat(num(META.checks.count), t("FIRs flagged as probably filed under the wrong crime type")) : null),
+    h("div", { style: "height:26px" }),
+    h("h2", {}, t("How it works, in three steps")),
+    h("div", { class: "steps" },
+      [["Enter or open an FIR", "Type in a new FIR's modus operandi, or open any FIR on record."],
+       ["Checked against every FIR", "Its MO and timing are compared with every FIR of the same kind in 20 districts across 4 states. Nobody has to suspect a link first."],
+       ["Reasons you can act on", "Each match says how rare it is and which details agree and differ. An officer marks it linked, not linked or needs investigation."]]
+        .map(([title, text], i) => h("div", { class: "card" }, h("div", { class: "step-n" }, String(i + 1)), h("h2", {}, t(title)), h("p", { class: "muted", style: "margin:0" }, t(text))))),
+    h("p", { class: "muted small", style: "margin-top:18px" }, t("All figures are measured on synthetic FIRs built to resemble four states' records. They show the method works; real records must be measured again.")));
+  startLens(board.querySelector("svg"));
+}
+
+// ---------- new FIR ----------
+let FORM = null;
+const newState = { record: { crime_type: "", state_code: "", district: "", police_station: "", occurred_from: "", fir_no: "", fields: {} },
+                   source: null, sourceFir: null, mode: "blind", tab: "same", result: null };
+async function showNew() {
+  setNav("new");
+  if (!FORM) { loading(); try { FORM = await api("/form"); } catch (e) { return fail(e); } }
+  const rec = newState.record;
+  const redraw = () => showNew();
+  const sel = (value, options, onchange, placeholder) => h("select", { onchange: e => onchange(e.target.value) },
+    h("option", { value: "" }, placeholder), options.map(([v, label]) => h("option", { value: v, selected: v === value }, label)));
+  const crimeSel = sel(rec.crime_type, Object.keys(FORM.crime_types).map(c => [c, crime(c)]),
+    v => { rec.crime_type = v; rec.fields = {}; newState.source = null; newState.result = null; redraw(); }, t("Choose…"));
+  const stateSel = sel(rec.state_code, Object.keys(FORM.places).map(s => [s, state(s)]), v => { rec.state_code = v; rec.district = ""; redraw(); }, t("Choose…"));
+  const distSel = sel(rec.district, (FORM.places[rec.state_code] || []).map(d => [d, district(d)]), v => { rec.district = v; redraw(); }, t("Choose…"));
+  const stationList = h("datalist", { id: "stations" }, (FORM.stations[rec.district] || []).map(st => h("option", { value: st })));
+  const input = (type, key, extra = {}) => h("input", { type, value: rec[key] || "", ...extra, oninput: e => { rec[key] = e.target.value; } });
+
+  const moFields = (FORM.crime_types[rec.crime_type] || []).map(spec => {
+    const current = rec.fields[spec.field];
+    if (spec.tag) {
+      // several values may apply; "none" (e.g. no tools) is a recorded answer, unlike leaving all unticked
+      const chosen = new Set(current || []);
+      const boxes = [...spec.values, "none"].map(v => h("label", {},
+        h("input", { type: "checkbox", value: v, checked: chosen.has(v), onchange: e => {
+          if (e.target.checked && v === "none") chosen.clear();
+          if (e.target.checked && v !== "none") chosen.delete("none");
+          e.target.checked ? chosen.add(v) : chosen.delete(v);
+          rec.fields[spec.field] = chosen.size ? [...chosen] : null;
+          e.target.closest(".tagset").querySelectorAll("input").forEach(i => { i.checked = chosen.has(i.value); }); } }), val(v)));
+      return h("label", {}, field(spec.field), h("div", { class: "tagset" }, boxes));
+    }
+    return h("label", {}, field(spec.field), sel(current || "", spec.values.map(v => [v, val(v)]),
+      v => { rec.fields[spec.field] = v || null; }, t("Not recorded")));
+  });
+
+  const results = h("div", {});
+  const run = async () => {
+    results.replaceChildren(h("div", { class: "empty", text: t("Searching every FIR…") }));
+    try {
+      newState.result = await api("/match", { method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ record: rec, rank: newState.mode, demo_source: newState.source }) });
+      drawResults(results);
+      results.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (e) { results.replaceChildren(h("div", { class: "notice caution", text: e.message })); }
+  };
+  const sample = async () => {
+    try {
+      const s = await api(`/form/sample${rec.crime_type ? `?crime_type=${rec.crime_type}` : ""}`);
+      Object.assign(rec, { ...s.record, fir_no: "" });
+      newState.source = s.source_case_id; newState.sourceFir = s.source_fir_no; newState.result = null;
+      redraw();
+    } catch (e) { results.replaceChildren(h("div", { class: "notice caution", text: e.message })); }
+  };
+
+  render(
+    h("h1", {}, t("Check a new FIR")),
+    h("p", { class: "lede" }, t("Enter what the FIR records. The system compares it with every FIR of the same kind and lists the ones that look like the same offender's work. Nothing is saved to the records in this demo.")),
+    newState.source ? h("div", { class: "notice info" }, t("Filled from test FIR {fir}. It is hidden from the results, as if it were being registered now.", { fir: newState.sourceFir }),
+      META.ground_truth_marks ? t(" Its real linked FIRs are marked in green when they appear.") : "") : null,
+    h("section", { class: "card" }, h("h3", {}, t("The offence")),
+      h("div", { class: "formgrid" },
+        h("label", {}, t("Crime type"), crimeSel), h("label", {}, t("FIR number (optional)"), input("text", "fir_no", { maxlength: "40" })),
+        h("label", {}, t("State"), stateSel), h("label", {}, t("District"), distSel),
+        h("label", {}, t("Police station"), input("text", "police_station", { list: "stations", maxlength: "24" }), stationList),
+        h("label", {}, t("Date of offence"), input("date", "occurred_from")))),
+    h("div", { class: "space" }),
+    rec.crime_type ? h("section", { class: "card" }, h("h3", {}, t("How it was done")),
+      h("p", { class: "muted small", style: "margin-top:0" }, t("Leave anything the FIR does not say as \"not recorded\" — it then neither helps nor hurts a match.")),
+      h("div", { class: "formgrid" }, moFields)) : null,
+    h("div", { class: "actions-row" },
+      h("button", { class: "btn primary", onclick: run }, t("Find matching FIRs")),
+      h("button", { class: "btn", onclick: sample }, t("Fill with a test FIR")),
+      h("button", { class: "btn", onclick: () => { Object.assign(newState, { source: null, result: null });
+        newState.record = { crime_type: "", state_code: "", district: "", police_station: "", occurred_from: "", fir_no: "", fields: {} }; redraw(); } }, t("Clear"))),
+    h("div", { class: "space" }),
+    results);
+  if (newState.result) drawResults(results);
+
+  function drawResults(box) {
+    const r = newState.result, rc = r.record;
+    const list = newState.tab === "same" ? r.lists.same_type : r.lists.cross_type;
+    const crimeType = newState.tab === "same" ? rc.crime_type : "CROSS_TYPE";
+    const modes = newState.tab === "same" ? [h("div", { class: "modes", role: "group", "aria-label": t("Ranking") },
+        [["blind", "Location-blind"], ["nearby", "Nearby first"]].map(([m, label]) =>
+          h("button", { "aria-pressed": String(newState.mode === m), onclick: () => { newState.mode = m; run(); } }, t(label)))),
+      h("p", { class: "muted small mode-help" }, modeHelp(newState.mode))] : null;
+    const tabs = h("div", { class: "tabs", role: "group" },
+      h("button", { "aria-pressed": String(newState.tab === "same"), onclick: () => { newState.tab = "same"; drawResults(box); } },
+        t("Same crime type ({n} FIRs checked)", { n: num(r.lists.same_type.pool_size) })),
+      h("button", { "aria-pressed": String(newState.tab === "cross"), onclick: () => { newState.tab = "cross"; drawResults(box); } }, t("Other property crimes")));
+    fill(box,
+      h("h2", {}, t("Matches")),
+      h("p", { class: "muted small" }, t("Compared with {n} {crime} FIRs.", { n: num(list.pool_size), crime: newState.tab === "same" ? crime(rc.crime_type).toLowerCase() : cases("CROSS_TYPE") })),
+      r.type_check ? h("div", { class: "notice caution small" },
+        h("b", {}, t("The MO in this FIR reads like {likely}, not {recorded}.", { likely: crime(r.type_check.likely), recorded: crime(r.type_check.recorded) })),
+        t(" Check the classification — if it is wrong, its real links are filed under the other type.")) : null,
+      tabs, modes,
+      newState.tab === "cross" ? h("div", { class: "notice caution" }, t("These compare only the offender's personal habits (time, group size, concealment, travel), because a different crime type has a different MO. They are weak leads — useful because keyword search on IPC sections can never connect different offences.")) : null,
+      h("div", { class: "shortlist" }, list.items.map(item => matchCard(rc, item, crimeType))));
+  }
+}
+function matchCard(rc, item, crimeType) {
+  const shared = item.reasons.filter(r => r.kind === "shared").slice(0, 3);
+  const maxAbs = Math.max(1, ...item.reasons.map(r => Math.abs(r.bits)));
+  const order = ["timing", "place", "shared", "different", "distinctiveness"];
+  return h("article", { class: "lead", style: "cursor:default" },
+    h("div", { class: "lead-top" }, h("b", {}, `#${item.rank}`), tierBadge(item), h("span", { class: "crime" }, crime(item.crime_type)),
+      item.cross_state ? h("span", { class: "xstate" }, t("Other state")) : null,
+      item.ground_truth_link ? h("span", { class: "truth" }, t("✓ true link (synthetic truth)")) : null),
+    h("div", {}, h("a", { class: "btn small", href: `#/case/${item.case_id}` }, t("Open this FIR"))),
+    h("div", { class: "rarity full" }, rarityText(item)),
+    h("div", { class: "pair" }, place(rc.district, rc.state_code, rc.occurred_from), gapNode(daysBetween(rc.occurred_from, item.occurred_from)),
+      place(item.district, item.state_code, item.occurred_from)),
+    h("div", { class: "reasons-inline" }, h("span", { class: "muted small" }, t("Both FIRs:")), shared.map(r => h("span", { class: "chip" }, reasonPhrase(r, crimeType)))),
+    h("details", { class: "why" }, h("summary", {}, t("Why this match")),
+      item.reasons.filter(r => order.includes(r.kind)).sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind)).map(r => reasonRowFor(r, crimeType, maxAbs))));
+}
+
 // ---------- compare ----------
 const VERDICT_TEXT = { confirmed: "linked", rejected: "not linked", investigate: "needs investigation" };
 async function showCompare(a, b, mode = "blind") {
@@ -898,42 +1227,7 @@ async function showCompare(a, b, mode = "blind") {
   const notRec = p.reasons.filter(r => r.kind === "not_recorded");
   const maxAbs = Math.max(1, ...p.reasons.map(r => Math.abs(r.bits)));
 
-  const reasonRow = r => {
-    let icon, what, why;
-    if (r.kind === "timing") {
-      icon = h("div", { class: "ico timing", "aria-hidden": "true" }, "⏱");
-      what = t("{gap} apart", { gap: gapText(r.days) });
-      why = t(r.bits > 0.5 ? "Serial offences usually come in bursts — a short gap supports a link."
-            : r.bits < -0.5 ? "A long gap makes the same offender less likely." : "The gap neither supports nor weakens a link.");
-    } else if (r.kind === "shared") {
-      icon = h("div", { class: "ico shared", "aria-hidden": "true" }, "✓");
-      what = val(r.shared_value ?? r.value);
-      const v = { pct: r.share == null ? "" : pct(r.share), of: cases(crimeType) };
-      why = t("{field} — same in both FIRs. ", { field: field(r.field) }) + (r.share == null ? "" :
-        r.share < 0.01 ? t("Fewer than 1 in 100 {of} have this, so it is a telling detail.", v) :
-        r.share < 0.2 ? t("Only {pct} of {of} have this, so it is a telling detail.", v) :
-        r.share < 0.5 ? t("{pct} of {of} have this.", v) : t("Common — {pct} of {of} have this, so it counts for little.", v));
-    } else if (r.kind === "place") {
-      icon = h("div", { class: "ico place", "aria-hidden": "true" }, "⌖");
-      what = t({ same_station: "Same police station", same_district: "Same district, different police station",
-                 same_state: "Same state, different district", other_state: "Different states" }[r.where]);
-      why = t("Counted because you chose nearby first: in testing, linked FIRs were far more often close together than unrelated ones.");
-    } else if (r.kind === "distinctiveness") {
-      icon = h("div", { class: "ico distinct", "aria-hidden": "true" }, "≈");
-      what = t(r.bits < 0 ? "One of these FIRs resembles many others" : "Both FIRs are unusual");
-      why = t(r.bits < 0 ? "A FIR whose MO matches many FIRs makes any one match with it less telling."
-                         : "Neither FIR resembles many others, so a match between them is more telling.");
-    } else {
-      icon = h("div", { class: "ico different", "aria-hidden": "true" }, "✕");
-      what = t("{a} vs {b}", { a: val(r.value), b: val(r.other_value) });
-      why = t("{field} — different in the two FIRs.", { field: field(r.field) });
-    }
-    const w = Math.abs(r.bits) / maxAbs * 50;
-    const fill = r.bits >= 0 ? `left:50%;width:${w}%;background:var(--support)` : `left:${50 - w}%;width:${w}%;background:var(--oppose)`;
-    return h("div", { class: "reason" }, icon, h("div", {}, h("div", { class: "what" }, what), h("div", { class: "why" }, why)),
-      h("div", { class: "weight", title: `${r.bits >= 0 ? "+" : ""}${r.bits.toFixed(2)} bits` },
-        h("div", { class: "track" }, h("div", { class: "fill", style: fill })), strengthWord(r.bits)));
-  };
+  const reasonRow = r => reasonRowFor(r, crimeType, maxAbs);
 
   const name = h("input", { type: "text", value: officer(), placeholder: t("Officer name (demo — not verified)"), "aria-label": t("Officer name (demo — not verified)"),
     onchange: e => { try { localStorage.setItem("officer", e.target.value.trim()); } catch (err) {} } });
@@ -1044,7 +1338,9 @@ async function route() {
     if (parts[0] === "checks") return showChecks();
     if (parts[0] === "search") return showSearch(decodeURIComponent(parts[1] || ""));
     if (parts[0] === "about") return showAbout();
-    return showLeads();
+    if (parts[0] === "new") return showNew();
+    if (parts[0] === "leads") return showLeads();
+    return showHome();
   } catch (e) { fail(e); }
 }
 (async () => {
