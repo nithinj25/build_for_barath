@@ -9,6 +9,9 @@ search it, but only once somebody already suspects a link. Nobody computes
 "this FIR in Nashik resembles that one in Indore from ten months ago." **The
 pipes exist; the inference doesn't.**
 
+**Live demo:** https://56z73fanvpxorv5dmkbc5d2kru0vmkqz.lambda-url.ap-south-1.on.aws/
+(synthetic data; demo mode marks synthetic ground-truth links)
+
 ## Status
 
 | Stage | State |
@@ -17,8 +20,10 @@ pipes exist; the inference doesn't.**
 | Adapters + normalisation (state feeds → canonical records) | done, exact on 44,533 of 44,533 records |
 | Scorer: Fellegi-Sunter + logistic correction, evaluation by offender | done |
 | repeat_rate × cross_type_sharing sweep | done, 30 points + 3-seed noise floor |
-| MO extraction from free text, narrative embeddings, retrieval recall@50 | blocked on Bedrock access |
-| AWS deploy (SAM skeleton exists), UI, Verified Permissions | not started |
+| MO extraction (local Ollama) and narrative embeddings (local e5) | done locally; Bedrock not available |
+| Analyst UI + API | done, verified locally and live |
+| AWS deploy, free tier: Lambda + Function URL + DynamoDB | **live** in ap-south-1 |
+| Cognito login, Verified Permissions, PII table with KMS | not started — needs API Gateway, beyond free tier |
 
 ## Results, honestly
 
@@ -67,6 +72,24 @@ pool, bits of evidence against the pool's typical range, driving fields,
 each field's contribution against the break-even line. `/api/*` is served by
 `handlers/api.py` — the same handler Lambda runs. `--demo` marks synthetic
 ground-truth links; leave it off to see what an analyst would.
+
+## Deploy (AWS free tier)
+
+One Lambda serves the UI and the API through a Lambda Function URL; the case
+bundle ships inside the package; feedback and audit go to DynamoDB at
+always-free capacity. No API Gateway, no Bedrock, no KMS key — about $0/month
+at demo traffic.
+
+```bash
+aws login                                  # browser sign-in (use an incognito window if you get a 400)
+python -m linkage.bundle --out data/serve --with-ground-truth
+python scripts/package_lambda.py           # stages build/app + a Linux numpy layer; no Docker needed
+cd infra && sam build && sam deploy --stack-name linkage-demo --resolve-s3 --capabilities CAPABILITY_IAM --region ap-south-1
+```
+
+The URL is public with no login — fine for a demo of synthetic data. The
+spec's Cognito login and Verified Permissions need API Gateway, which is the
+upgrade path when it is needed.
 
 ## Run it
 

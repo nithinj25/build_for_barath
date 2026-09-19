@@ -1,6 +1,8 @@
-"""HTTP API. API Gateway HTTP API (payload v2) on AWS; scripts/serve_local.py
-feeds it real requests locally — the same code both places.
+"""HTTP API and the analyst UI. On AWS it sits behind a Lambda Function URL
+(payload v2 — the same shape as API Gateway HTTP API); scripts/serve_local.py
+feeds it real requests locally. The same code both places.
 
+    GET  /                                       the analyst UI (ui/index.html)
     GET  /health
     GET  /meta                                   corpus context, demo cases
     GET  /cases/{id}                             canonical record, no PII
@@ -8,7 +10,8 @@ feeds it real requests locally — the same code both places.
     POST /links/{id_a}__{id_b}/feedback          {"verdict": "confirmed"|"rejected", "note": "..."}
 
 Every shortlist request is audited: who, which case, which scope, when.
-Responses never carry a probability (CLAUDE.md rule 4).
+Responses never carry a probability (CLAUDE.md rule 4). The UI calls /api/...;
+that prefix is stripped here so one URL serves both page and API.
 
 Environment:
     BUNDLE_URI          directory or s3://bucket/prefix (default data/serve)
@@ -23,12 +26,14 @@ import json
 import os
 import re
 from datetime import datetime, timezone
+from pathlib import Path
 
 from handlers.store import load_bundle, open_store
 from linkage.serve import Shortlister
 
 CASE = r"([0-9a-f]{16})"
 VERDICTS = ("confirmed", "rejected")
+UI_PAGE = Path(__file__).resolve().parent.parent / "ui" / "index.html"
 _APP: dict = {}
 
 
@@ -73,9 +78,17 @@ def _now() -> str:
 def handler(event: dict, context=None) -> dict:
     method = ((event.get("requestContext") or {}).get("http") or {}).get("method", "GET")
     path = event.get("rawPath", "/").rstrip("/") or "/"
+    if path == "/api" or path.startswith("/api/"):
+        path = path[len("/api"):] or "/"
     query = event.get("queryStringParameters") or {}
     if method == "OPTIONS":
         return _response(204, None)
+    if method == "GET" and path in ("/", "/index.html"):
+        if not UI_PAGE.exists():
+            return _response(404, {"error": "UI not packaged"})
+        return {"statusCode": 200, "headers": {"content-type": "text/html; charset=utf-8",
+                                               "cache-control": "no-cache"},
+                "body": UI_PAGE.read_text(encoding="utf-8")}
     if path == "/health":
         return _response(200, {"status": "ok"})
     try:

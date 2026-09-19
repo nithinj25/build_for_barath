@@ -81,7 +81,7 @@ adapters/       one YAML per state feed; the pipeline's only state knowledge
 enrich/         local models: embeddings (sentence-transformers), MO extraction (Ollama)
 handlers/       Lambda entry points (api.py, store.py); boto3 lives here only
 ui/             analyst view (index.html), served locally by scripts/serve_local.py
-infra/          SAM template (skeleton: GET /health)
+infra/          SAM template: free tier — Lambda + Function URL + DynamoDB (stack linkage-demo, ap-south-1)
 TECHNICAL_SPEC.md           full technical spec
 TASK_DATA_GENERATION.md     generator brief
 DATASET.md      dataset card: artifacts, key numbers, limitations
@@ -120,7 +120,8 @@ python -m linkage.train --normalised data/final_sharing1_normalised.parquet --tr
 python -m linkage.evaluate --normalised data/final_sharing1_normalised.parquet --truth data/final_sharing1/truth.parquet --weights data/weights.json --out data/eval.json
 python -m linkage.bundle --out data/serve --with-ground-truth   # serve bundle for the API
 python scripts/serve_local.py --demo               # UI + API locally on :8000, same handler as Lambda
-sam build && sam deploy                            # from infra/
+python scripts/package_lambda.py                   # stage build/app + Linux numpy layer (no Docker)
+sam build && sam deploy --stack-name linkage-demo --resolve-s3 --capabilities CAPABILITY_IAM   # from infra/
 ```
 
 ## Conventions

@@ -7,3 +7,4 @@ __pycache__/
 .aws-sam/
 weights.json
 !results/**/weights*.json
+build/

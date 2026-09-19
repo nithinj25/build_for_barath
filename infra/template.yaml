@@ -1,30 +1,94 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >-
-  Cross-jurisdiction crime linkage — skeleton stack. Proves the deploy path
-  (CloudFormation, IAM, Lambda packaging, HTTP API) before it holds any data.
+  Cross-jurisdiction crime linkage — free-tier demo stack. One Lambda serves the
+  analyst UI and the API through a Lambda Function URL (no API Gateway); the case
+  bundle ships inside the package (no bucket); feedback and audit go to DynamoDB
+  at always-free capacity. No Bedrock, no KMS key. Stage first with
+  scripts/package_lambda.py.
+
+Parameters:
+  DemoGroundTruth:
+    Type: String
+    AllowedValues: ["0", "1"]
+    Default: "1"
+    Description: Mark synthetic ground-truth links in shortlists (demo only; the data is synthetic).
 
 Globals:
   Function:
     Runtime: python3.12
     Architectures: [arm64]
-    MemorySize: 256
-    Timeout: 10
 
 Resources:
-  HealthFunction:
+  NumpyLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      Description: numpy 1.26.4 for Linux arm64, staged by scripts/package_lambda.py
+      ContentUri: ../build/layer/
+      CompatibleRuntimes: [python3.12]
+      CompatibleArchitectures: [arm64]
+
+  # PROVISIONED at 1 read / 1 write unit: inside DynamoDB's always-free 25/25.
+  FeedbackTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PROVISIONED
+      ProvisionedThroughput: {ReadCapacityUnits: 1, WriteCapacityUnits: 1}
+      AttributeDefinitions:
+        - {AttributeName: pair_id, AttributeType: S}
+        - {AttributeName: sk, AttributeType: S}
+      KeySchema:
+        - {AttributeName: pair_id, KeyType: HASH}
+        - {AttributeName: sk, KeyType: RANGE}
+
+  AuditTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PROVISIONED
+      ProvisionedThroughput: {ReadCapacityUnits: 1, WriteCapacityUnits: 1}
+      AttributeDefinitions:
+        - {AttributeName: actor_id, AttributeType: S}
+        - {AttributeName: timestamp, AttributeType: S}
+      KeySchema:
+        - {AttributeName: actor_id, KeyType: HASH}
+        - {AttributeName: timestamp, KeyType: RANGE}
+
+  AppFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ../handlers/
-      Handler: health.handler
-      Events:
-        Health:
-          Type: HttpApi
-          Properties:
-            Path: /health
-            Method: GET
+      Description: Analyst UI + linkage API (handlers/api.py)
+      CodeUri: ../build/app/
+      Handler: handlers.api.handler
+      MemorySize: 1024
+      Timeout: 30
+      Layers: [!Ref NumpyLayer]
+      Environment:
+        Variables:
+          BUNDLE_URI: /var/task/bundle
+          STORE: !Sub "dynamodb:${FeedbackTable},${AuditTable}"
+          DEMO_GROUND_TRUTH: !Ref DemoGroundTruth
+      Policies:
+        - DynamoDBWritePolicy: {TableName: !Ref FeedbackTable}
+        - DynamoDBWritePolicy: {TableName: !Ref AuditTable}
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors:
+          AllowOrigins: ["*"]
+          AllowMethods: ["GET", "POST"]
+          AllowHeaders: ["content-type"]
+
+  # Keep logs small: 7 days instead of forever.
+  AppLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${AppFunction}"
+      RetentionInDays: 7
 
 Outputs:
-  HealthUrl:
-    Description: 'GET this; expect {"status": "ok"}'
-    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/health"
+  AppUrl:
+    Description: Open this — the analyst UI, with the API under /api
+    Value: !GetAtt AppFunctionUrl.FunctionUrl
+  FeedbackTableName:
+    Value: !Ref FeedbackTable
+  AuditTableName:
+    Value: !Ref AuditTable
