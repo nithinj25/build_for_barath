@@ -123,6 +123,45 @@ def test_feedback_is_validated_and_recorded(call, case_id):
     assert call("POST", f"/links/{case_id}__{other}/feedback", body={"verdict": "maybe"})[0] == 400
 
 
+def test_series_are_same_type_same_state_and_joined_by_listed_links(call):
+    status, body = call("GET", "/series", {"limit": "5"})
+    assert status == 200 and body["total"] > 0
+    for summary in body["items"]:
+        assert "links" not in summary and "ground_truth_offenders" not in summary
+        _, s = call("GET", f"/series/{summary['id']}")
+        ids = [m["case_id"] for m in s["members"]]
+        assert s["size"] == len(ids) >= 3 and len(s["states"]) == 1            # cross-state edges never join a series
+        assert [m["occurred_from"] for m in s["members"]] == sorted(m["occurred_from"] for m in s["members"])
+        joined = {ids[0]}
+        for _ in ids:                                                        # the links connect every member
+            joined |= {x for l in s["links"] for x in (l["a"], l["b"]) if {l["a"], l["b"]} & joined}
+        assert joined == set(ids)
+        for m in s["members"]:
+            assert call("GET", f"/cases/{m['case_id']}")[1]["series_id"] == s["id"]
+    assert call("GET", "/series/0000000000")[0] == 404
+
+
+def test_checks_name_another_type_in_the_same_family(call):
+    _, body = call("GET", "/checks", {"limit": "20"})
+    assert body["total"] > 0
+    for c in body["items"]:
+        assert c["recorded"] != c["likely"] and {c["recorded"], c["likely"]} <= {"BURGLARY_RESIDENTIAL", "BURGLARY_COMMERCIAL"}
+        assert c["bits"] >= 2 and c["reasons"]
+    first = body["items"][0]
+    assert call("GET", f"/cases/{first['case_id']}")[1]["type_check"]["likely"] == first["likely"]
+
+
+def test_feedback_history_records_the_typed_officer_name(call, case_id):
+    from handlers import api
+    _, body = call("GET", f"/cases/{case_id}/links", {"scope": "same", "limit": "2"})
+    other = body["lists"]["same_type"]["items"][1]["case_id"]
+    r = api.handler({"rawPath": f"/links/{case_id}__{other}/feedback", "requestContext": {"http": {"method": "POST"}},
+                     "headers": {"x-officer": "SI Rao <script>"}, "body": json.dumps({"verdict": "investigate"})})
+    assert json.loads(r["body"])["actor_id"] == "demo:SI Rao script"            # marked unverified, markup stripped
+    _, history = call("GET", f"/links/{other}__{case_id}/feedback")              # either order finds it
+    assert history["items"][0]["verdict"] == "investigate"
+
+
 @pytest.mark.parametrize("method, path, query, expected", [
     ("GET", "/cases/0000000000000000", None, 404),
     ("GET", "/cases/not-a-case-id", None, 404),

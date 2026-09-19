@@ -27,9 +27,10 @@
       --good: #0ca30c; --good-soft: #13301a; --caution-soft: #3a2f10; --caution-ink: #f2d38a;
       --shadow: none;
     }
+    .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(.85) contrast(.9); }
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", "Nirmala UI", sans-serif; }
   a { color: var(--accent); }
   button, input, select, textarea { font: inherit; color: inherit; }
   button { cursor: pointer; }
@@ -37,13 +38,14 @@
 
   /* app bar */
   .bar { background: var(--brand); color: var(--brand-ink); }
-  .bar-inner { max-width: 1180px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .bar-inner { max-width: 1180px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 14px 18px; flex-wrap: wrap; }
   .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: .01em; }
   .logo small { display: block; font-weight: 400; font-size: 12px; opacity: .85; }
   .mark { width: 30px; height: 30px; border-radius: 7px; background: rgba(255,255,255,.16); display: grid; place-items: center; }
-  nav { display: flex; gap: 4px; margin-left: auto; }
-  nav a { color: var(--brand-ink); text-decoration: none; padding: 7px 14px; border-radius: 8px; font-weight: 500; opacity: .88; }
+  nav { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; align-items: center; }
+  nav a { color: var(--brand-ink); text-decoration: none; padding: 7px 12px; border-radius: 8px; font-weight: 500; opacity: .88; }
   nav a[aria-current=page] { background: rgba(255,255,255,.18); opacity: 1; }
+  .lang { background: transparent; color: var(--brand-ink); border: 1px solid rgba(255,255,255,.45); border-radius: 8px; padding: 5px 10px; margin-left: 6px; }
   .pill-synth { font-size: 12px; background: rgba(255,255,255,.18); padding: 3px 10px; border-radius: 99px; }
 
   main { max-width: 1180px; margin: 0 auto; padding: 22px 20px 60px; }
@@ -51,20 +53,22 @@
   h1 { font-size: 24px; margin: 0 0 4px; }
   h2 { font-size: 17px; margin: 0 0 12px; }
   h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
-  .lede { color: var(--ink-2); margin: 0 0 18px; max-width: 780px; }
+  :lang(hi) h3 { text-transform: none; letter-spacing: 0; font-size: 14px; }
+  .lede { color: var(--ink-2); margin: 0 0 18px; max-width: 800px; }
   .card { background: var(--surface); border: 1px solid var(--ring); border-radius: 12px; padding: 18px; box-shadow: var(--shadow); }
   .stack > * + * { margin-top: 12px; }
   .muted { color: var(--muted); }
   .small { font-size: 13px; }
+  .space { height: 16px; }
 
   /* filters */
   .filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; margin-bottom: 14px; }
   .filters label { display: grid; gap: 4px; font-size: 12.5px; color: var(--ink-2); font-weight: 500; }
-  select, input[type=search], textarea { background: var(--surface); border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 10px; min-width: 170px; }
-  .check { display: flex !important; align-items: center; gap: 8px; grid-auto-flow: column; padding-bottom: 8px; }
-  .notice { border-radius: 10px; padding: 12px 14px; font-size: 14px; margin-bottom: 14px; }
+  select, input[type=search], input[type=text], textarea { background: var(--surface); border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 10px; min-width: 170px; }
+  .notice { border-radius: 10px; padding: 12px 14px; font-size: 14px; margin: 0 0 14px; }
   .notice.info { background: var(--accent-soft); }
   .notice.caution { background: var(--caution-soft); color: var(--caution-ink); }
+  .notice .btn { margin-left: 8px; }
 
   /* tier badge */
   .tier { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; padding: 3px 10px; border-radius: 99px; white-space: nowrap; }
@@ -76,7 +80,7 @@
   .dots i.on { opacity: 1; }
   .rarity { font-size: 13px; color: var(--ink-2); }
 
-  /* lead cards */
+  /* cards and lists */
   .leads { display: grid; gap: 12px; }
   .lead { background: var(--surface); border: 1px solid var(--ring); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow);
           display: grid; grid-template-columns: 1fr auto; gap: 10px 18px; cursor: pointer; }
@@ -90,14 +94,15 @@
   .gap { text-align: center; font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
   .gap svg { display: block; margin: 0 auto 2px; }
   @media (max-width: 640px) { .pair { grid-template-columns: 1fr; } .gap { text-align: left; } .gap svg { display: none; } }
-  .reasons-inline { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+  .full { grid-column: 1 / -1; }
+  .reasons-inline { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
   .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; background: var(--support-soft); border-radius: 99px; padding: 3px 10px; }
-  .chip.time { background: var(--surface-2); border: 1px solid var(--line); }
   .xstate { font-size: 12px; font-weight: 600; color: var(--accent); border: 1px solid var(--accent); border-radius: 99px; padding: 1px 8px; }
   .truth { font-size: 12px; font-weight: 600; color: var(--good); background: var(--good-soft); border-radius: 99px; padding: 2px 9px; }
   .btn { background: var(--surface); border: 1px solid var(--line-2); border-radius: 8px; padding: 7px 14px; font-weight: 500; }
   .btn:hover { border-color: var(--ink-2); }
   .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.small { padding: 4px 10px; font-size: 13px; }
   .lanes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 6px; }
   .lane { text-align: left; background: var(--surface); border: 1px solid var(--line-2); border-radius: 10px; padding: 10px 14px; display: grid; gap: 2px; }
   .lane span { font-size: 12.5px; color: var(--muted); }
@@ -105,15 +110,18 @@
   .lane-help { margin: 4px 0 14px; }
   @media (max-width: 640px) { .lanes { grid-template-columns: 1fr; } }
   .pager { display: flex; gap: 10px; align-items: center; justify-content: center; margin-top: 16px; }
+  .route { font-weight: 600; font-size: 15px; }
+  .route .arrow { color: var(--muted); font-weight: 400; }
+  .count { font-weight: 700; background: var(--ink); color: var(--surface); border-radius: 99px; padding: 2px 10px; font-size: 13px; }
 
   /* search */
   .searchbox { display: flex; gap: 10px; }
-  .searchbox input { flex: 1; font-size: 17px; padding: 12px 14px; }
+  .searchbox input { flex: 1; font-size: 17px; padding: 12px 14px; min-width: 0; }
   .results { display: grid; gap: 8px; margin-top: 14px; }
   .result { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 10px 14px;
             background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; cursor: pointer; flex-wrap: wrap; }
   .result:hover { border-color: var(--line-2); }
-  .examples { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .examples { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
 
   /* case + compare */
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -126,9 +134,9 @@
   .verdict { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
   .verdict .big { font-size: 20px; font-weight: 700; }
   .explain { color: var(--ink-2); margin: 8px 0 0; max-width: 820px; }
-  .timeline { margin-top: 14px; }
   .reason { display: grid; grid-template-columns: 26px 1fr 150px; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
   .reason:first-of-type { border-top: 0; }
+  @media (max-width: 560px) { .reason { grid-template-columns: 26px 1fr; } .reason .weight { grid-column: 2; text-align: left; } }
   .reason .ico { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
   .ico.shared { background: var(--support-soft); color: var(--support); }
   .ico.different { background: var(--oppose-soft); color: var(--oppose); }
@@ -142,7 +150,10 @@
   .narr { white-space: pre-wrap; font-size: 13.5px; color: var(--ink-2); background: var(--surface-2); border-radius: 8px; padding: 10px 12px; }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .actions textarea { flex: 1 1 260px; min-height: 40px; }
+  .actions input { flex: 0 1 220px; }
   .saved { color: var(--good); font-weight: 600; }
+  .history { display: grid; gap: 6px; font-size: 13.5px; }
+  .history div { padding: 6px 10px; background: var(--surface-2); border-radius: 8px; }
   .shortlist { display: grid; gap: 10px; }
   .tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
   .tabs button { border: 1px solid var(--line-2); background: var(--surface); border-radius: 99px; padding: 6px 14px; }
@@ -152,8 +163,20 @@
   .stat { font-size: 28px; font-weight: 700; }
   .empty { text-align: center; color: var(--muted); padding: 40px 0; }
 
+  /* series */
+  .map { height: 340px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--surface-2); }
+  .map > svg { width: 100%; height: 100%; display: block; }
+  .pin span { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff;
+              font: 700 12px/1 system-ui, sans-serif; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
+  .timeline svg { width: 100%; height: auto; display: block; }
+  .tablewrap { overflow-x: auto; }
+  table.firs { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table.firs th { text-align: left; color: var(--muted); font-weight: 500; font-size: 12.5px; padding: 6px 10px; border-bottom: 1px solid var(--line); }
+  table.firs td { padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.firs td.num { font-weight: 700; color: var(--accent); }
+
   @media print {
-    .bar, nav, .actions, .back, .noprint { display: none !important; }
+    .bar, nav, .actions, .back, .noprint, .pager { display: none !important; }
     body { background: #fff; color: #000; }
     .card, .lead { box-shadow: none; border-color: #bbb; break-inside: avoid; }
     main { padding: 0; }
@@ -161,55 +184,263 @@
 </style>
 </head>
 <body>
-<div class="bar">
-  <div class="bar-inner">
-    <div class="logo">
-      <div class="mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="2"><circle cx="4" cy="9" r="2.5"/><circle cx="14" cy="4" r="2.5"/><circle cx="14" cy="14" r="2.5"/><path d="M6.3 8l5.4-3M6.3 10l5.4 3"/></svg></div>
-      <div>Cross-Jurisdiction Linkage<small>Property-crime MO analysis for investigators</small></div>
-    </div>
-    <span class="pill-synth" title="All cases in this demo are synthetic">Synthetic demo data</span>
-    <nav aria-label="Main">
-      <a href="#/leads" data-nav="leads">Leads</a>
-      <a href="#/search" data-nav="search">Find a case</a>
-      <a href="#/about" data-nav="about">How it works</a>
-    </nav>
-  </div>
-</div>
+<div class="bar"><div class="bar-inner" id="bar"></div></div>
 <main id="view" aria-live="polite"></main>
 
 <script>
 const API = window.API_BASE || "/api";
-const $ = s => document.querySelector(s);
-const STATES = { MH: "Maharashtra", MP: "Madhya Pradesh", KA: "Karnataka", TG: "Telangana" };
-const CRIMES = { BURGLARY_RESIDENTIAL: "House burglary", BURGLARY_COMMERCIAL: "Shop / commercial burglary",
-  VEHICLE_THEFT: "Vehicle theft", SNATCHING: "Chain snatching", ATM_TAMPERING: "ATM tampering" };
-const CRIME_CASES = { BURGLARY_RESIDENTIAL: "house burglaries", BURGLARY_COMMERCIAL: "commercial burglaries",
-  VEHICLE_THEFT: "vehicle thefts", SNATCHING: "chain snatchings", ATM_TAMPERING: "ATM tampering cases",
-  CROSS_TYPE: "property crimes" };
-const FIELDS = { time_band: "Time of day", group_size_est: "Number of offenders", tools: "Tools used",
-  counter_forensic: "Identity concealment", target_selection: "How the target was chosen", property_taken: "Property stolen",
-  approach_mode: "Arrived by", exit_mode: "Escaped by", entry_point: "Point of entry", entry_method: "Method of entry",
-  premise: "Type of premises", occupancy: "Occupancy at the time", search_pattern: "How the place was searched",
-  vehicle_class: "Vehicle stolen", ignition_method: "How the vehicle was started", location_type: "Where it was parked",
-  vehicle_used: "Snatchers' vehicle", victim_activity: "What the victim was doing", escape_direction: "Escape route",
-  machine_type: "ATM type", attack_method: "How the ATM was attacked", alarm_defeated: "Alarm", days_apart: "Time between offences" };
-const VALUES = { "1": "one person", "2-3": "2–3 people", "4+": "4 or more people", none: "none",
-  cctv_disabled: "CCTV disabled", face_covered: "faces covered", insider_info: "inside information", no_force: "no forced entry",
-  lock_broken: "lock broken", forced_open: "door or window forced", grill_cut: "grill cut", duplicate_key: "duplicate key",
-  wall_breach: "hole made in wall", handle_lock_broken: "handle lock broken", direct_wiring: "wires joined",
-  key_left: "key left in vehicle", towed_or_lifted: "towed or lifted", two_wheeler: "two-wheeler", four_wheeler: "four-wheeler",
-  on_foot: "on foot", early_morning: "early morning", residential_parking: "residential parking",
-  public_parking: "public parking", transit_hub: "railway or bus station", riding_pillion: "riding pillion",
-  waiting_for_transport: "waiting for transport", morning_walk: "on a morning walk", main_road: "main road",
-  offsite_kiosk: "off-site kiosk", white_label: "white-label ATM", onsite_branch: "bank-branch ATM", cash_trap: "cash trap",
-  gas_cutting: "gas cutting", physical_forcing: "forced open", not_defeated: "left working", defeated: "disabled",
-  independent_house: "independent house", mixed_use: "shop-cum-residence", row_house: "row house",
-  temporarily_away: "occupants out", vacant_extended: "locked for days", closed_overnight: "closed for the night",
-  closed_extended: "closed for holidays", occupied: "occupied", gas_cutter: "gas cutter" };
-const TOKENS = { "__MISSING__": "not recorded", "__ABSENT__": "not recorded", "__UNKNOWABLE__": "not known" };
+let LANG = "en";
+try { LANG = localStorage.getItem("lang") === "hi" ? "hi" : "en"; } catch (e) {}
 let META = null;
 
-// ---------- helpers ----------
+// ---------- labels (English / हिंदी) ----------
+const STATES = { en: { MH: "Maharashtra", MP: "Madhya Pradesh", KA: "Karnataka", TG: "Telangana" },
+  hi: { MH: "महाराष्ट्र", MP: "मध्य प्रदेश", KA: "कर्नाटक", TG: "तेलंगाना" } };
+const DISTRICTS_HI = { Pune: "पुणे", Nashik: "नासिक", Nagpur: "नागपुर", Thane: "ठाणे", Kolhapur: "कोल्हापुर", Indore: "इंदौर",
+  Bhopal: "भोपाल", Jabalpur: "जबलपुर", Gwalior: "ग्वालियर", Ujjain: "उज्जैन", "Bengaluru Urban": "बेंगलुरु शहरी", Mysuru: "मैसूरु",
+  Belagavi: "बेलगावी", Kalaburagi: "कलबुर्गी", Dharwad: "धारवाड़", Hyderabad: "हैदराबाद", Rangareddy: "रंगारेड्डी",
+  Hanumakonda: "हनमकोंडा", Karimnagar: "करीमनगर", Nizamabad: "निज़ामाबाद" };
+// Approximate district headquarters, for the series map.
+const DISTRICT_LL = { Pune: [18.52, 73.86], Nashik: [20.0, 73.79], Nagpur: [21.15, 79.09], Thane: [19.22, 72.98], Kolhapur: [16.7, 74.24],
+  Indore: [22.72, 75.86], Bhopal: [23.26, 77.41], Jabalpur: [23.18, 79.99], Gwalior: [26.22, 78.18], Ujjain: [23.18, 75.78],
+  "Bengaluru Urban": [12.97, 77.59], Mysuru: [12.3, 76.64], Belagavi: [15.85, 74.5], Kalaburagi: [17.33, 76.83], Dharwad: [15.46, 75.01],
+  Hyderabad: [17.39, 78.49], Rangareddy: [17.25, 78.2], Hanumakonda: [18.01, 79.56], Karimnagar: [18.44, 79.13], Nizamabad: [18.67, 78.09] };
+const CRIMES = {
+  en: { BURGLARY_RESIDENTIAL: "House burglary", BURGLARY_COMMERCIAL: "Shop / commercial burglary", VEHICLE_THEFT: "Vehicle theft",
+        SNATCHING: "Chain snatching", ATM_TAMPERING: "ATM tampering" },
+  hi: { BURGLARY_RESIDENTIAL: "घर में सेंधमारी", BURGLARY_COMMERCIAL: "दुकान / व्यावसायिक सेंधमारी", VEHICLE_THEFT: "वाहन चोरी",
+        SNATCHING: "चेन स्नैचिंग", ATM_TAMPERING: "एटीएम से छेड़छाड़" } };
+const CRIME_CASES = {
+  en: { BURGLARY_RESIDENTIAL: "house burglaries", BURGLARY_COMMERCIAL: "commercial burglaries", VEHICLE_THEFT: "vehicle thefts",
+        SNATCHING: "chain snatchings", ATM_TAMPERING: "ATM tampering cases", CROSS_TYPE: "property crimes" },
+  hi: { BURGLARY_RESIDENTIAL: "घरेलू सेंधमारी के मामलों", BURGLARY_COMMERCIAL: "व्यावसायिक सेंधमारी के मामलों", VEHICLE_THEFT: "वाहन चोरी के मामलों",
+        SNATCHING: "चेन स्नैचिंग के मामलों", ATM_TAMPERING: "एटीएम छेड़छाड़ के मामलों", CROSS_TYPE: "संपत्ति अपराधों" } };
+const FIELDS = {
+  en: { time_band: "Time of day", group_size_est: "Number of offenders", tools: "Tools used", counter_forensic: "Identity concealment",
+        target_selection: "How the target was chosen", property_taken: "Property stolen", approach_mode: "Arrived by", exit_mode: "Escaped by",
+        entry_point: "Point of entry", entry_method: "Method of entry", premise: "Type of premises", occupancy: "Occupancy at the time",
+        search_pattern: "How the place was searched", vehicle_class: "Vehicle stolen", ignition_method: "How the vehicle was started",
+        location_type: "Where it was parked", vehicle_used: "Snatchers' vehicle", victim_activity: "What the victim was doing",
+        escape_direction: "Escape route", machine_type: "ATM type", attack_method: "How the ATM was attacked", alarm_defeated: "Alarm",
+        days_apart: "Time between offences" },
+  hi: { time_band: "समय", group_size_est: "अपराधियों की संख्या", tools: "प्रयुक्त औज़ार", counter_forensic: "पहचान छिपाने का तरीका",
+        target_selection: "निशाना कैसे चुना", property_taken: "चोरी गई संपत्ति", approach_mode: "कैसे आए", exit_mode: "कैसे भागे",
+        entry_point: "प्रवेश का स्थान", entry_method: "प्रवेश का तरीका", premise: "परिसर का प्रकार", occupancy: "घटना के समय उपस्थिति",
+        search_pattern: "तलाशी का तरीका", vehicle_class: "चोरी गया वाहन", ignition_method: "वाहन कैसे चालू किया",
+        location_type: "वाहन कहाँ खड़ा था", vehicle_used: "स्नैचरों का वाहन", victim_activity: "पीड़ित की गतिविधि",
+        escape_direction: "भागने का रास्ता", machine_type: "एटीएम का प्रकार", attack_method: "एटीएम पर हमले का तरीका", alarm_defeated: "अलार्म",
+        days_apart: "अपराधों के बीच का समय" } };
+const VALUES = {
+  en: { "1": "one person", "2-3": "2–3 people", "4+": "4 or more people", none: "none", cctv_disabled: "CCTV disabled",
+        face_covered: "faces covered", insider_info: "inside information", scouted: "scouted in advance", no_force: "no forced entry",
+        lock_broken: "lock broken", forced_open: "door or window forced", grill_cut: "grill cut", duplicate_key: "duplicate key",
+        wall_breach: "hole made in wall", handle_lock_broken: "handle lock broken", direct_wiring: "wires joined",
+        key_left: "key left in vehicle", towed_or_lifted: "towed or lifted", two_wheeler: "two-wheeler", four_wheeler: "four-wheeler",
+        on_foot: "on foot", early_morning: "early morning", residential_parking: "residential parking", public_parking: "public parking",
+        transit_hub: "railway or bus station", riding_pillion: "riding pillion", waiting_for_transport: "waiting for transport",
+        morning_walk: "on a morning walk", main_road: "main road", lanes: "back lanes", commercial: "commercial vehicle",
+        offsite_kiosk: "off-site kiosk", white_label: "white-label ATM", onsite_branch: "bank-branch ATM", cash_trap: "cash trap",
+        gas_cutting: "gas cutting", physical_forcing: "forced open", not_defeated: "left working", defeated: "disabled",
+        independent_house: "independent house", mixed_use: "shop-cum-residence", row_house: "row house", temporarily_away: "occupants out",
+        vacant_extended: "locked for days", closed_overnight: "closed for the night", closed_extended: "closed for holidays",
+        occupied: "occupied", gas_cutter: "gas cutter" },
+  hi: { "1": "एक व्यक्ति", "2-3": "2–3 व्यक्ति", "4+": "4 या अधिक व्यक्ति", none: "कोई नहीं", day: "दिन", early_morning: "तड़के सुबह", night: "रात",
+        crowbar: "सब्बल", cutter: "कटर", gas_cutter: "गैस कटर", screwdriver: "पेचकस", cctv_disabled: "सीसीटीवी बंद किया",
+        face_covered: "चेहरा ढका", gloves: "दस्ताने", insider_info: "अंदरूनी जानकारी", opportunistic: "मौका देखकर", scouted: "पहले से रेकी",
+        cash: "नकद", documents: "दस्तावेज़", electronics: "इलेक्ट्रॉनिक सामान", gold: "सोना", vehicle: "वाहन", four_wheeler: "चार पहिया वाहन",
+        on_foot: "पैदल", two_wheeler: "दोपहिया वाहन", balcony: "बालकनी", door: "दरवाज़ा", roof: "छत", shutter: "शटर",
+        wall_breach: "दीवार में सेंध", window: "खिड़की", duplicate_key: "डुप्लिकेट चाबी", forced_open: "ज़बरदस्ती खोला", grill_cut: "ग्रिल काटी",
+        lock_broken: "ताला तोड़ा", no_force: "बिना ज़ोर-ज़बरदस्ती", apartment: "फ़्लैट", independent_house: "स्वतंत्र मकान",
+        mixed_use: "दुकान-सह-आवास", office: "कार्यालय", row_house: "रो हाउस", shop: "दुकान", warehouse: "गोदाम",
+        closed_extended: "छुट्टियों में बंद", closed_overnight: "रात भर बंद", occupied: "लोग मौजूद थे", temporarily_away: "लोग बाहर गए थे",
+        vacant_extended: "कई दिनों से बंद", ransacked: "सब उलट-पलट", selective: "चुनिंदा सामान", targeted: "निशाना बनाकर", car: "कार",
+        commercial: "व्यावसायिक वाहन", motorcycle: "मोटरसाइकिल", scooter: "स्कूटर", direct_wiring: "तार जोड़कर",
+        handle_lock_broken: "हैंडल लॉक तोड़ा", key_left: "चाबी वाहन में छूटी", towed_or_lifted: "खींचकर या उठाकर", market: "बाज़ार",
+        public_parking: "सार्वजनिक पार्किंग", residential_parking: "आवासीय पार्किंग", street: "सड़क", transit_hub: "रेलवे या बस स्टेशन",
+        morning_walk: "सुबह की सैर", riding_pillion: "पीछे बैठकर सवारी", shopping: "ख़रीदारी", waiting_for_transport: "वाहन की प्रतीक्षा",
+        walking: "पैदल चलते हुए", highway: "राजमार्ग", lanes: "गलियाँ", main_road: "मुख्य सड़क", offsite_kiosk: "ऑफ़-साइट कियोस्क",
+        onsite_branch: "बैंक शाखा का एटीएम", white_label: "व्हाइट-लेबल एटीएम", cash_trap: "कैश ट्रैप", explosive: "विस्फोटक",
+        gas_cutting: "गैस कटिंग", physical_forcing: "ज़बरदस्ती तोड़ा", skimmer: "स्किमर", defeated: "निष्क्रिय किया", not_defeated: "चालू रहा" } };
+const TOKENS = { en: { "__MISSING__": "not recorded", "__ABSENT__": "not recorded", "__UNKNOWABLE__": "not known" },
+  hi: { "__MISSING__": "दर्ज नहीं", "__ABSENT__": "दर्ज नहीं", "__UNKNOWABLE__": "ज्ञात नहीं" } };
+const TIERS = { strong: "Strong lead", possible: "Worth checking", weak: "Weak lead" };
+
+// Interface text: English is the key; missing Hindi falls back to English.
+const HI = {
+  "Cross-Jurisdiction Linkage": "अंतर-क्षेत्राधिकार अपराध मिलान",
+  "Property-crime MO analysis for investigators": "जाँच अधिकारियों के लिए संपत्ति-अपराध कार्यप्रणाली (MO) विश्लेषण",
+  "Synthetic demo data": "कृत्रिम डेमो डेटा", "All cases in this demo are synthetic": "इस डेमो के सभी मामले कृत्रिम हैं",
+  "Leads": "सुराग", "Series": "शृंखलाएँ", "Find a case": "मामला खोजें", "Checks": "वर्गीकरण जाँच", "How it works": "यह कैसे काम करता है",
+  "Loading…": "लोड हो रहा है…", "Something went wrong: {msg}": "कुछ गड़बड़ हुई: {msg}",
+  "State": "राज्य", "District": "ज़िला", "Crime type": "अपराध का प्रकार", "All states": "सभी राज्य", "All districts": "सभी ज़िले",
+  "All crime types": "सभी अपराध प्रकार", "← Previous": "← पिछला", "Next →": "अगला →", "{from}–{to} of {total}": "{total} में से {from}–{to}",
+  "Strong lead": "मज़बूत सुराग", "Worth checking": "जाँच योग्य", "Weak lead": "कमज़ोर सुराग",
+  "about 1 in {n} unrelated cases look this alike": "असंबंधित मामलों में लगभग {n} में से 1 ही इतने मिलते-जुलते होते हैं",
+  "rarer than 1 in {n} unrelated cases": "असंबंधित मामलों में {n} में से 1 से भी कम",
+  "same day": "उसी दिन", "{n} day": "{n} दिन", "{n} days": "{n} दिन", "{n} weeks": "{n} सप्ताह", "{n} months": "{n} महीने",
+  "{n} years": "{n} वर्ष", "time unknown": "समय अज्ञात", "{gap} apart": "{gap} के अंतर पर", "under 1%": "1% से कम",
+  "Both FIRs:": "दोनों एफआईआर में:", "{field}: {value} ({pct} of {of})": "{field}: {value} ({of} में से {pct})",
+  "Crime type doubtful": "अपराध-प्रकार संदिग्ध", "Across states": "अलग-अलग राज्य", "Different police stations": "अलग-अलग थाने", "Other state": "दूसरा राज्य",
+  "✓ true link (synthetic truth)": "✓ वास्तविक संबंध (कृत्रिम सत्य)", "not a true link in the synthetic truth": "कृत्रिम सत्य में वास्तविक संबंध नहीं",
+  "Same district": "एक ही ज़िला", "Other districts, same state": "एक ही राज्य, अलग ज़िले", "Other states": "अलग राज्य",
+  "Different FIRs in one district — often different police stations.": "एक ही ज़िले की अलग-अलग एफआईआर — अक्सर अलग-अलग थानों की।",
+  "Matches that cross district lines inside a state.": "एक राज्य के भीतर ज़िले की सीमा पार करने वाले मिलान।",
+  "Matches across state borders — the hardest to confirm.": "राज्य की सीमा पार के मिलान — पुष्टि करना सबसे कठिन।",
+  "{n} leads": "{n} सुराग",
+  "In testing, about 1 in {k} leads like these was a real serial link": "परीक्षण में, ऐसे लगभग {k} में से 1 सुराग वास्तविक शृंखलाबद्ध अपराध निकला",
+  "1 in {k}": "{k} में 1",
+  " — about {x}× better than reviewing case pairs at random. Each lead is a reason to look, not a finding.":
+    " — बिना क्रम के मामलों की जोड़ियाँ देखने से लगभग {x} गुना बेहतर। हर सुराग देखने का कारण है, निष्कर्ष नहीं।",
+  "Low confidence. In testing, only {a} of {b} leads like these were real links. ": "कम भरोसा। परीक्षण में, ऐसे {b} सुरागों में से केवल {a} वास्तविक संबंध निकले। ",
+  "Serial offenders mostly work within one state, so two FIRs from different states that look alike are usually coincidence. ":
+    "शृंखलाबद्ध अपराधी ज़्यादातर एक ही राज्य में सक्रिय रहते हैं, इसलिए अलग राज्यों की दो मिलती-जुलती एफआईआर प्रायः संयोग होती हैं। ",
+  "These are shown because no keyword search could connect them at all — check them only when something else points the same way.":
+    "इन्हें इसलिए दिखाया गया है क्योंकि कोई कीवर्ड खोज इन्हें जोड़ ही नहीं सकती — इन्हें तभी जाँचें जब कोई और सबूत भी इसी ओर इशारा करे।",
+  "No leads match these filters.": "इन फ़िल्टरों से कोई सुराग नहीं मिला।", "Leads to review": "जाँच के लिए सुराग",
+  "Pairs of FIRs whose modus operandi and timing match more closely than unrelated cases almost ever do. The system found them by comparing every FIR with every other — nobody had to suspect them first.":
+    "एफआईआर की वे जोड़ियाँ जिनकी कार्यप्रणाली (MO) और समय आपस में इतने मिलते हैं जितना असंबंधित मामलों में लगभग कभी नहीं होता। सिस्टम ने हर एफआईआर की तुलना हर दूसरी एफआईआर से करके इन्हें खोजा — किसी को पहले से शक होना ज़रूरी नहीं था।",
+  "{n} leads · strongest first": "{n} सुराग · सबसे मज़बूत पहले",
+  "{n} leads · strongest first; leads involving a FIR whose crime type looks wrong are listed last": "{n} सुराग · सबसे मज़बूत पहले; संदिग्ध अपराध-प्रकार वाली एफआईआर के सुराग अंत में",
+  "Possible series": "संभावित शृंखलाएँ",
+  "Groups of FIRs joined by strong matches — the same MO turning up again and again, often across district lines. Each group is built only from links an analyst would also see in the leads inbox; links across state borders are left out because in testing they were almost never real.":
+    "मज़बूत मिलानों से जुड़ी एफआईआर के समूह — वही कार्यप्रणाली बार-बार, अक्सर ज़िलों की सीमा पार। हर समूह केवल उन्हीं कड़ियों से बना है जो सुराग सूची में भी दिखती हैं; राज्य-सीमा पार की कड़ियाँ शामिल नहीं, क्योंकि परीक्षण में वे लगभग कभी सही नहीं निकलीं।",
+  "In testing, about 1 in {k} pairs of FIRs inside these series were the same offender.": "परीक्षण में, इन शृंखलाओं के भीतर एफआईआर की लगभग {k} में से 1 जोड़ी एक ही अपराधी की थी।",
+  " A series is a set of links to check one by one, not a confirmed gang.": " शृंखला एक-एक कर जाँचने लायक कड़ियों का समूह है, पुष्ट गिरोह नहीं।",
+  "{n} FIRs": "{n} एफआईआर", "{n} series · most districts first": "{n} शृंखलाएँ · सबसे ज़्यादा ज़िलों वाली पहले",
+  "Weakest link:": "सबसे कमज़ोर कड़ी:", "Same in every FIR:": "हर एफआईआर में समान:",
+  "✓ one offender (synthetic truth)": "✓ एक ही अपराधी (कृत्रिम सत्य)",
+  "{n} different offenders in the synthetic truth": "कृत्रिम सत्य में {n} अलग-अलग अपराधी",
+  "No series match these filters.": "इन फ़िल्टरों से कोई शृंखला नहीं मिली।", "← All series": "← सभी शृंखलाएँ",
+  "Possible series · {n} FIRs": "संभावित शृंखला · {n} एफआईआर", "{first} to {last} · {span}": "{first} से {last} · {span}",
+  "Where": "कहाँ", "When": "कब", "FIRs in order": "क्रम से एफआईआर", "FIR no.": "एफआईआर सं.", "Police station": "थाना",
+  "Occurred": "घटना", "Gap": "अंतराल", "The links that join them": "इन्हें जोड़ने वाली कड़ियाँ", "Compare": "तुलना करें",
+  "Map tiles could not load; showing positions only.": "नक्शा लोड नहीं हुआ; केवल स्थान दिखाए गए हैं।",
+  "Read each link on its own: a group can contain a coincidental match.": "हर कड़ी को अलग से परखें: समूह में कोई संयोगवश मिलान भी हो सकता है।",
+  "Crime-type checks": "अपराध-प्रकार जाँच",
+  "FIRs whose MO reads like a different crime type from the one recorded — for example a \"house burglary\" through a shop shutter while the premises were closed for the holidays. A misfiled FIR is compared with the wrong set of cases, so its real links can be missed.":
+    "वे एफआईआर जिनकी कार्यप्रणाली दर्ज अपराध-प्रकार से अलग किसी प्रकार जैसी लगती है — जैसे \"घर में सेंधमारी\" जिसमें दुकान का शटर तोड़ा गया और परिसर छुट्टियों में बंद था। ग़लत वर्ग में दर्ज एफआईआर की तुलना ग़लत मामलों से होती है, इसलिए उसके असली संबंध छूट सकते हैं।",
+  "In testing, {a} of {b} flagged FIRs really had been recorded under the wrong type, and the check found {r}% of all misfiled FIRs.":
+    "परीक्षण में, चिह्नित {b} एफआईआर में से {a} वास्तव में ग़लत प्रकार में दर्ज थीं, और इस जाँच ने सभी ग़लत दर्ज एफआईआर में से {r}% पकड़ीं।",
+  "Recorded as {a} — MO looks like {b}": "{a} के रूप में दर्ज — कार्यप्रणाली {b} जैसी",
+  "{field}: {value} — {p1} of {of1}, {p2} of {of2}": "{field}: {value} — {of1} में {p1}, {of2} में {p2}",
+  "Open case": "मामला खोलें", "{n} FIRs to re-check": "पुनः जाँच के लिए {n} एफआईआर", "No FIRs match these filters.": "इन फ़िल्टरों से कोई एफआईआर नहीं मिली।",
+  "Open any FIR to see which cases elsewhere look like the same offender's work.": "कोई भी एफआईआर खोलें और देखें कि और कहाँ के मामले उसी अपराधी का काम लगते हैं।",
+  "FIR number, police station or district — e.g. Nashik, MH-PUN-03": "एफआईआर संख्या, थाना या ज़िला — जैसे Nashik, MH-PUN-03",
+  "Search cases": "मामले खोजें", "Search": "खोजें", "Or try an example:": "या कोई उदाहरण देखें:",
+  "Examples are a random sample of test cases, not picked for how well they score.": "उदाहरण परीक्षण मामलों का यादृच्छिक नमूना हैं, अच्छे स्कोर के आधार पर नहीं चुने गए।",
+  "Type at least 2 characters.": "कम से कम 2 अक्षर लिखें।", "Searching…": "खोज जारी…", "No cases found.": "कोई मामला नहीं मिला।",
+  "Comparing with every case in the pool…": "हर मामले से तुलना हो रही है…", "← Find another case": "← दूसरा मामला खोजें",
+  "This case": "यह मामला", "Cases that may be linked": "संभवतः जुड़े मामले",
+  "Ranked out of every {crime} FIR on record, in every district and state. Open any lead to compare the two FIRs side by side.":
+    "हर ज़िले और राज्य की सभी दर्ज \"{crime}\" एफआईआर में से क्रमबद्ध। दोनों एफआईआर की आमने-सामने तुलना के लिए कोई भी सुराग खोलें।",
+  "Location is deliberately not used to rank, so matches from other states appear here. In testing they were rarely the same offender — matches in the same district were far more often real.":
+    "रैंकिंग में जानबूझकर स्थान का उपयोग नहीं होता, इसलिए दूसरे राज्यों के मिलान भी यहाँ दिखते हैं। परीक्षण में वे शायद ही कभी एक ही अपराधी के निकले — एक ही ज़िले के मिलान कहीं ज़्यादा बार सही थे।",
+  "Same crime type ({n} FIRs checked)": "समान अपराध प्रकार ({n} एफआईआर जाँची गईं)", "Other property crimes": "अन्य संपत्ति अपराध",
+  "These compare only the offender's personal habits (time, group size, concealment, travel), because a different crime type has a different MO. They are weak leads — useful because keyword search on IPC sections can never connect different offences.":
+    "यहाँ केवल अपराधी की निजी आदतों (समय, समूह का आकार, पहचान छिपाना, आवागमन) की तुलना होती है, क्योंकि अलग अपराध-प्रकार की कार्यप्रणाली अलग होती है। ये कमज़ोर सुराग हैं — उपयोगी इसलिए कि आईपीसी धाराओं पर कीवर्ड खोज अलग-अलग अपराधों को कभी नहीं जोड़ सकती।",
+  "Offence": "अपराध", "Registered": "दर्ज",
+  "This state records MO only as free text; structured details are pending extraction.": "यह राज्य कार्यप्रणाली केवल मुक्त पाठ में दर्ज करता है; संरचित विवरण निकालना बाकी है।",
+  "The MO in this FIR reads like {likely}, not {recorded}.": "इस एफआईआर की कार्यप्रणाली {recorded} नहीं, {likely} जैसी लगती है।",
+  " Check the classification — if it is wrong, its real links are filed under the other type.": " वर्गीकरण जाँचें — अगर वह ग़लत है, तो इसके असली संबंध दूसरे प्रकार में दर्ज हैं।",
+  "Part of a possible series of {n} FIRs.": "{n} एफआईआर की संभावित शृंखला का हिस्सा।", "View series": "शृंखला देखें",
+  "← Back": "← वापस", "The evidence comes from {n} shared detail": "सबूत {n} समान विवरण से आता है",
+  "The evidence comes from {n} shared details": "सबूत {n} समान विवरणों से आता है", " and the {gap} between them": " और उनके बीच {gap} के अंतर से",
+  ", set against {n} difference": ", {n} अंतर इसके विरुद्ध है", ", set against {n} differences": ", {n} अंतर इसके विरुद्ध हैं",
+  "This is a reason to investigate, not proof — confirm through the FIRs, witnesses and recovered property.":
+    "यह जाँच का कारण है, सबूत नहीं — एफआईआर, गवाहों और बरामद संपत्ति से पुष्टि करें।",
+  "Different crime types: only the offender's personal habits are compared, so this is a weak lead by design.":
+    "अलग अपराध प्रकार: केवल अपराधी की निजी आदतों की तुलना होती है, इसलिए यह स्वभावतः कमज़ोर सुराग है।",
+  "FIR A": "एफआईआर A", "FIR B": "एफआईआर B", "Why these may be the same offender": "ये एक ही अपराधी के क्यों हो सकते हैं",
+  "Serial offences usually come in bursts — a short gap supports a link.": "शृंखलाबद्ध अपराध अक्सर थोड़े-थोड़े अंतराल पर होते हैं — छोटा अंतर संबंध का समर्थन करता है।",
+  "A long gap makes the same offender less likely.": "लंबा अंतर एक ही अपराधी की संभावना घटाता है।",
+  "The gap neither supports nor weakens a link.": "यह अंतर संबंध को न मज़बूत करता है, न कमज़ोर।",
+  "{field} — same in both FIRs. ": "{field} — दोनों एफआईआर में समान। ",
+  "Fewer than 1 in 100 {of} have this, so it is a telling detail.": "{of} में से 100 में 1 से भी कम में यह होता है, इसलिए यह अहम विवरण है।",
+  "Only {pct} of {of} have this, so it is a telling detail.": "{of} में से केवल {pct} में यह होता है, इसलिए यह अहम विवरण है।",
+  "{pct} of {of} have this.": "{of} में से {pct} में यह होता है।",
+  "Common — {pct} of {of} have this, so it counts for little.": "आम बात — {of} में से {pct} में यह होता है, इसलिए इसका वज़न कम है।",
+  "{field} — different in the two FIRs.": "{field} — दोनों एफआईआर में अलग।", "{a} vs {b}": "{a} बनाम {b}",
+  "no effect": "कोई असर नहीं", "strongly supports": "पुरज़ोर समर्थन", "supports": "समर्थन", "slightly supports": "हल्का समर्थन",
+  "strongly weakens": "काफ़ी कमज़ोर करता है", "weakens": "कमज़ोर करता है", "slightly weakens": "थोड़ा कमज़ोर करता है",
+  "Where they differ": "कहाँ अलग हैं", "Not recorded in one of the FIRs, so not used: {list}.": "किसी एक एफआईआर में दर्ज नहीं, इसलिए उपयोग नहीं हुआ: {list}।",
+  "FIR A — narrative": "एफआईआर A — विवरण", "FIR B — narrative": "एफआईआर B — विवरण", "No narrative.": "कोई विवरण नहीं।",
+  ". ": "। ",
+  "FIR text is shown as recorded.": "एफआईआर का पाठ जैसा दर्ज है वैसा दिखाया गया है।",
+  "Record your assessment": "अपना आकलन दर्ज करें", "Officer name (demo — not verified)": "अधिकारी का नाम (डेमो — सत्यापित नहीं)",
+  "Note for the case file (optional)": "केस फ़ाइल के लिए टिप्पणी (वैकल्पिक)", "Linked": "जुड़े हैं", "Needs investigation": "जाँच ज़रूरी",
+  "Not linked": "नहीं जुड़े", "Print report": "रिपोर्ट प्रिंट करें", "Recorded: {v}": "दर्ज: {v}",
+  "linked": "जुड़े हैं", "not linked": "नहीं जुड़े", "needs investigation": "जाँच ज़रूरी", "anonymous": "अनाम",
+  "Every lookup and decision is logged with the officer and time for audit.": "ऑडिट के लिए हर खोज और निर्णय अधिकारी और समय के साथ दर्ज होता है।",
+  "Earlier decisions on this pair": "इस जोड़ी पर पहले के निर्णय", "No decisions yet.": "अभी कोई निर्णय नहीं।",
+  "Police record the modus operandi of every property crime. Offenders repeat their habits — how they enter, what tools they carry, when they strike. This system compares every FIR's MO against every other FIR of the same kind, across all districts and states, and brings the most similar pairs to an analyst.":
+    "पुलिस हर संपत्ति अपराध की कार्यप्रणाली दर्ज करती है। अपराधी अपनी आदतें दोहराते हैं — कैसे घुसते हैं, कौन से औज़ार रखते हैं, कब वारदात करते हैं। यह सिस्टम हर एफआईआर की कार्यप्रणाली की तुलना सभी ज़िलों और राज्यों की उसी प्रकार की हर दूसरी एफआईआर से करता है और सबसे मिलती-जुलती जोड़ियाँ विश्लेषक के सामने रखता है।",
+  "1 · Rare habits count most": "1 · दुर्लभ आदतें सबसे अहम",
+  "Two FIRs that both say \"entered by breaking the lock\" prove little — most burglars do. Both saying \"entered through the roof\" or \"disabled the CCTV\" is far more telling. Each shared detail is weighted by how rare it is.":
+    "दो एफआईआर में \"ताला तोड़कर घुसे\" लिखा होना ज़्यादा कुछ साबित नहीं करता — ज़्यादातर सेंधमार ऐसा करते हैं। दोनों में \"छत से घुसे\" या \"सीसीटीवी बंद किया\" होना कहीं ज़्यादा अहम है। हर समान विवरण को उसकी दुर्लभता के हिसाब से वज़न मिलता है।",
+  "2 · Timing matters": "2 · समय मायने रखता है",
+  "Serial offenders strike in bursts. Two similar FIRs three weeks apart are more telling than two years apart.":
+    "शृंखलाबद्ध अपराधी थोड़े-थोड़े समय में लगातार वारदात करते हैं। तीन सप्ताह के अंतर वाली दो मिलती-जुलती एफआईआर, दो साल के अंतर वाली से ज़्यादा अहम हैं।",
+  "3 · Strength you can read": "3 · समझ में आने वाली मज़बूती",
+  "Every lead says how often unrelated FIRs look this alike — \"about 1 in 25,000\". That is measured on two lakh random unrelated pairs, not guessed.":
+    "हर सुराग बताता है कि असंबंधित एफआईआर कितनी बार इतनी मिलती-जुलती होती हैं — \"लगभग 25,000 में 1\"। यह दो लाख यादृच्छिक असंबंधित जोड़ियों पर मापा गया है, अनुमान नहीं।",
+  "4 · A human decides": "4 · निर्णय इंसान का",
+  "The system never names a person and never claims a link. It narrows thousands of FIRs to a handful worth reading; officers confirm or reject, and every decision is logged.":
+    "सिस्टम कभी किसी व्यक्ति का नाम नहीं लेता और कभी संबंध का दावा नहीं करता। यह हज़ारों एफआईआर को पढ़ने लायक कुछ मामलों तक सीमित करता है; अधिकारी पुष्टि या अस्वीकार करते हैं, और हर निर्णय दर्ज होता है।",
+  "How well it works (synthetic test data)": "यह कितना कारगर है (कृत्रिम परीक्षण डेटा)",
+  "of cases have a true linked FIR in their top 10 — out of about 15,000 of the same crime type": "मामलों में असली जुड़ी एफआईआर शीर्ष 10 में आती है — उसी प्रकार की लगभग 15,000 एफआईआर में से",
+  "same-district leads in the inbox was a real serial link, found with nobody asking": "एक ही ज़िले के सुरागों में से वास्तविक शृंखलाबद्ध संबंध निकला — बिना किसी के पूछे खोजा गया",
+  "leads across districts of one state was a real link": "एक राज्य के अलग ज़िलों के सुरागों में से वास्तविक संबंध निकला",
+  "cross-state leads were real — so they are marked low confidence, not hidden": "अलग राज्यों के सुराग वास्तविक निकले — इसलिए उन्हें छिपाया नहीं, कम भरोसे वाला चिह्नित किया गया",
+  "pairs of FIRs inside a possible series were the same offender": "संभावित शृंखला के भीतर एफआईआर की जोड़ियाँ एक ही अपराधी की निकलीं",
+  "FIRs flagged as misfiled really were — {r}% of all misfiled FIRs caught": "ग़लत दर्ज बताई गई एफआईआर वास्तव में ग़लत दर्ज थीं — सभी ग़लत दर्ज में से {r}% पकड़ी गईं",
+  "for links between different crime types — weak, but keyword search on IPC sections finds none at all": "अलग अपराध प्रकारों के बीच संबंधों में — कमज़ोर, पर आईपीसी धाराओं पर कीवर्ड खोज इनमें से एक भी नहीं ढूँढ पाती",
+  "Measured on offenders held out from training. The data is synthetic: these numbers show the method works on data built to resemble FIRs, not how it will perform on real records.":
+    "प्रशिक्षण से अलग रखे गए अपराधियों पर मापा गया। डेटा कृत्रिम है: ये आँकड़े दिखाते हैं कि विधि एफआईआर जैसे बनाए गए डेटा पर काम करती है, न कि असली रिकॉर्ड पर इसका प्रदर्शन कैसा होगा।",
+  "Safeguards": "सुरक्षा उपाय",
+  "No caste, religion or community field exists anywhere in the system.": "सिस्टम में कहीं भी जाति, धर्म या समुदाय का कोई क्षेत्र नहीं है।",
+  "Personal details are kept out of matching entirely; matching sees only how the crime was committed.": "मिलान में व्यक्तिगत विवरण बिल्कुल शामिल नहीं; मिलान केवल यह देखता है कि अपराध कैसे किया गया।",
+  "Location is never used to score a match — which is what lets links across states surface at all.": "मिलान के स्कोर में स्थान का कभी उपयोग नहीं होता — इसी से राज्यों के पार संबंध सामने आ पाते हैं।",
+  "Scores are never shown as probabilities, because a strong-looking number invites false certainty.": "स्कोर कभी प्रायिकता के रूप में नहीं दिखाए जाते, क्योंकि मज़बूत दिखता अंक झूठा भरोसा पैदा करता है।",
+  "Officer names on this demo are typed, not verified; a production deployment signs officers in.": "इस डेमो में अधिकारियों के नाम लिखे जाते हैं, सत्यापित नहीं होते; असली तैनाती में अधिकारी लॉग-इन करते हैं।",
+};
+
+function t(s, vars = {}) {
+  const text = LANG === "hi" && HI[s] != null ? HI[s] : s;
+  return text.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? "");
+}
+const num = n => Number(n).toLocaleString("en-IN");
+const val = v => v == null ? "—" : TOKENS[LANG][v] || String(v).split(";").filter(Boolean)
+  .map(x => VALUES[LANG][x] || VALUES.en[x] || x.replace(/_/g, " ")).join(", ") || VALUES[LANG].none || "none";
+const field = f => FIELDS[LANG][f] || FIELDS.en[f] || f.replace(/_/g, " ");
+const crime = c => CRIMES[LANG][c] || String(c || "").replace(/_/g, " ").toLowerCase();
+const cases = c => CRIME_CASES[LANG][c] || CRIME_CASES[LANG].CROSS_TYPE;
+const state = s => STATES[LANG][s] || s;
+const district = d => (LANG === "hi" && DISTRICTS_HI[d]) || d;
+const where = (d, s) => `${district(d)}, ${state(s)}`;
+const date = d => d ? new Date(d).toLocaleDateString(LANG === "hi" ? "hi-IN" : "en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—";
+const pct = s => s < 0.01 ? t("under 1%") : `${Math.round(s * 100)}%`;
+function gapText(days) {
+  if (days == null) return t("time unknown");
+  if (days < 1) return t("same day");
+  if (days < 14) return t(days === 1 ? "{n} day" : "{n} days", { n: days });
+  if (days < 60) return t("{n} weeks", { n: Math.round(days / 7) });
+  if (days < 730) return t("{n} months", { n: Math.round(days / 30.4) });
+  return t("{n} years", { n: (days / 365).toFixed(1) });
+}
+function daysBetween(a, b) { return a && b ? Math.round(Math.abs(new Date(a) - new Date(b)) / 864e5) : null; }
+function sig2(n) { if (n < 100) return num(n); const p = 10 ** (Math.floor(Math.log10(n)) - 1); return num(Math.round(n / p) * p); }
+function rarityText(x) { return t(x.rarer_than_measured ? "rarer than 1 in {n} unrelated cases" : "about 1 in {n} unrelated cases look this alike", { n: sig2(x.one_in) }); }
+function strengthWord(b) {
+  const a = Math.abs(b), dir = b > 0 ? "supports" : "weakens";
+  return t(a < 0.05 ? "no effect" : a >= 2 ? `strongly ${dir}` : a >= 0.75 ? dir : `slightly ${dir}`);
+}
+function reasonPhrase(r, crimeType) {
+  const v = val(r.shared_value ?? r.value);
+  return r.share != null ? t("{field}: {value} ({pct} of {of})", { field: field(r.field), value: v, pct: pct(r.share), of: cases(crimeType) })
+                         : `${field(r.field)}: ${v}`;
+}
+
+// ---------- DOM helpers ----------
 function h(tag, attrs = {}, ...kids) {
   const n = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) {
@@ -220,48 +451,70 @@ function h(tag, attrs = {}, ...kids) {
   for (const c of kids.flat(Infinity)) if (c != null && c !== false) n.append(c instanceof Node ? c : String(c));
   return n;
 }
-const val = v => v == null ? "—" : TOKENS[v] || String(v).split(";").filter(Boolean).map(x => VALUES[x] || x.replace(/_/g, " ")).join(", ") || "none";
-const field = f => FIELDS[f] || f.replace(/_/g, " ");
-const crime = c => CRIMES[c] || String(c || "").replace(/_/g, " ").toLowerCase();
-const state = s => STATES[s] || s;
-const date = d => d ? new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—";
-function gapText(days) {
-  if (days == null) return "time unknown";
-  if (days < 1) return "same day";
-  if (days < 14) return `${days} day${days === 1 ? "" : "s"}`;
-  if (days < 60) return `${Math.round(days / 7)} weeks`;
-  if (days < 730) return `${Math.round(days / 30.4)} months`;
-  return `${(days / 365).toFixed(1)} years`;
-}
-const pct = s => s < 0.01 ? "under 1%" : `${Math.round(s * 100)}%`;
-function daysBetween(a, b) { return a && b ? Math.round(Math.abs(new Date(a) - new Date(b)) / 864e5) : null; }
-function sig2(n) { if (n < 100) return n.toLocaleString("en-IN"); const p = 10 ** (Math.floor(Math.log10(n)) - 1); return (Math.round(n / p) * p).toLocaleString("en-IN"); }
-function rarityText(x) { return x.rarer_than_measured ? `rarer than 1 in ${sig2(x.one_in)} unrelated cases` : `about 1 in ${sig2(x.one_in)} unrelated cases look this alike`; }
-function strengthWord(b) {
-  const a = Math.abs(b), dir = b > 0 ? "supports" : "weakens";
-  return a < 0.05 ? "no effect" : a >= 2 ? `strongly ${dir}` : a >= 0.75 ? dir : `slightly ${dir}`;
-}
+function svgEl(markup) { const d = document.createElement("div"); d.innerHTML = markup; return d.firstElementChild; }
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 function tierBadge(x) {
   const lit = { strong: 3, possible: 2, weak: 1 }[x.tier] || 1;
   return h("span", { class: `tier ${x.tier}` }, h("span", { class: "dots", "aria-hidden": "true" },
-    [1, 2, 3].map(i => h("i", { class: i <= lit ? "on" : "" }))), x.tier_label);
+    [1, 2, 3].map(i => h("i", { class: i <= lit ? "on" : "" }))), t(TIERS[x.tier] || x.tier_label));
 }
-async function api(path, opts) {
-  const r = await fetch(API + path, opts);
+function officer() { try { return localStorage.getItem("officer") || ""; } catch (e) { return ""; } }
+async function api(path, opts = {}) {
+  const headers = { ...(opts.headers || {}) };
+  if (officer()) headers["x-officer"] = officer();
+  const r = await fetch(API + path, { ...opts, headers });
   const body = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(body.error || r.statusText);
   return body;
 }
-function reasonPhrase(r, crimeType) {
-  if (r.kind === "timing") return `${gapText(r.days)} apart`;
-  const v = val(r.shared_value ?? r.value);
-  return `${field(r.field)}: ${v}` + (r.share != null ? ` (${pct(r.share)} of ${CRIME_CASES[crimeType] || "cases"})` : "");
+const view = document.getElementById("view");
+function render(...nodes) { view.replaceChildren(...nodes.flat(Infinity).filter(n => n != null && n !== false)); window.scrollTo(0, 0); }
+function loading(text = "Loading…") { render(h("div", { class: "empty", text: t(text) })); }
+function fail(e) { render(h("div", { class: "empty", text: t("Something went wrong: {msg}", { msg: e.message }) })); }
+function openOnClick(go) { return { tabindex: "0", onclick: go, onkeydown: e => { if (e.key === "Enter") go(); } }; }
+
+// ---------- app bar ----------
+let current = "leads";
+function renderBar() {
+  document.documentElement.lang = LANG;
+  const items = [["leads", "Leads"], ["series", "Series"], ["search", "Find a case"], ["checks", "Checks"], ["about", "How it works"]];
+  document.getElementById("bar").replaceChildren(
+    h("div", { class: "logo" },
+      svgEl('<div class="mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="2"><circle cx="4" cy="9" r="2.5"/><circle cx="14" cy="4" r="2.5"/><circle cx="14" cy="14" r="2.5"/><path d="M6.3 8l5.4-3M6.3 10l5.4 3"/></svg></div>'),
+      h("div", {}, t("Cross-Jurisdiction Linkage"), h("small", {}, t("Property-crime MO analysis for investigators")))),
+    h("span", { class: "pill-synth", title: t("All cases in this demo are synthetic") }, t("Synthetic demo data")),
+    h("nav", { "aria-label": "Main" },
+      items.map(([id, label]) => h("a", { href: `#/${id}`, "aria-current": current === id ? "page" : "false" }, t(label))),
+      h("button", { class: "lang", lang: LANG === "hi" ? "en" : "hi", onclick: () => {
+        LANG = LANG === "hi" ? "en" : "hi";
+        try { localStorage.setItem("lang", LANG); } catch (e) {}
+        route();
+      } }, LANG === "hi" ? "English" : "हिंदी")));
 }
-const view = $("#view");
-function render(...nodes) { view.replaceChildren(...nodes); window.scrollTo(0, 0); }
-function setNav(name) { document.querySelectorAll("nav a").forEach(a => a.setAttribute("aria-current", a.dataset.nav === name ? "page" : "false")); }
-function loading(text = "Loading…") { render(h("div", { class: "empty", text })); }
-function fail(e) { render(h("div", { class: "empty", text: "Something went wrong: " + e.message })); }
+function setNav(name) { current = name; renderBar(); }
+
+function filterBar(st, onChange) {
+  const stateSel = h("select", { onchange: e => onChange({ state: e.target.value, district: "" }) },
+    h("option", { value: "" }, t("All states")), Object.keys(META.places).map(s => h("option", { value: s, selected: st.state === s }, state(s))));
+  const districts = st.state ? META.places[st.state] : Object.values(META.places).flat().sort();
+  const distSel = h("select", { onchange: e => onChange({ district: e.target.value }) },
+    h("option", { value: "" }, t("All districts")), districts.map(d => h("option", { value: d, selected: st.district === d }, district(d))));
+  const crimeSel = h("select", { onchange: e => onChange({ crime_type: e.target.value }) },
+    h("option", { value: "" }, t("All crime types")), META.crime_types.map(c => h("option", { value: c, selected: st.crime_type === c }, crime(c))));
+  return h("div", { class: "filters" },
+    h("label", {}, t("State"), stateSel), h("label", {}, t("District"), distSel), h("label", {}, t("Crime type"), crimeSel));
+}
+function pager(data, st, size, redraw) {
+  return h("div", { class: "pager" },
+    h("button", { class: "btn", disabled: st.offset === 0, onclick: () => { st.offset = Math.max(0, st.offset - size); redraw(); } }, t("← Previous")),
+    h("span", { class: "muted small" }, t("{from}–{to} of {total}", { from: data.total ? data.offset + 1 : 0, to: Math.min(data.offset + size, data.total), total: num(data.total) })),
+    h("button", { class: "btn", disabled: data.offset + size >= data.total, onclick: () => { st.offset += size; redraw(); } }, t("Next →")));
+}
+function queryOf(st, extra = {}) {
+  const q = new URLSearchParams({ limit: "20", offset: String(st.offset), ...extra });
+  for (const k of ["state", "district", "crime_type"]) if (st[k]) q.set(k, st[k]);
+  return q;
+}
 
 // ---------- leads ----------
 const LANES = [
@@ -271,122 +524,283 @@ const LANES = [
 const leadState = { lane: "same_district", state: "", district: "", crime_type: "", offset: 0 };
 async function showLeads() {
   setNav("leads");
-  const q = new URLSearchParams({ limit: "20", offset: String(leadState.offset), lane: leadState.lane });
-  for (const k of ["state", "district", "crime_type"]) if (leadState[k]) q.set(k, leadState[k]);
   loading();
   let data;
-  try { data = await api(`/leads?${q}`); } catch (e) { return fail(e); }
+  try { data = await api(`/leads?${queryOf(leadState, { lane: leadState.lane })}`); } catch (e) { return fail(e); }
   const reset = patch => { Object.assign(leadState, patch, { offset: 0 }); showLeads(); };
-
-  const stateSel = h("select", { onchange: e => reset({ state: e.target.value, district: "" }) },
-    h("option", { value: "" }, "All states"), Object.keys(META.places).map(s => h("option", { value: s, selected: leadState.state === s }, state(s))));
-  const districts = leadState.state ? META.places[leadState.state] : Object.values(META.places).flat().sort();
-  const distSel = h("select", { onchange: e => reset({ district: e.target.value }) },
-    h("option", { value: "" }, "All districts"), districts.map(d => h("option", { value: d, selected: leadState.district === d }, d)));
-  const crimeSel = h("select", { onchange: e => reset({ crime_type: e.target.value }) },
-    h("option", { value: "" }, "All crime types"), META.crime_types.map(c => h("option", { value: c, selected: leadState.crime_type === c }, crime(c))));
-
-  const lanes = h("div", { class: "lanes", role: "tablist", "aria-label": "Where the two FIRs are" },
+  const lanes = h("div", { class: "lanes", role: "tablist", "aria-label": t("Where") },
     LANES.map(([id, label]) => h("button", { role: "tab", "aria-selected": String(leadState.lane === id), class: "lane",
-      onclick: () => reset({ lane: id }) }, h("b", {}, label), h("span", {}, `${(data.lanes[id] || 0).toLocaleString("en-IN")} leads`))));
+      onclick: () => reset({ lane: id }) }, h("b", {}, t(label)), h("span", {}, t("{n} leads", { n: num(data.lanes[id] || 0) })))));
 
   const lq = META.lead_quality, lane = LANES.find(l => l[0] === leadState.lane);
   const quality = lq && lq[leadState.lane];
   let notice = null;
-  if (quality && quality.leads) {
-    if (quality.true_links) {
-      notice = h("div", { class: "notice info" },
-        h("b", {}, `In testing, ${quality.true_links} of ${quality.leads} leads like these were real serial links`),
-        ` — about ${sig2(Math.round(quality.true_link_rate / lq.chance_rate))}× better than reviewing case pairs at random. Each lead is a reason to look, not a finding.`);
-    } else {
-      notice = h("div", { class: "notice caution" },
-        h("b", {}, `Low confidence. In testing, none of ${quality.leads} leads like these were real links. `),
-        "Serial offenders mostly work within one state, so two FIRs from different states that look alike are usually coincidence. ",
-        "These are shown because no keyword search could connect them at all — check them only when something else points the same way.");
-    }
+  if (quality && quality.n) {
+    notice = quality.rate > 0.005
+      ? h("div", { class: "notice info" },
+          h("b", {}, t("In testing, about 1 in {k} leads like these was a real serial link", { k: Math.round(1 / quality.rate) })),
+          t(" — about {x}× better than reviewing case pairs at random. Each lead is a reason to look, not a finding.",
+            { x: sig2(Math.round(quality.rate / lq.chance_rate)) }))
+      : h("div", { class: "notice caution" },
+          h("b", {}, t("Low confidence. In testing, only {a} of {b} leads like these were real links. ", { a: num(quality.true_all_offenders), b: num(quality.n) })),
+          t("Serial offenders mostly work within one state, so two FIRs from different states that look alike are usually coincidence. "),
+          t("These are shown because no keyword search could connect them at all — check them only when something else points the same way."));
   }
-
   const list = h("div", { class: "leads" });
-  if (!data.items.length) list.append(h("div", { class: "empty", text: "No leads match these filters." }));
+  if (!data.items.length) list.append(h("div", { class: "empty", text: t("No leads match these filters.") }));
   for (const l of data.items) list.append(leadCard(l));
-
   render(
-    h("h1", {}, "Leads to review"),
-    h("p", { class: "lede" }, "Pairs of FIRs whose modus operandi and timing match more closely than unrelated cases almost ever do. ",
-      "The system found them by comparing every FIR with every other — nobody had to suspect them first."),
-    lanes,
-    h("p", { class: "muted small lane-help" }, lane[2]),
-    h("div", { class: "filters" },
-      h("label", {}, "State", stateSel), h("label", {}, "District", distSel), h("label", {}, "Crime type", crimeSel)),
-    notice,
-    h("p", { class: "muted small" }, `${data.total.toLocaleString("en-IN")} leads · strongest first`),
-    list,
-    h("div", { class: "pager" },
-      h("button", { class: "btn", disabled: leadState.offset === 0, onclick: () => { leadState.offset = Math.max(0, leadState.offset - 20); showLeads(); } }, "← Previous"),
-      h("span", { class: "muted small" }, `${data.total ? data.offset + 1 : 0}–${Math.min(data.offset + 20, data.total)} of ${data.total}`),
-      h("button", { class: "btn", disabled: data.offset + 20 >= data.total, onclick: () => { leadState.offset += 20; showLeads(); } }, "Next →")));
+    h("h1", {}, t("Leads to review")),
+    h("p", { class: "lede" }, t("Pairs of FIRs whose modus operandi and timing match more closely than unrelated cases almost ever do. The system found them by comparing every FIR with every other — nobody had to suspect them first.")),
+    lanes, h("p", { class: "muted small lane-help" }, t(lane[2])),
+    filterBar(leadState, reset), notice,
+    h("p", { class: "muted small" }, t("{n} leads · strongest first; leads involving a FIR whose crime type looks wrong are listed last", { n: num(data.total) })),
+    list, pager(data, leadState, 20, showLeads));
 }
-function place(district, st, when) {
-  return h("div", { class: "place" }, h("b", {}, `${district}, ${state(st)}`), h("span", {}, date(when)));
-}
+function place(d, st, when) { return h("div", { class: "place" }, h("b", {}, where(d, st)), h("span", {}, date(when))); }
 function gapNode(days) {
-  return h("div", { class: "gap" }, svgArrow(), days == null ? "time unknown" : gapText(days) + " apart");
-}
-function svgArrow() {
-  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  s.setAttribute("width", "54"); s.setAttribute("height", "12"); s.setAttribute("aria-hidden", "true");
-  s.innerHTML = '<path d="M2 6h50M46 2l6 4-6 4M8 2 2 6l6 4" fill="none" stroke="currentColor" stroke-width="1.5"/>';
-  return s;
+  return h("div", { class: "gap" },
+    svgEl('<svg width="54" height="12" aria-hidden="true"><path d="M2 6h50M46 2l6 4-6 4M8 2 2 6l6 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>'),
+    days == null ? t("time unknown") : t("{gap} apart", { gap: gapText(days) }));
 }
 function leadCard(l) {
-  const days = daysBetween(l.date_a, l.date_b);
-  const open = () => { location.hash = `#/compare/${l.a}/${l.b}`; };
-  return h("article", { class: "lead", tabindex: "0", onclick: open, onkeydown: e => { if (e.key === "Enter") open(); } },
+  return h("article", { class: "lead", ...openOnClick(() => { location.hash = `#/compare/${l.a}/${l.b}`; }) },
     h("div", { class: "lead-top" }, tierBadge(l), h("span", { class: "crime" }, crime(l.crime_type)),
-      l.cross_state ? h("span", { class: "xstate" }, "Across states") : l.same_station === false ? h("span", { class: "xstate" }, "Different police stations") : null,
-      l.ground_truth_link ? h("span", { class: "truth" }, "✓ true link (synthetic truth)") : null),
+      l.cross_state ? h("span", { class: "xstate" }, t("Across states")) : l.same_station === false ? h("span", { class: "xstate" }, t("Different police stations")) : null,
+      l.type_doubt ? h("span", { class: "xstate", style: "color:var(--caution-ink);border-color:var(--caution-ink)" }, t("Crime type doubtful")) : null,
+      l.ground_truth_link ? h("span", { class: "truth" }, t("✓ true link (synthetic truth)")) : null),
     h("div", { class: "rarity" }, rarityText(l)),
-    h("div", { class: "pair" }, place(l.district_a, l.state_a, l.date_a), gapNode(days), place(l.district_b, l.state_b, l.date_b)),
-    h("div", { class: "reasons-inline" },
-      h("span", { class: "muted small" }, "Both FIRs:"),
+    h("div", { class: "pair" }, place(l.district_a, l.state_a, l.date_a), gapNode(daysBetween(l.date_a, l.date_b)), place(l.district_b, l.state_b, l.date_b)),
+    h("div", { class: "reasons-inline" }, h("span", { class: "muted small" }, t("Both FIRs:")),
       l.top_reasons.map(r => h("span", { class: "chip" }, reasonPhrase(r, l.crime_type)))));
+}
+
+// ---------- series ----------
+const seriesState = { state: "", district: "", crime_type: "", offset: 0 };
+async function showSeriesList() {
+  setNav("series");
+  loading();
+  let data;
+  try { data = await api(`/series?${queryOf(seriesState)}`); } catch (e) { return fail(e); }
+  const reset = patch => { Object.assign(seriesState, patch, { offset: 0 }); showSeriesList(); };
+  const sq = META.series_quality;
+  const list = h("div", { class: "leads" });
+  if (!data.items.length) list.append(h("div", { class: "empty", text: t("No series match these filters.") }));
+  for (const s of data.items) list.append(seriesCard(s));
+  render(
+    h("h1", {}, t("Possible series")),
+    h("p", { class: "lede" }, t("Groups of FIRs joined by strong matches — the same MO turning up again and again, often across district lines. Each group is built only from links an analyst would also see in the leads inbox; links across state borders are left out because in testing they were almost never real.")),
+    sq && sq.pairs && sq.pairs.rate ? h("div", { class: "notice info" },
+      h("b", {}, t("In testing, about 1 in {k} pairs of FIRs inside these series were the same offender.", { k: Math.round(1 / sq.pairs.rate) })),
+      t(" A series is a set of links to check one by one, not a confirmed gang.")) : null,
+    filterBar(seriesState, reset),
+    h("p", { class: "muted small" }, t("{n} series · most districts first", { n: num(data.total) })),
+    list, pager(data, seriesState, 20, showSeriesList));
+}
+function routeLine(members) {
+  const out = [];
+  members.forEach((m, i) => { if (i) out.push(" ", h("span", { class: "arrow" }, "→"), " "); out.push(h("span", { style: "white-space:nowrap" }, district(m.district))); });
+  return h("div", { class: "route" }, out);
+}
+function seriesCard(s) {
+  const span = daysBetween(s.first, s.last);
+  return h("article", { class: "lead", ...openOnClick(() => { location.hash = `#/series/${s.id}`; }) },
+    h("div", { class: "lead-top" }, h("span", { class: "count" }, t("{n} FIRs", { n: s.size })), h("span", { class: "crime" }, crime(s.crime_type)),
+      h("span", { class: "muted" }, s.states.map(state).join(", ")),
+      s.ground_truth_offenders === 1 ? h("span", { class: "truth" }, t("✓ one offender (synthetic truth)")) :
+      s.ground_truth_offenders > 1 ? h("span", { class: "muted small" }, t("{n} different offenders in the synthetic truth", { n: s.ground_truth_offenders })) : null),
+    h("div", { class: "rarity" }, t("Weakest link:"), " ", rarityText({ one_in: s.weakest_one_in, rarer_than_measured: s.weakest_one_in >= 200000 })),
+    h("div", { class: "full" }, routeLine(s.members)),
+    h("div", { class: "full muted small" }, t("{first} to {last} · {span}", { first: date(s.first), last: date(s.last), span: gapText(span) })),
+    s.common_habits.length ? h("div", { class: "reasons-inline" }, h("span", { class: "muted small" }, t("Same in every FIR:")),
+      s.common_habits.map(r => h("span", { class: "chip" }, reasonPhrase(r, s.crime_type)))) : null);
+}
+async function showSeries(id) {
+  setNav("series");
+  loading();
+  let s;
+  try { s = await api(`/series/${id}`); } catch (e) { return fail(e); }
+  const mapBox = h("div", { class: "map", role: "img", "aria-label": t("Where") });
+  const rows = s.members.map((m, i) => h("tr", {},
+    h("td", { class: "num" }, String(i + 1)),
+    h("td", {}, h("a", { href: `#/case/${m.case_id}` }, m.fir_no)),
+    h("td", {}, m.police_station), h("td", {}, where(m.district, m.state_code)), h("td", {}, date(m.occurred_from)),
+    h("td", { class: "muted" }, i ? gapText(daysBetween(s.members[i - 1].occurred_from, m.occurred_from)) : "—")));
+  const order = Object.fromEntries(s.members.map((m, i) => [m.case_id, i + 1]));
+  const links = s.links.map(l => h("article", { class: "lead" },
+    h("div", { class: "lead-top" }, h("b", {}, `${order[l.a]} ↔ ${order[l.b]}`), tierBadge(l),
+      l.ground_truth_link === true ? h("span", { class: "truth" }, t("✓ true link (synthetic truth)")) :
+      l.ground_truth_link === false ? h("span", { class: "muted small" }, t("not a true link in the synthetic truth")) : null),
+    h("div", {}, h("a", { class: "btn small", href: `#/compare/${l.a}/${l.b}` }, t("Compare"))),
+    h("div", { class: "rarity full" }, rarityText(l)),
+    h("div", { class: "reasons-inline" }, l.top_reasons.map(r => h("span", { class: "chip" }, reasonPhrase(r, s.crime_type))))));
+  render(
+    h("a", { class: "back", href: "#/series" }, t("← All series")),
+    h("section", { class: "card" },
+      h("div", { class: "verdict" }, h("span", { class: "big" }, t("Possible series · {n} FIRs", { n: s.size })), h("span", { class: "crime" }, crime(s.crime_type)),
+        s.ground_truth_offenders === 1 ? h("span", { class: "truth" }, t("✓ one offender (synthetic truth)")) :
+        s.ground_truth_offenders > 1 ? h("span", { class: "muted small" }, t("{n} different offenders in the synthetic truth", { n: s.ground_truth_offenders })) : null),
+      h("div", { style: "margin-top:8px" }, routeLine(s.members)),
+      h("p", { class: "muted small" }, t("{first} to {last} · {span}", { first: date(s.first), last: date(s.last), span: gapText(daysBetween(s.first, s.last)) })),
+      s.common_habits.length ? h("div", { class: "reasons-inline" }, h("span", { class: "muted small" }, t("Same in every FIR:")),
+        s.common_habits.map(r => h("span", { class: "chip" }, reasonPhrase(r, s.crime_type)))) : null),
+    h("div", { class: "space" }),
+    h("div", { class: "grid2" },
+      h("section", { class: "card" }, h("h3", {}, t("Where")), mapBox),
+      h("section", { class: "card" }, h("h3", {}, t("When")), h("div", { class: "timeline" }, timeline(s.members)))),
+    h("div", { class: "space" }),
+    h("section", { class: "card" }, h("h3", {}, t("FIRs in order")),
+      h("div", { class: "tablewrap" }, h("table", { class: "firs" },
+        h("thead", {}, h("tr", {}, ["#", "FIR no.", "Police station", "District", "Occurred", "Gap"].map(x => h("th", {}, t(x))))),
+        h("tbody", {}, rows)))),
+    h("div", { class: "space" }),
+    h("h2", {}, t("The links that join them")),
+    h("p", { class: "notice caution small" }, t("Read each link on its own: a group can contain a coincidental match.")),
+    h("div", { class: "leads" }, links));
+  drawMap(mapBox, s.members);
+}
+function positions(members) {
+  const seen = {};
+  return members.map(m => {
+    const base = DISTRICT_LL[m.district] || [20, 77];
+    const k = seen[m.district] = (seen[m.district] || 0) + 1;
+    const r = k === 1 ? 0 : 0.07, a = k * 2.4;
+    return [base[0] + r * Math.sin(a), base[1] + r * Math.cos(a)];
+  });
+}
+let leafletLoading = null;
+function loadLeaflet() {
+  if (window.L) return Promise.resolve(window.L);
+  if (!leafletLoading) leafletLoading = new Promise((resolve, reject) => {
+    const css = h("link", { rel: "stylesheet", href: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" });
+    const js = h("script", { src: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js" });
+    js.onload = () => resolve(window.L);
+    js.onerror = () => { leafletLoading = null; reject(new Error("map library unavailable")); };
+    setTimeout(() => reject(new Error("map library timed out")), 8000);
+    document.head.append(css, js);
+  });
+  return leafletLoading;
+}
+async function drawMap(box, members) {
+  const pts = positions(members);
+  try {
+    const L = await loadLeaflet();
+    if (!box.isConnected) return;
+    const map = L.map(box, { scrollWheelZoom: false, attributionControl: true });
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 12, attribution: "&copy; OpenStreetMap contributors" }).addTo(map);
+    const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#2a78d6";
+    L.polyline(pts, { color: accent, weight: 2, dashArray: "6 6" }).addTo(map);
+    pts.forEach((p, i) => L.marker(p, { icon: L.divIcon({ className: "pin", html: `<span>${i + 1}</span>`, iconSize: [24, 24], iconAnchor: [12, 12] }),
+      title: `${members[i].fir_no} · ${district(members[i].district)} · ${date(members[i].occurred_from)}` }).addTo(map));
+    map.fitBounds(L.latLngBounds(pts).pad(0.35), { maxZoom: 9 });
+  } catch (e) {
+    box.replaceChildren(schematicMap(members, pts), h("div", { class: "muted small", style: "padding:6px 10px" }, t("Map tiles could not load; showing positions only.")));
+  }
+}
+function schematicMap(members, pts) {
+  const W = 520, H = 420, lat0 = 27, lat1 = 11.8, lon0 = 72.4, lon1 = 80.6;
+  const xy = ([la, lo]) => [((lo - lon0) / (lon1 - lon0)) * W, ((lat0 - la) / (lat0 - lat1)) * H];
+  const all = Object.entries(DISTRICT_LL).map(([d, ll]) => { const [x, y] = xy(ll);
+    return `<circle cx="${x}" cy="${y}" r="3" fill="var(--line-2)"/><text x="${x + 5}" y="${y + 4}" font-size="10" fill="var(--muted)">${esc(district(d))}</text>`; }).join("");
+  const path = pts.map(p => xy(p).join(",")).join(" ");
+  const pins = pts.map((p, i) => { const [x, y] = xy(p);
+    return `<circle cx="${x}" cy="${y}" r="11" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/><text x="${x}" y="${y + 4}" font-size="11" font-weight="700" text-anchor="middle" fill="#fff">${i + 1}</text>`; }).join("");
+  return svgEl(`<svg viewBox="0 0 ${W} ${H}" aria-hidden="true">${all}<polyline points="${path}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="6 6"/>${pins}</svg>`);
+}
+function timeline(members) {
+  // Labels go on the nearest free level (above/below, then further out) so close dates never overlap.
+  const W = 640, H = 210, P = 44, AXIS = 105, ts = members.map(m => +new Date(m.occurred_from));
+  const t0 = Math.min(...ts), span = Math.max(Math.max(...ts) - t0, 864e5);
+  const x = v => P + (v - t0) / span * (W - 2 * P);
+  const levels = [{ y: 66, up: true }, { y: 142, up: false }, { y: 28, up: true }, { y: 180, up: false }].map(l => ({ ...l, end: -1e9 }));
+  let dotEnd = -1e9, row = 0;
+  const marks = members.map((m, i) => {
+    const cx = x(ts[i]);
+    row = cx - dotEnd < 22 ? row + 1 : 0;               // stack dots that would touch
+    dotEnd = cx;
+    const cy = AXIS - row * 24;
+    const lv = levels.find(l => cx - l.end > 78) || levels.reduce((a, b) => (a.end < b.end ? a : b));
+    lv.end = cx;
+    const ty = lv.y, tick = lv.up ? [ty + 18, cy - 12] : [cy + 12, ty - 12];
+    return `<line x1="${cx}" y1="${tick[0]}" x2="${cx}" y2="${tick[1]}" stroke="var(--line-2)"/>` +
+      `<circle cx="${cx}" cy="${cy}" r="11" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>` +
+      `<text x="${cx}" y="${cy + 4}" font-size="11" font-weight="700" text-anchor="middle" fill="#fff">${i + 1}</text>` +
+      `<text x="${cx}" y="${ty}" font-size="11" text-anchor="middle" fill="var(--ink-2)">${esc(district(m.district))}</text>` +
+      `<text x="${cx}" y="${ty + 13}" font-size="10" text-anchor="middle" fill="var(--muted)">${esc(date(m.occurred_from))}</text>`;
+  }).join("");
+  return svgEl(`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t("When"))}"><line x1="${P - 10}" y1="${AXIS}" x2="${W - P + 10}" y2="${AXIS}" stroke="var(--line-2)" stroke-width="2"/>${marks}</svg>`);
+}
+
+// ---------- checks ----------
+const checkState = { state: "", district: "", crime_type: "", offset: 0 };
+async function showChecks() {
+  setNav("checks");
+  loading();
+  let data;
+  try { data = await api(`/checks?${queryOf(checkState)}`); } catch (e) { return fail(e); }
+  const reset = patch => { Object.assign(checkState, patch, { offset: 0 }); showChecks(); };
+  const cq = META.check_quality;
+  const list = h("div", { class: "leads" });
+  if (!data.items.length) list.append(h("div", { class: "empty", text: t("No FIRs match these filters.") }));
+  for (const c of data.items) list.append(h("article", { class: "lead", ...openOnClick(() => { location.hash = `#/case/${c.case_id}`; }) },
+    h("div", { class: "lead-top" }, h("b", {}, c.fir_no), h("span", { class: "muted" }, `${where(c.district, c.state_code)} · ${date(c.occurred_from)}`)),
+    h("div", {}, h("span", { class: "btn small" }, t("Open case"))),
+    h("div", { class: "full crime" }, t("Recorded as {a} — MO looks like {b}", { a: crime(c.recorded), b: crime(c.likely) })),
+    h("div", { class: "reasons-inline" }, c.reasons.map(r => h("span", { class: "chip" },
+      t("{field}: {value} — {p1} of {of1}, {p2} of {of2}", { field: field(r.field), value: val(r.value),
+        p1: pct(r.share_recorded), of1: cases(c.recorded), p2: pct(r.share_likely), of2: cases(c.likely) }))))));
+  render(
+    h("h1", {}, t("Crime-type checks")),
+    h("p", { class: "lede" }, t("FIRs whose MO reads like a different crime type from the one recorded — for example a \"house burglary\" through a shop shutter while the premises were closed for the holidays. A misfiled FIR is compared with the wrong set of cases, so its real links can be missed.")),
+    cq && cq.flagged ? h("div", { class: "notice info" }, t("In testing, {a} of {b} flagged FIRs really had been recorded under the wrong type, and the check found {r}% of all misfiled FIRs.",
+      { a: num(cq.truly_misfiled), b: num(cq.flagged), r: Math.round(cq.recall * 100) })) : null,
+    filterBar(checkState, reset),
+    h("p", { class: "muted small" }, t("{n} FIRs to re-check", { n: num(data.total) })),
+    list, pager(data, checkState, 20, showChecks));
 }
 
 // ---------- search ----------
 async function showSearch(q = "") {
   setNav("search");
-  const input = h("input", { type: "search", value: q, placeholder: "FIR number, police station or district — e.g. Nashik, MH-PUN-03", "aria-label": "Search cases" });
+  const input = h("input", { type: "search", value: q, placeholder: t("FIR number, police station or district — e.g. Nashik, MH-PUN-03"), "aria-label": t("Search cases") });
   const results = h("div", { class: "results" });
   const go = async () => {
     const text = input.value.trim();
-    if (text.length < 2) { results.replaceChildren(h("div", { class: "muted", text: "Type at least 2 characters." })); return; }
-    results.replaceChildren(h("div", { class: "muted", text: "Searching…" }));
+    if (text.length < 2) { results.replaceChildren(h("div", { class: "muted", text: t("Type at least 2 characters.") })); return; }
+    results.replaceChildren(h("div", { class: "muted", text: t("Searching…") }));
     try {
       const r = await api(`/search?q=${encodeURIComponent(text)}&limit=30`);
-      results.replaceChildren(...(r.items.length ? r.items.map(resultRow) : [h("div", { class: "muted", text: "No cases found." })]));
+      results.replaceChildren(...(r.items.length ? r.items.map(resultRow) : [h("div", { class: "muted", text: t("No cases found.") })]));
     } catch (e) { results.replaceChildren(h("div", { class: "muted", text: e.message })); }
   };
   input.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
   render(
-    h("h1", {}, "Find a case"),
-    h("p", { class: "lede" }, "Open any FIR to see which cases elsewhere look like the same offender's work."),
+    h("h1", {}, t("Find a case")),
+    h("p", { class: "lede" }, t("Open any FIR to see which cases elsewhere look like the same offender's work.")),
     h("div", { class: "card" },
-      h("div", { class: "searchbox" }, input, h("button", { class: "btn primary", onclick: go }, "Search")),
-      h("div", { class: "examples" }, h("span", { class: "muted small" }, "Or try an example:"),
+      h("div", { class: "searchbox" }, input, h("button", { class: "btn primary", onclick: go }, t("Search"))),
+      h("div", { class: "examples" }, h("span", { class: "muted small" }, t("Or try an example:")),
         META.demo_cases.slice(0, 6).map(d => h("button", { class: "btn small", onclick: () => { location.hash = `#/case/${d.case_id}`; } },
           `${crime(d.crime_type)} · ${state(d.state_code)}`))),
-      h("p", { class: "muted small" }, "Examples are a random sample of test cases, not picked for how well they score.")),
+      h("p", { class: "muted small" }, t("Examples are a random sample of test cases, not picked for how well they score."))),
     results);
   if (q) go(); else input.focus();
 }
 function resultRow(c) {
-  return h("div", { class: "result", tabindex: "0", onclick: () => { location.hash = `#/case/${c.case_id}`; },
-                    onkeydown: e => { if (e.key === "Enter") location.hash = `#/case/${c.case_id}`; } },
+  return h("div", { class: "result", ...openOnClick(() => { location.hash = `#/case/${c.case_id}`; }) },
     h("div", {}, h("b", {}, c.fir_no), " ", h("span", { class: "muted" }, `· ${crime(c.crime_type)}`)),
-    h("div", { class: "muted small" }, `${c.police_station} · ${c.district}, ${state(c.state_code)} · ${date(c.occurred_from)}`));
+    h("div", { class: "muted small" }, `${c.police_station} · ${where(c.district, c.state_code)} · ${date(c.occurred_from)}`));
 }
 
 // ---------- case ----------
+function caseNotices(c) {
+  return [
+    c.type_check ? h("div", { class: "notice caution small" },
+      h("b", {}, t("The MO in this FIR reads like {likely}, not {recorded}.", { likely: crime(c.type_check.likely), recorded: crime(c.type_check.recorded) })),
+      t(" Check the classification — if it is wrong, its real links are filed under the other type.")) : null,
+    c.series_id ? h("div", { class: "notice info small" }, t("Part of a possible series of {n} FIRs.", { n: c.series_size }),
+      h("a", { class: "btn small", href: `#/series/${c.series_id}` }, t("View series"))) : null];
+}
 async function showCase(id, tab = "same") {
   setNav("search");
   loading("Comparing with every case in the pool…");
@@ -394,51 +808,52 @@ async function showCase(id, tab = "same") {
   try { [c, links] = await Promise.all([api(`/cases/${id}`), api(`/cases/${id}/links?scope=all&limit=10`)]); } catch (e) { return fail(e); }
   const lists = links.lists;
   const tabs = h("div", { class: "tabs", role: "group" },
-    h("button", { "aria-pressed": String(tab === "same"), onclick: () => showCase(id, "same") }, `Same crime type (${lists.same_type.pool_size.toLocaleString("en-IN")} FIRs checked)`),
-    h("button", { "aria-pressed": String(tab === "cross"), onclick: () => showCase(id, "cross") }, "Other property crimes"));
+    h("button", { "aria-pressed": String(tab === "same"), onclick: () => showCase(id, "same") }, t("Same crime type ({n} FIRs checked)", { n: num(lists.same_type.pool_size) })),
+    h("button", { "aria-pressed": String(tab === "cross"), onclick: () => showCase(id, "cross") }, t("Other property crimes")));
   const list = tab === "same" ? lists.same_type : lists.cross_type;
   const box = h("div", { class: "shortlist" });
-  if (tab === "cross") box.append(h("div", { class: "notice caution" },
-    "These compare only the offender's personal habits (time, group size, concealment, travel), because a different crime type has a different MO. They are weak leads — useful because keyword search on IPC sections can never connect different offences."));
+  if (tab === "cross") box.append(h("div", { class: "notice caution" }, t("These compare only the offender's personal habits (time, group size, concealment, travel), because a different crime type has a different MO. They are weak leads — useful because keyword search on IPC sections can never connect different offences.")));
   for (const item of list.items) box.append(candidateCard(c, item));
   render(
-    h("a", { class: "back", href: "#/search" }, "← Find another case"),
-    firCard(c, "This case"),
+    h("a", { class: "back", href: "#/search" }, t("← Find another case")),
+    caseNotices(c),
+    firCard(c, t("This case")),
     h("div", { style: "height:18px" }),
-    h("h2", {}, "Cases that may be linked"),
-    h("p", { class: "muted small" }, `Ranked out of every ${crime(c.crime_type).toLowerCase()} FIR on record, in every district and state. Open any lead to compare the two FIRs side by side.`),
-    lists.same_type.items.some(i => i.cross_state) ? h("p", { class: "notice caution small" },
-      "Location is deliberately not used to rank, so matches from other states appear here. In testing they were rarely the same offender — matches in the same district were far more often real.") : null,
+    h("h2", {}, t("Cases that may be linked")),
+    h("p", { class: "muted small" }, t("Ranked out of every {crime} FIR on record, in every district and state. Open any lead to compare the two FIRs side by side.", { crime: crime(c.crime_type).toLowerCase() })),
+    tab === "same" && lists.same_type.items.some(i => i.cross_state) ? h("p", { class: "notice caution small" },
+      t("Location is deliberately not used to rank, so matches from other states appear here. In testing they were rarely the same offender — matches in the same district were far more often real.")) : null,
     tabs, box);
 }
 function candidateCard(c, item) {
-  const open = () => { location.hash = `#/compare/${c.case_id}/${item.case_id}`; };
   const shared = item.reasons.filter(r => r.kind === "shared").slice(0, 3);
-  return h("article", { class: "lead", tabindex: "0", onclick: open, onkeydown: e => { if (e.key === "Enter") open(); } },
+  return h("article", { class: "lead", ...openOnClick(() => { location.hash = `#/compare/${c.case_id}/${item.case_id}`; }) },
     h("div", { class: "lead-top" }, h("b", {}, `#${item.rank}`), tierBadge(item), h("span", { class: "crime" }, crime(item.crime_type)),
-      item.cross_state ? h("span", { class: "xstate" }, "Other state") : null,
-      item.ground_truth_link ? h("span", { class: "truth" }, "✓ true link (synthetic truth)") : null),
+      item.cross_state ? h("span", { class: "xstate" }, t("Other state")) : null,
+      item.ground_truth_link ? h("span", { class: "truth" }, t("✓ true link (synthetic truth)")) : null),
     h("div", { class: "rarity" }, rarityText(item)),
     h("div", { class: "pair" }, place(c.district, c.state_code, c.occurred_from), gapNode(daysBetween(c.occurred_from, item.occurred_from)),
       place(item.district, item.state_code, item.occurred_from)),
-    h("div", { class: "reasons-inline" }, h("span", { class: "muted small" }, "Both FIRs:"),
+    h("div", { class: "reasons-inline" }, h("span", { class: "muted small" }, t("Both FIRs:")),
       shared.map(r => h("span", { class: "chip" }, reasonPhrase(r, item.crime_type === c.crime_type ? c.crime_type : "CROSS_TYPE")))));
 }
 function firCard(c, title) {
-  const rows = [["FIR no.", c.fir_no], ["Police station", c.police_station], ["District", `${c.district}, ${state(c.state_code)}`],
+  const rows = [["FIR no.", c.fir_no], ["Police station", c.police_station], ["District", where(c.district, c.state_code)],
     ["Offence", crime(c.crime_type)], ["Occurred", `${date(c.occurred_from)} – ${date(c.occurred_to)}`], ["Registered", date(c.registered_at)]];
   return h("section", { class: "card" },
     h("div", { class: "firhead" }, h("b", {}, title), h("span", { class: "muted small" }, c.case_id)),
-    h("dl", { class: "fir" }, rows.map(([k, v]) => [h("dt", {}, k), h("dd", {}, v ?? "—")])),
-    c.needs_extraction ? h("p", { class: "notice caution small" }, "This state records MO only as free text; structured details are pending extraction.") : null);
+    h("dl", { class: "fir" }, rows.map(([k, v]) => [h("dt", {}, t(k)), h("dd", {}, v ?? "—")])),
+    c.needs_extraction ? h("p", { class: "notice caution small" }, t("This state records MO only as free text; structured details are pending extraction.")) : null);
 }
 
 // ---------- compare ----------
+const VERDICT_TEXT = { confirmed: "linked", rejected: "not linked", investigate: "needs investigation" };
 async function showCompare(a, b) {
   setNav("search");
   loading();
-  let p;
-  try { p = await api(`/pairs/${a}__${b}`); } catch (e) { return fail(e); }
+  let p, history;
+  // The decision history is a convenience: if it cannot be read, the comparison still shows.
+  try { [p, history] = await Promise.all([api(`/pairs/${a}__${b}`), api(`/links/${a}__${b}/feedback`).catch(() => ({ items: [] }))]); } catch (e) { return fail(e); }
   const crimeType = p.same_type ? p.case_a.crime_type : "CROSS_TYPE";
   const timing = p.reasons.find(r => r.kind === "timing");
   const shared = p.reasons.filter(r => r.kind === "shared");
@@ -446,109 +861,126 @@ async function showCompare(a, b) {
   const notRec = p.reasons.filter(r => r.kind === "not_recorded");
   const maxAbs = Math.max(1, ...p.reasons.map(r => Math.abs(r.bits)));
 
-  const reasonRow = (r) => {
+  const reasonRow = r => {
     let icon, what, why;
     if (r.kind === "timing") {
       icon = h("div", { class: "ico timing", "aria-hidden": "true" }, "⏱");
-      what = `${gapText(r.days)} apart`;
-      why = r.bits > 0.5 ? "Serial offences usually come in bursts — a short gap supports a link."
-          : r.bits < -0.5 ? "A long gap makes the same offender less likely." : "The gap neither supports nor weakens a link.";
+      what = t("{gap} apart", { gap: gapText(r.days) });
+      why = t(r.bits > 0.5 ? "Serial offences usually come in bursts — a short gap supports a link."
+            : r.bits < -0.5 ? "A long gap makes the same offender less likely." : "The gap neither supports nor weakens a link.");
     } else if (r.kind === "shared") {
       icon = h("div", { class: "ico shared", "aria-hidden": "true" }, "✓");
-      what = `${val(r.shared_value ?? r.value)}`;
-      const of = CRIME_CASES[crimeType];
-      why = `${field(r.field)} — same in both FIRs. ` + (r.share == null ? "" :
-        r.share < 0.01 ? `Fewer than 1 in 100 ${of} have this, so it is a telling detail.` :
-        r.share < 0.2 ? `Only ${pct(r.share)} of ${of} have this, so it is a telling detail.` :
-        r.share < 0.5 ? `${pct(r.share)} of ${of} have this.` :
-        `Common — ${pct(r.share)} of ${of} have this, so it counts for little.`);
+      what = val(r.shared_value ?? r.value);
+      const v = { pct: r.share == null ? "" : pct(r.share), of: cases(crimeType) };
+      why = t("{field} — same in both FIRs. ", { field: field(r.field) }) + (r.share == null ? "" :
+        r.share < 0.01 ? t("Fewer than 1 in 100 {of} have this, so it is a telling detail.", v) :
+        r.share < 0.2 ? t("Only {pct} of {of} have this, so it is a telling detail.", v) :
+        r.share < 0.5 ? t("{pct} of {of} have this.", v) : t("Common — {pct} of {of} have this, so it counts for little.", v));
     } else {
       icon = h("div", { class: "ico different", "aria-hidden": "true" }, "✕");
-      what = `${val(r.value)} vs ${val(r.other_value)}`;
-      why = `${field(r.field)} — different in the two FIRs.`;
+      what = t("{a} vs {b}", { a: val(r.value), b: val(r.other_value) });
+      why = t("{field} — different in the two FIRs.", { field: field(r.field) });
     }
     const w = Math.abs(r.bits) / maxAbs * 50;
     const fill = r.bits >= 0 ? `left:50%;width:${w}%;background:var(--support)` : `left:${50 - w}%;width:${w}%;background:var(--oppose)`;
     return h("div", { class: "reason" }, icon, h("div", {}, h("div", { class: "what" }, what), h("div", { class: "why" }, why)),
-      h("div", { class: "weight", title: `${r.bits >= 0 ? "+" : ""}${r.bits.toFixed(2)} evidence` },
+      h("div", { class: "weight", title: `${r.bits >= 0 ? "+" : ""}${r.bits.toFixed(2)} bits` },
         h("div", { class: "track" }, h("div", { class: "fill", style: fill })), strengthWord(r.bits)));
   };
 
-  const note = h("textarea", { placeholder: "Note for the case file (optional)", "aria-label": "Note" });
+  const name = h("input", { type: "text", value: officer(), placeholder: t("Officer name (demo — not verified)"), "aria-label": t("Officer name (demo — not verified)"),
+    onchange: e => { try { localStorage.setItem("officer", e.target.value.trim()); } catch (err) {} } });
+  const note = h("textarea", { placeholder: t("Note for the case file (optional)"), "aria-label": t("Note for the case file (optional)") });
   const status = h("span", {});
+  const historyBox = h("div", { class: "history" });
+  const drawHistory = items => historyBox.replaceChildren(...(items.length ? items.map(f => h("div", {},
+    h("b", {}, t(VERDICT_TEXT[f.verdict] || f.verdict)), ` · ${f.actor_id === "anonymous" ? t("anonymous") : f.actor_id.replace(/^demo:/, "")} · ${date(f.timestamp)}`,
+    f.note ? ` — ${f.note}` : "")) : [h("span", { class: "muted" }, t("No decisions yet."))]));
+  drawHistory(history.items);
   const decide = async verdict => {
+    try { localStorage.setItem("officer", name.value.trim()); } catch (e) {}
     try {
       await api(`/links/${a}__${b}/feedback`, { method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ verdict, note: note.value }) });
-      status.replaceChildren(h("span", { class: "saved" }, { confirmed: "Recorded: linked", rejected: "Recorded: not linked", investigate: "Recorded: needs investigation" }[verdict]));
+      status.replaceChildren(h("span", { class: "saved" }, t("Recorded: {v}", { v: t(VERDICT_TEXT[verdict]) })));
+      drawHistory((await api(`/links/${a}__${b}/feedback`).catch(() => ({ items: [] }))).items);
     } catch (e) { status.textContent = e.message; }
   };
-  const narrative = c => h("div", { class: "narr" }, [c.mo_description, c.narrative_text].filter(Boolean).join("\n\n") || "No narrative.");
+  const narrative = c => h("div", { class: "narr" }, [c.mo_description, c.narrative_text].filter(Boolean).join("\n\n") || t("No narrative."));
+  const rarity = rarityText(p);
+  const detailsText = t(shared.length === 1 ? "The evidence comes from {n} shared detail" : "The evidence comes from {n} shared details", { n: shared.length }) +
+    (timing ? t(" and the {gap} between them", { gap: gapText(timing.days) }) : "") +
+    (different.length ? t(different.length === 1 ? ", set against {n} difference" : ", set against {n} differences", { n: different.length }) : "") + t(". ");
 
   render(
-    h("a", { class: "back", href: "javascript:history.back()" }, "← Back"),
+    h("a", { class: "back", href: "javascript:history.back()" }, t("← Back")),
+    caseNotices(p.case_a), p.case_b.type_check ? caseNotices({ type_check: p.case_b.type_check }) : null,
     h("section", { class: "card" },
       h("div", { class: "verdict" }, tierBadge(p), h("span", { class: "big" }, p.same_type ? crime(p.case_a.crime_type) : `${crime(p.case_a.crime_type)} ↔ ${crime(p.case_b.crime_type)}`),
-        p.cross_state ? h("span", { class: "xstate" }, "Across states") : null,
-        p.ground_truth_link === true ? h("span", { class: "truth" }, "✓ true link (synthetic truth)") : null,
-        p.ground_truth_link === false ? h("span", { class: "muted small" }, "not a true link in the synthetic truth") : null),
-      h("p", { class: "explain" }, h("b", {}, `${rarityText(p)[0].toUpperCase()}${rarityText(p).slice(1)}.`),
-        ` The evidence comes from ${shared.length} shared detail${shared.length === 1 ? "" : "s"}` +
-        (timing ? ` and the ${gapText(timing.days)} between them` : "") +
-        `${different.length ? `, set against ${different.length} difference${different.length === 1 ? "" : "s"}` : ""}. `,
-        "This is a reason to investigate, not proof — confirm through the FIRs, witnesses and recovered property."),
-      p.same_type ? null : h("p", { class: "notice caution small" }, "Different crime types: only the offender's personal habits are compared, so this is a weak lead by design.")),
-    h("div", { style: "height:16px" }),
-    h("div", { class: "grid2" }, firCard(p.case_a, "FIR A"), firCard(p.case_b, "FIR B")),
-    h("div", { style: "height:16px" }),
+        p.cross_state ? h("span", { class: "xstate" }, t("Across states")) : null,
+        p.ground_truth_link === true ? h("span", { class: "truth" }, t("✓ true link (synthetic truth)")) : null,
+        p.ground_truth_link === false ? h("span", { class: "muted small" }, t("not a true link in the synthetic truth")) : null),
+      h("p", { class: "explain" }, h("b", {}, `${rarity[0].toUpperCase()}${rarity.slice(1)}. `), detailsText,
+        t("This is a reason to investigate, not proof — confirm through the FIRs, witnesses and recovered property.")),
+      p.same_type ? null : h("p", { class: "notice caution small" }, t("Different crime types: only the offender's personal habits are compared, so this is a weak lead by design."))),
+    h("div", { class: "space" }),
+    h("div", { class: "grid2" }, firCard(p.case_a, t("FIR A")), firCard(p.case_b, t("FIR B"))),
+    h("div", { class: "space" }),
     h("section", { class: "card" },
-      h("h3", {}, "Why these may be the same offender"),
+      h("h3", {}, t("Why these may be the same offender")),
       timing ? reasonRow(timing) : null,
       shared.map(reasonRow),
-      different.length ? [h("div", { style: "height:10px" }), h("h3", {}, "Where they differ"), different.map(reasonRow)] : null,
-      notRec.length ? h("p", { class: "notrec" }, `Not recorded in one of the FIRs, so not used: ${notRec.map(r => field(r.field).toLowerCase()).join(", ")}.`) : null),
-    h("div", { style: "height:16px" }),
-    h("section", { class: "grid2" }, h("div", { class: "card stack" }, h("h3", {}, "FIR A — narrative"), narrative(p.case_a)),
-      h("div", { class: "card stack" }, h("h3", {}, "FIR B — narrative"), narrative(p.case_b))),
-    h("div", { style: "height:16px" }),
-    h("section", { class: "card stack" }, h("h3", {}, "Record your assessment"),
-      h("div", { class: "actions" }, note,
-        h("button", { class: "btn primary", onclick: () => decide("confirmed") }, "Linked"),
-        h("button", { class: "btn", onclick: () => decide("investigate") }, "Needs investigation"),
-        h("button", { class: "btn", onclick: () => decide("rejected") }, "Not linked"),
-        h("button", { class: "btn", onclick: () => window.print() }, "Print report"), status),
-      h("p", { class: "muted small" }, "Every lookup and decision is logged with the officer and time for audit.")));
+      different.length ? [h("div", { style: "height:10px" }), h("h3", {}, t("Where they differ")), different.map(reasonRow)] : null,
+      notRec.length ? h("p", { class: "notrec" }, t("Not recorded in one of the FIRs, so not used: {list}.", { list: notRec.map(r => field(r.field).toLowerCase()).join(", ") })) : null),
+    h("div", { class: "space" }),
+    h("section", { class: "grid2" }, h("div", { class: "card stack" }, h("h3", {}, t("FIR A — narrative")), narrative(p.case_a)),
+      h("div", { class: "card stack" }, h("h3", {}, t("FIR B — narrative")), narrative(p.case_b))),
+    LANG === "hi" ? h("p", { class: "muted small" }, t("FIR text is shown as recorded.")) : null,
+    h("div", { class: "space" }),
+    h("section", { class: "card stack" }, h("h3", {}, t("Record your assessment")),
+      h("div", { class: "actions" }, name, note),
+      h("div", { class: "actions" },
+        h("button", { class: "btn primary", onclick: () => decide("confirmed") }, t("Linked")),
+        h("button", { class: "btn", onclick: () => decide("investigate") }, t("Needs investigation")),
+        h("button", { class: "btn", onclick: () => decide("rejected") }, t("Not linked")),
+        h("button", { class: "btn", onclick: () => window.print() }, t("Print report")), status),
+      h("h3", {}, t("Earlier decisions on this pair")), historyBox,
+      h("p", { class: "muted small" }, t("Every lookup and decision is logged with the officer and time for audit."), " ",
+        t("Officer names on this demo are typed, not verified; a production deployment signs officers in."))));
 }
 
 // ---------- about ----------
 function showAbout() {
   setNav("about");
-  const ms = META.model_summary || {}, lq = META.lead_quality;
+  const ms = META.model_summary || {}, lq = META.lead_quality, sq = META.series_quality, cq = META.check_quality;
   const stat = (big, text) => h("div", { class: "card" }, h("div", { class: "stat" }, big), h("div", { class: "muted small" }, text));
+  const card = (title, text) => h("div", { class: "card" }, h("h3", {}, t(title)), h("p", {}, t(text)));
   render(
-    h("h1", {}, "How it works"),
-    h("p", { class: "lede" }, "Police record the modus operandi of every property crime. Offenders repeat their habits — how they enter, what tools they carry, when they strike. ",
-      "This system compares every FIR's MO against every other FIR of the same kind, across all districts and states, and brings the most similar pairs to an analyst."),
+    h("h1", {}, t("How it works")),
+    h("p", { class: "lede" }, t("Police record the modus operandi of every property crime. Offenders repeat their habits — how they enter, what tools they carry, when they strike. This system compares every FIR's MO against every other FIR of the same kind, across all districts and states, and brings the most similar pairs to an analyst.")),
     h("div", { class: "howto" },
-      h("div", { class: "card" }, h("h3", {}, "1 · Rare habits count most"), h("p", {}, "Two FIRs that both say \"entered by breaking the lock\" prove little — most burglars do. Both saying \"entered through the roof\" or \"disabled the CCTV\" is far more telling. Each shared detail is weighted by how rare it is.")),
-      h("div", { class: "card" }, h("h3", {}, "2 · Timing matters"), h("p", {}, "Serial offenders strike in bursts. Two similar FIRs three weeks apart are more telling than two years apart.")),
-      h("div", { class: "card" }, h("h3", {}, "3 · Strength you can read"), h("p", {}, "Every lead says how often unrelated FIRs look this alike — \"about 1 in 25,000\". That is measured on hundreds of thousands of random unrelated pairs, not guessed.")),
-      h("div", { class: "card" }, h("h3", {}, "4 · A human decides"), h("p", {}, "The system never names a person and never claims a link. It narrows thousands of FIRs to a handful worth reading; officers confirm or reject, and every decision is logged."))),
+      card("1 · Rare habits count most", "Two FIRs that both say \"entered by breaking the lock\" prove little — most burglars do. Both saying \"entered through the roof\" or \"disabled the CCTV\" is far more telling. Each shared detail is weighted by how rare it is."),
+      card("2 · Timing matters", "Serial offenders strike in bursts. Two similar FIRs three weeks apart are more telling than two years apart."),
+      card("3 · Strength you can read", "Every lead says how often unrelated FIRs look this alike — \"about 1 in 25,000\". That is measured on two lakh random unrelated pairs, not guessed."),
+      card("4 · A human decides", "The system never names a person and never claims a link. It narrows thousands of FIRs to a handful worth reading; officers confirm or reject, and every decision is logged.")),
     h("div", { style: "height:22px" }),
-    h("h2", {}, "How well it works (synthetic test data)"),
+    h("h2", {}, t("How well it works (synthetic test data)")),
     h("div", { class: "howto" },
-      ms.same_type ? stat(`${Math.round(ms.same_type.hit_at_10 * 100)}%`, "of cases have a true linked FIR in their top 10 — out of about 15,000 of the same crime type") : null,
-      lq && lq.same_district && lq.same_district.leads ? stat(`${lq.same_district.true_links} of ${lq.same_district.leads}`, "same-district leads in the inbox were real serial links, found with nobody asking") : null,
-      lq && lq.same_state && lq.same_state.leads ? stat(`${lq.same_state.true_links} of ${lq.same_state.leads}`, "leads across districts of one state were real links") : null,
-      lq && lq.cross_state && lq.cross_state.leads ? stat(`${lq.cross_state.true_links} of ${lq.cross_state.leads}`, "cross-state leads were real — so they are marked low confidence, not hidden") : null,
-      ms.cross_type ? stat(`${(ms.cross_type.hit_at_10 * 100).toFixed(1)}%`, "for links between different crime types — weak, but keyword search on IPC sections finds none at all") : null),
-    h("p", { class: "muted small" }, "Measured on offenders held out from training. The data is synthetic: these numbers show the method works on data built to resemble FIRs, not how it will perform on real records."),
+      ms.same_type ? stat(`${Math.round(ms.same_type.hit_at_10 * 100)}%`, t("of cases have a true linked FIR in their top 10 — out of about 15,000 of the same crime type")) : null,
+      lq && lq.same_district && lq.same_district.rate ? stat(t("1 in {k}", { k: Math.round(1 / lq.same_district.rate) }), t("same-district leads in the inbox was a real serial link, found with nobody asking")) : null,
+      lq && lq.same_state && lq.same_state.rate ? stat(t("1 in {k}", { k: Math.round(1 / lq.same_state.rate) }), t("leads across districts of one state was a real link")) : null,
+      lq && lq.cross_state && lq.cross_state.n ? stat(`${num(lq.cross_state.true_all_offenders)} / ${num(lq.cross_state.n)}`, t("cross-state leads were real — so they are marked low confidence, not hidden")) : null,
+      sq && sq.pairs && sq.pairs.rate ? stat(t("1 in {k}", { k: Math.round(1 / sq.pairs.rate) }), t("pairs of FIRs inside a possible series were the same offender")) : null,
+      cq && cq.flagged ? stat(`${num(cq.truly_misfiled)} / ${num(cq.flagged)}`, t("FIRs flagged as misfiled really were — {r}% of all misfiled FIRs caught", { r: Math.round(cq.recall * 100) })) : null,
+      ms.cross_type ? stat(`${(ms.cross_type.hit_at_10 * 100).toFixed(1)}%`, t("for links between different crime types — weak, but keyword search on IPC sections finds none at all")) : null),
+    h("p", { class: "muted small" }, t("Measured on offenders held out from training. The data is synthetic: these numbers show the method works on data built to resemble FIRs, not how it will perform on real records.")),
     h("div", { style: "height:14px" }),
-    h("div", { class: "card" }, h("h3", {}, "Safeguards"),
-      h("ul", {}, h("li", {}, "No caste, religion or community field exists anywhere in the system."),
-        h("li", {}, "Personal details are kept out of matching entirely; matching sees only how the crime was committed."),
-        h("li", {}, "Location is never used to score a match — which is what lets links across states surface at all."),
-        h("li", {}, "Scores are never shown as probabilities, because a strong-looking number invites false certainty."))));
+    h("div", { class: "card" }, h("h3", {}, t("Safeguards")),
+      h("ul", {}, ["No caste, religion or community field exists anywhere in the system.",
+        "Personal details are kept out of matching entirely; matching sees only how the crime was committed.",
+        "Location is never used to score a match — which is what lets links across states surface at all.",
+        "Scores are never shown as probabilities, because a strong-looking number invites false certainty.",
+        "Officer names on this demo are typed, not verified; a production deployment signs officers in."].map(x => h("li", {}, t(x))))));
 }
 
 // ---------- router ----------
@@ -557,12 +989,16 @@ async function route() {
   try {
     if (parts[0] === "case" && parts[1]) return showCase(parts[1]);
     if (parts[0] === "compare" && parts[2]) return showCompare(parts[1], parts[2]);
+    if (parts[0] === "series" && parts[1]) return showSeries(parts[1]);
+    if (parts[0] === "series") return showSeriesList();
+    if (parts[0] === "checks") return showChecks();
     if (parts[0] === "search") return showSearch(decodeURIComponent(parts[1] || ""));
     if (parts[0] === "about") return showAbout();
     return showLeads();
   } catch (e) { fail(e); }
 }
 (async () => {
+  renderBar();
   try { META = await api("/meta"); } catch (e) { return fail(e); }
   window.addEventListener("hashchange", route);
   route();

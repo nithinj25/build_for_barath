@@ -370,16 +370,32 @@ of extrapolating.
 
 **The inbox.** Every case is scored against its whole same-type pool; its
 top 3 matches become candidates, rarer than 1 in 1,000 are kept, mutual
-matches (each is in the other's top 3) first, then rarest. 5,000 are kept.
-Quality is measured only on pairs where both offenders were held out of
-training (`data/serve/meta.json` `lead_quality`):
+matches (each is in the other's top 3) first, then rarest. 5,000 are kept
+(`data/serve/meta.json` `lead_quality`):
 
-| lane | held-out leads | real links | vs random pair |
+| lane | leads | estimated real links | vs random pair |
 |---|---|---|---|
-| same district | 36 | 22 (61%) | ~16,000× |
-| other district, same state | 100 | 12 (12%) | ~3,100× |
-| **other state** | **172** | **0** | — |
-| all | 308 | 34 (11%) | ~2,900× |
+| same district | 433 | **20.9%** (about 1 in 5) | ~5,400× |
+| other district, same state | 1,485 | 3.8% (about 1 in 27) | ~1,000× |
+| **other state** | **3,082** | **~0** (3 real among all offenders) | — |
+| all | 5,000 | 2.9% | ~760× |
+
+Leads touching a FIR the crime-type check flags (§13) are listed last in each
+lane. They were almost all false: in the same-district lane 4 of 36 such
+leads were real vs 120 of 399 others (all offenders), and demoting them took
+the true links among the lane's first 20 from 10 to 19.
+
+**Correction.** An earlier version of this section reported 22 of 36
+same-district leads (61%) and 11% overall. Those numbers counted only leads
+whose *both* FIRs came from held-out offenders. That filter is biased: a true
+pair (one offender) survives it with probability ≈ 0.23, a false pair (two
+offenders) with ≈ 0.23² ≈ 0.05, so it inflates the odds about 4×. The
+estimate above counts true leads whose offender is held out, divides by the
+held-out share of all true pairs (0.232), and divides by every lead. It is
+unbiased for the rate an unseen offender would get. Counting all offenders
+(including the 75% the scorer was trained on) gives 28.9% same district —
+the gap is the training optimism the estimate removes. `evaluate.py`'s
+hit@10 was not affected: it ranks a held-out query against the whole pool.
 
 Chance: a random same-type pair is a true link 1 in 25,942.
 
@@ -406,6 +422,56 @@ misclassified FIRs look alike because they are misclassified, not because
 one offender did both. On real data this is the IPC 380/454/457 confusion;
 flagging "MO atypical for the recorded crime type" as its own finding would
 be more useful than a link.
+
+## 12. Possible series: chaining only the links that hold up
+
+A series is a connected group of FIRs joined by mutual top-3 matches. Plain
+connected components fail the way CLAUDE.md warns: with every strong mutual
+edge, cross-state edges chain unrelated cases into components of 3,000–7,000
+FIRs. Tested on held-out pair precision (scratch sweep, not committed):
+
+| edges allowed | series | largest | pairs that are one offender* |
+|---|---|---|---|
+| all mutual ≥ 1 in 1,000, any geography | 1,376 | 7,007 | 0.00 |
+| same state only, ≥ 1 in 10,000 | 1,126 | 13 | 0.16 |
+| same district ≥ 1 in 10,000 | 101 | 6 | 0.72 |
+| same district ≥ 1 in 10,000 + other district ≥ 1 in 200,000 | 206 | 7 | 0.53 |
+
+\*both-held-out filter, so inflated the same way as §11's first draft; the
+ranking between rows is what was used.
+
+Shipped: the last row, minus any FIR the crime-type check (§13) flags — two
+misfiled FIRs share values that are rare only because they sit in the wrong
+pool. Result (`meta.json` `series_quality`, estimator from §11): **182 series,
+102 spanning districts; about 1 in 5 FIR pairs inside a series are the same
+offender** (20.4%); 25 series are wholly one offender. Larger series and
+series held together by same-district links were purer, so the list is
+ordered by size, then share of same-district links. The UI calls a series "a
+set of links to check one by one, not a confirmed gang" and shows every link
+with its own strength.
+
+## 13. Crime-type check: misfiled FIRs, found without labels
+
+The generator records some FIRs under the wrong type — 948 of 44,533, all
+house ↔ commercial burglary (`states.yaml` confusability). For each FIR in a
+family with more than one type, sum over the fields both pools score of
+log2(frequency of the recorded value under the other type ÷ under the recorded
+type). Flag at ≥ 2 bits. No labels are used, only value frequencies.
+
+| threshold | flagged | truly misfiled | recall |
+|---|---|---|---|
+| 2 bits (shipped) | 714 | **97.1%** | **73.1%** |
+| 4 bits | 575 | 100% | 61% |
+| 8 bits | 181 | 100% | 19% |
+
+Caveat: the generator's misfiling moves a FIR between types whose MO differs
+sharply (shop vs house premises), so this mostly shows the check can invert
+our own confusion model. Real misfiling (IPC 380 vs 454 vs 457) is subtler.
+It matters for linkage because the pools are by recorded type: a misfiled
+commercial burglary is compared only with house burglaries, so its real
+partners never appear in its shortlist, and its rare-in-this-pool values
+manufacture false strong leads. The case view and the comparison page show
+the flag.
 
 ---
 

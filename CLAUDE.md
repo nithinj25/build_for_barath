@@ -88,6 +88,7 @@ TECHNICAL_SPEC.md           full technical spec
 TASK_DATA_GENERATION.md     generator brief
 DATASET.md      dataset card: artifacts, key numbers, limitations
 FINDINGS.md     measured results + their provenance; read before quoting numbers
+DEMO.md         3-minute demo script with the FIRs to click
 scripts/        local tooling (plot_sweep.py)
 results/        committed results: pre_core_fix/, post_core_fix/, sweep/
 data/           gitignored except the two committed sweep-endpoint corpora

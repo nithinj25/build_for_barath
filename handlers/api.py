@@ -12,6 +12,10 @@ feeds it real requests locally. The same code both places.
     GET  /cases/{id}                             canonical record, no PII
     GET  /cases/{id}/links?scope=same|all&limit  ranked shortlist
     GET  /pairs/{id_a}__{id_b}                   side-by-side comparison with reasons
+    GET  /series?state&district&crime_type&limit&offset   possible series, multi-district first
+    GET  /series/{id}                            one series: its FIRs in date order and the links joining them
+    GET  /checks?state&district&limit&offset     FIRs whose MO looks like another crime type
+    GET  /links/{id_a}__{id_b}/feedback          decisions already recorded on this pair
     POST /links/{id_a}__{id_b}/feedback          {"verdict": "confirmed"|"rejected"|"investigate", "note": "..."}
 
 Every shortlist request is audited: who, which case, which scope, when.
@@ -37,6 +41,7 @@ from handlers.store import load_bundle, open_store
 from linkage.serve import Shortlister
 
 CASE = r"([0-9a-f]{16})"
+SERIES = r"([0-9a-f]{10})"
 VERDICTS = ("confirmed", "rejected", "investigate")
 SEARCH_FIELDS = ("fir_no", "police_station", "district", "case_id")
 UI_PAGE = Path(__file__).resolve().parent.parent / "ui" / "index.html"
@@ -54,9 +59,15 @@ def _app() -> dict:
         _APP["leads"] = bundle["leads"] if demo else [
             {k: v for k, v in lead.items() if k != "ground_truth_link"} for lead in bundle["leads"]]
         _APP["truth"] = bundle["truth_groups"] if demo else None
+        _APP["series"] = bundle["series"]
+        _APP["series_by_id"] = {s["id"]: s for s in bundle["series"]}
+        _APP["series_of_case"] = {m["case_id"]: s["id"] for s in bundle["series"] for m in s["members"]}
+        _APP["checks"] = bundle["checks"]
+        _APP["check_of_case"] = {c["case_id"]: c for c in bundle["checks"]}
         meta = {**bundle["meta"], "ground_truth_marks": demo}
         if not demo:
-            meta.pop("lead_quality", None)
+            for key in ("lead_quality", "series_quality", "check_quality"):
+                meta.pop(key, None)
         _APP["meta"] = meta
         _APP["store"] = open_store(os.environ.get("STORE", "local:data/serve/state"))
     return _APP
@@ -66,14 +77,33 @@ def _response(status: int, body) -> dict:
     return {"statusCode": status,
             "headers": {"content-type": "application/json",
                         "access-control-allow-origin": os.environ.get("ALLOWED_ORIGIN", "*"),
-                        "access-control-allow-headers": "content-type,authorization",
+                        "access-control-allow-headers": "content-type,authorization,x-officer",
                         "access-control-allow-methods": "GET,POST,OPTIONS"},
             "body": json.dumps(body) if body is not None else ""}
 
 
 def _actor(event: dict) -> str:
+    """Who is asking. A verified login (JWT claims) when the stack has one; until
+    then the name an officer types into the page, marked "demo:" because
+    nothing verifies it."""
     claims = (((event.get("requestContext") or {}).get("authorizer") or {}).get("jwt") or {}).get("claims") or {}
-    return claims.get("email") or claims.get("sub") or "anonymous"
+    if claims.get("email") or claims.get("sub"):
+        return claims.get("email") or claims.get("sub")
+    name = re.sub(r"[^\w .-]", "", str((event.get("headers") or {}).get("x-officer", "")))[:40].strip()
+    return f"demo:{name}" if name else "anonymous"
+
+
+def _page(rows: list, query: dict, default: int = 20) -> tuple[list, int] | None:
+    limit, offset = int(query.get("limit", str(default))), int(query.get("offset", "0"))
+    if not 1 <= limit <= 100 or offset < 0:
+        return None
+    return rows[offset:offset + limit], offset
+
+
+def _where(rows: list, query: dict, states, districts) -> list:
+    state, district = query.get("state"), query.get("district")
+    return [r for r in rows if (not state or state in states(r)) and (not district or district in districts(r))
+            and (not query.get("crime_type") or r.get("crime_type", r.get("recorded")) == query["crime_type"])]
 
 
 def _body(event: dict) -> dict:
@@ -85,6 +115,17 @@ def _body(event: dict) -> dict:
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
+
+
+def _annotate(app: dict, case: dict) -> dict:
+    """A case record plus what the bundle found about it: a crime-type check, a series."""
+    out = dict(case)
+    if case["case_id"] in app["check_of_case"]:
+        out["type_check"] = app["check_of_case"][case["case_id"]]
+    if case["case_id"] in app["series_of_case"]:
+        series = app["series_by_id"][app["series_of_case"][case["case_id"]]]
+        out["series_id"], out["series_size"] = series["id"], series["size"]
+    return out
 
 
 def handler(event: dict, context=None) -> dict:
@@ -112,12 +153,9 @@ def handler(event: dict, context=None) -> dict:
             limit, offset = int(query.get("limit", "25")), int(query.get("offset", "0"))
             if not 1 <= limit <= 100 or offset < 0:
                 return _response(400, {"error": "limit must be 1-100, offset >= 0"})
-            state, district = query.get("state"), query.get("district")
-            rows = [l for l in app["leads"]
-                    if (not state or state in (l["state_a"], l["state_b"]))
-                    and (not district or district in (l["district_a"], l["district_b"]))
-                    and (not query.get("crime_type") or l["crime_type"] == query["crime_type"])
-                    and (not query.get("tier") or l["tier"] == query["tier"])
+            rows = [l for l in _where(app["leads"], query, lambda l: (l["state_a"], l["state_b"]),
+                                      lambda l: (l["district_a"], l["district_b"]))
+                    if (not query.get("tier") or l["tier"] == query["tier"])
                     and (query.get("cross_state") != "1" or l["cross_state"])]
             lanes: dict = {}
             for l in rows:
@@ -145,15 +183,54 @@ def handler(event: dict, context=None) -> dict:
                         break
             return _response(200, {"items": hits})
 
+        if method == "GET" and path == "/series":
+            rows = _where(app["series"], query, lambda s: s["states"], lambda s: s["districts"])
+            paged = _page(rows, query)
+            if paged is None:
+                return _response(400, {"error": "limit must be 1-100, offset >= 0"})
+            items = [{k: v for k, v in s.items() if k != "links"} for s in paged[0]]
+            if app["truth"] is not None:
+                truth = app["truth"]
+                items = [{**s, "ground_truth_offenders": len({truth.get(x["case_id"], x["case_id"]) for x in s["members"]})}
+                         for s in items]
+            return _response(200, {"total": len(rows), "offset": paged[1], "items": items})
+
+        if method == "GET" and (m := re.fullmatch(f"/series/{SERIES}", path)):
+            series = app["series_by_id"].get(m.group(1))
+            if series is None:
+                return _response(404, {"error": "unknown series"})
+            if app["truth"] is not None:
+                truth = app["truth"]
+                same = lambda a, b: truth.get(a) is not None and truth.get(a) == truth.get(b)
+                series = {**series, "links": [{**l, "ground_truth_link": same(l["a"], l["b"])} for l in series["links"]],
+                          "ground_truth_offenders": len({truth.get(x["case_id"], x["case_id"]) for x in series["members"]})}
+            app["store"].record_audit({"actor_id": _actor(event), "timestamp": _now(), "action": "series",
+                                       "series_id": m.group(1)})
+            return _response(200, series)
+
+        if method == "GET" and path == "/checks":
+            rows = _where(app["checks"], query, lambda c: (c["state_code"],), lambda c: (c["district"],))
+            paged = _page(rows, query)
+            if paged is None:
+                return _response(400, {"error": "limit must be 1-100, offset >= 0"})
+            return _response(200, {"total": len(rows), "offset": paged[1], "items": paged[0]})
+
+        if method == "GET" and (m := re.fullmatch(f"/links/{CASE}__{CASE}/feedback", path)):
+            items = app["store"].feedback_for(f"{m.group(1)}__{m.group(2)}")
+            items += app["store"].feedback_for(f"{m.group(2)}__{m.group(1)}")
+            return _response(200, {"items": sorted(items, key=lambda f: f["timestamp"], reverse=True)})
+
         if method == "GET" and (m := re.fullmatch(f"/pairs/{CASE}__{CASE}", path)):
             result = app["shortlister"].pair(m.group(1), m.group(2))
+            result["case_a"] = _annotate(app, result["case_a"])
+            result["case_b"] = _annotate(app, result["case_b"])
             app["store"].record_audit({"actor_id": _actor(event), "timestamp": _now(), "action": "compare",
                                        "case_id": m.group(1), "other_case_id": m.group(2)})
             return _response(200, result)
 
         if method == "GET" and (m := re.fullmatch(f"/cases/{CASE}", path)):
             case = app["cases"].get(m.group(1))
-            return _response(200, case) if case else _response(404, {"error": "unknown case"})
+            return _response(200, _annotate(app, case)) if case else _response(404, {"error": "unknown case"})
 
         if method == "GET" and (m := re.fullmatch(f"/cases/{CASE}/links", path)):
             scope = query.get("scope", "same")

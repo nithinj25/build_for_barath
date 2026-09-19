@@ -42,17 +42,27 @@ Time roughly doubles same-type linkage — on synthetic data whose gaps we
 generated to be bursty, so the size of that gain must be re-measured on real
 FIRs ([FINDINGS §10](FINDINGS.md)).
 
-**Leads inbox** (pairs found with nobody asking, held-out offenders only):
+**Leads inbox** (pairs found with nobody asking; rate estimated for offenders
+the scorer never saw):
 
-| where the two FIRs are | real links among the leads |
-|---|---|
-| same district | 22 of 36 |
-| other districts, same state | 12 of 100 |
-| other states | 0 of 172 — shown, labelled low confidence |
+| where the two FIRs are | leads | real links |
+|---|---|---|
+| same district | 433 | about 1 in 5 (20.9%) |
+| other districts, same state | 1,485 | about 1 in 27 (3.8%) |
+| other states | 3,082 | ~0 — shown, labelled low confidence |
 
-A random same-type pair is a real link 1 in 25,942. The score never uses
-location, so cross-state matches can surface; most turn out to be
-coincidence, and the UI says so ([FINDINGS §11](FINDINGS.md)).
+A random same-type pair is a real link 1 in 25,942, so the same-district lane
+is ~5,400× better than chance. The score never uses location, so cross-state
+matches can surface; most turn out to be coincidence, and the UI says so
+([FINDINGS §11](FINDINGS.md), which also corrects an earlier, inflated
+version of these numbers).
+
+**Possible series** — groups of FIRs chained by strong same-state links, with
+a map and a timeline: 182 series, 102 spanning districts; about 1 in 5 FIR
+pairs inside a series are one offender, so each link is shown separately
+([§12](FINDINGS.md)). **Crime-type checks** — FIRs whose MO reads like the
+other burglary type: 714 flagged, 97% truly misfiled, 73% of all misfiled
+FIRs found, with no labels ([§13](FINDINGS.md)).
 
 **Accuracy is not the metric and would be misleading.** True links are ~1 in
 50,000 pairs, so "no link" everywhere scores 99.998% accurate. This is a
@@ -84,8 +94,9 @@ python -m linkage.bundle --out data/serve --with-ground-truth   # package the co
 python scripts/serve_local.py --demo                            # http://127.0.0.1:8000
 ```
 
-The analyst view: a leads inbox split by where the two FIRs are, each lane
-with its tested record; search by FIR number, police station or district; a
+The analyst view (English / हिंदी): a leads inbox split by where the two FIRs
+are, each lane with its tested record; possible series on a map and timeline;
+crime-type checks; search by FIR number, police station or district; a
 case's ranked shortlist with a strength tier ("about 1 in 40,000 unrelated
 cases look this alike") and the shared habits that drive it; and a
 side-by-side comparison of two FIRs that lists every reason — timing, shared

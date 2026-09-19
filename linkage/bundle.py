@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import gzip
+import hashlib
 import json
 import shutil
 import sys
@@ -54,6 +55,9 @@ def apply_extractions(df: pd.DataFrame, path: Path) -> tuple[pd.DataFrame, int]:
 
 RANDOM_PAIRS = 200_000
 LEADS_PER_CASE, LEADS_KEPT, LEAD_MIN_ONE_IN = 3, 5000, 1000
+# Series edges: chosen on held-out pair precision (FINDINGS §12), not tuned per demo.
+SERIES_NEAR_ONE_IN, SERIES_FAR_ONE_IN, SERIES_MIN_SIZE = 10_000, 200_000, 3
+TYPE_CHECK_MIN_BITS = 2.0
 
 
 def random_pair_rarity(scorer: Scorer, codes: dict, types: np.ndarray, seed: int) -> dict:
@@ -89,12 +93,13 @@ def lane_of(ca: dict, cb: dict) -> str:
     return "same_district" if ca["district"] == cb["district"] else "same_state"
 
 
-def compute_leads(short, per_case: int = LEADS_PER_CASE, keep: int = LEADS_KEPT) -> list[dict]:
-    """Every case against its whole same-type pool; its top matches become
-    candidate leads. Ranked by rarity so pools of different sizes mix fairly."""
+def top_matches(short, per_case: int = LEADS_PER_CASE) -> dict:
+    """Every case against its whole same-type pool (no blocking). Returns
+    {(a, b): (bits, times_seen)}; seen == 2 means mutual — each case is in the
+    other's top matches."""
     scorer, types, codes = short.scorer, short.types, short.codes
     best: dict[tuple[int, int], float] = {}
-    seen: dict[tuple[int, int], int] = {}          # 2 = mutual: each case is in the other's top matches
+    seen: dict[tuple[int, int], int] = {}
     for pool in np.unique(types):
         rows = np.flatnonzero(types == pool)
         cand_codes = {k: v[rows] for k, v in codes[pool].items()}
@@ -105,55 +110,229 @@ def compute_leads(short, per_case: int = LEADS_PER_CASE, keep: int = LEADS_KEPT)
                 key = (min(q, rows[j]), max(q, rows[j]))
                 best[key] = float(ev[j])
                 seen[key] = seen.get(key, 0) + 1
+    return {k: (best[k], seen[k]) for k in best}
+
+
+def _shared_reasons(short, pool: str, a: int, b: int, n: int = 3) -> list[dict]:
+    codes = short.codes[pool]
+    row = short.scorer.field_bits(pool, {k: v[a] for k, v in codes.items()}, {k: v[b] for k, v in codes.items()})
+    shared = [r for r in short._reasons(pool, a, b, row) if r["kind"] == "shared"][:n]
+    return [{"field": r["field"], "value": r.get("shared_value"), "share": r.get("share")} for r in shared]
+
+
+def compute_leads(short, matches: dict, doubtful: set[str] = frozenset(), keep: int = LEADS_KEPT) -> list[dict]:
+    """Candidate leads from every case's top matches, ranked by rarity so pools
+    of different sizes mix fairly. Leads touching a FIR whose crime type looks
+    wrong go last (flagged, not hidden): their rare-in-this-pool values make
+    misfiled FIRs look alike (FINDINGS §13)."""
+    types = short.types
     scored = []
-    for (a, b), bits in best.items():
+    for (a, b), (bits, seen) in matches.items():
         pool = str(types[a])
         n, rarer = short.one_in(pool, bits)
         if n >= LEAD_MIN_ONE_IN:
-            scored.append((n, bits, a, b, pool, rarer, seen[(a, b)] >= 2))
-    scored.sort(key=lambda t: (-t[6], -t[0], -t[1]))          # mutual first, then rarest
+            doubt = short.case_ids[a] in doubtful or short.case_ids[b] in doubtful
+            scored.append((n, bits, a, b, pool, rarer, seen >= 2, doubt))
+    scored.sort(key=lambda t: (t[7], -t[6], -t[0], -t[1]))    # sound type first, mutual, then rarest
     leads = []
-    for n, bits, a, b, pool, rarer, mutual in scored[:keep]:
+    for n, bits, a, b, pool, rarer, mutual, doubt in scored[:keep]:
         ca, cb = short.cases[short.case_ids[a]], short.cases[short.case_ids[b]]
-        row = scorer.field_bits(pool, {k: v[a] for k, v in codes[pool].items()},
-                                {k: v[b] for k, v in codes[pool].items()})
-        shared = [r for r in short._reasons(pool, a, b, row) if r["kind"] == "shared"][:3]
         tier_id, label = short.tier(n)
         leads.append({
             "a": short.case_ids[a], "b": short.case_ids[b], "pool": pool, "crime_type": pool,
             "bits": round(bits, 2), "one_in": n, "rarer_than_measured": rarer, "tier": tier_id, "tier_label": label,
             "cross_state": ca["state_code"] != cb["state_code"], "lane": lane_of(ca, cb), "mutual": mutual,
+            "type_doubt": doubt,
             "same_station": ca.get("police_station") == cb.get("police_station"),
             "state_a": ca["state_code"], "district_a": ca["district"], "date_a": ca.get("occurred_from"),
             "state_b": cb["state_code"], "district_b": cb["district"], "date_b": cb.get("occurred_from"),
-            "top_reasons": [{"field": r["field"], "value": r.get("shared_value"), "share": r.get("share")}
-                            for r in shared]})
+            "top_reasons": _shared_reasons(short, pool, a, b)})
     return leads
 
 
-def lead_quality(leads: list[dict], truth: Path, seed: int, normalised: Path) -> dict:
-    """Share of leads that are true links, per tier — held-out offenders only, so
-    offenders the scorer was trained on cannot flatter the number."""
-    t = pd.read_parquet(truth, columns=["case_id", "offender_id"])
-    offender = dict(zip(t["case_id"], t["offender_id"]))
-    split = dict(zip(t["offender_id"], dataset.split_of(t["offender_id"], seed)))
-    held_out = [l for l in leads if split[offender[l["a"]]] == "test" and split[offender[l["b"]]] == "test"]
-    groups = {"all": held_out,
-              "mutual": [l for l in held_out if l["mutual"]],
-              "one_sided": [l for l in held_out if not l["mutual"]],
-              "cross_state": [l for l in held_out if l["cross_state"]],
-              "mutual_cross_state": [l for l in held_out if l["mutual"] and l["cross_state"]],
-              **{lane: [l for l in held_out if l["lane"] == lane] for lane in LANES}}
-    out = {}
-    for name, rows in groups.items():
-        hits = sum(offender[l["a"]] == offender[l["b"]] for l in rows)
-        out[name] = {"leads": len(rows), "true_links": hits,
-                     "true_link_rate": round(hits / len(rows), 3) if rows else None}
-    # chance: how often a random same-type pair is a true link, for the "x times better than chance" line
+def compute_series(short, matches: dict, doubtful: set[str] = frozenset()) -> list[dict]:
+    """Possible series: connected groups of FIRs joined by mutual strong matches.
+    Transitive chaining turns weak edges into bogus mega-clusters (CLAUDE.md),
+    so an edge must be mutual AND, inside one district, rarer than
+    SERIES_NEAR_ONE_IN; across districts of one state, rarer than
+    SERIES_FAR_ONE_IN. Cross-state edges are left out: in testing they were
+    almost never real and chained unrelated cases into clusters of thousands.
+    FIRs whose crime type looks wrong (`doubtful`, from type_checks) never join:
+    two misfiled FIRs share values that are rare only in the wrong pool."""
+    types, cases, ids = short.types, short.cases, short.case_ids
+    parent: dict[int, int] = {}
+
+    def root(x: int) -> int:
+        parent.setdefault(x, x)
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    edges = []
+    for (a, b), (bits, seen) in matches.items():
+        ca, cb = cases[ids[a]], cases[ids[b]]
+        if seen < 2 or ca["state_code"] != cb["state_code"] or ids[a] in doubtful or ids[b] in doubtful:
+            continue
+        pool = str(types[a])
+        n, rarer = short.one_in(pool, bits)
+        if n >= (SERIES_NEAR_ONE_IN if ca["district"] == cb["district"] else SERIES_FAR_ONE_IN):
+            edges.append((a, b, n, rarer))
+            parent[root(a)] = root(b)
+    groups: dict[int, list[int]] = {}
+    for x in parent:
+        groups.setdefault(root(x), []).append(x)
+    out = []
+    for members in groups.values():
+        if len(members) < SERIES_MIN_SIZE:
+            continue
+        member_set = set(members)
+        pool = str(types[members[0]])
+        members.sort(key=lambda i: (cases[ids[i]].get("occurred_from") or "", ids[i]))
+        links = []
+        for a, b, n, rarer in edges:
+            if a in member_set:
+                tier_id, label = short.tier(n)
+                links.append({"a": ids[a], "b": ids[b], "one_in": n, "rarer_than_measured": rarer,
+                              "tier": tier_id, "tier_label": label,
+                              "top_reasons": _shared_reasons(short, pool, a, b)})
+        rows = [cases[ids[i]] for i in members]
+        dates = [r.get("occurred_from") for r in rows if r.get("occurred_from")]
+        key = hashlib.sha1("|".join(sorted(ids[i] for i in members)).encode()).hexdigest()[:10]
+        district_of = {ids[i]: cases[ids[i]]["district"] for i in members}
+        near = sum(district_of[l["a"]] == district_of[l["b"]] for l in links) / len(links)
+        out.append({
+            "id": key, "crime_type": pool, "size": len(members), "near_share": round(near, 2),
+            "members": [{k: r.get(k) for k in ("case_id", "fir_no", "police_station", "district", "state_code",
+                                                "occurred_from")} for r in rows],
+            "districts": sorted({r["district"] for r in rows}), "states": sorted({r["state_code"] for r in rows}),
+            "first": min(dates) if dates else None, "last": max(dates) if dates else None,
+            "weakest_one_in": min(l["one_in"] for l in links),
+            "common_habits": _common_habits(short, pool, members),
+            "links": links})
+    # Larger groups and groups held together by same-district links were purer in testing (FINDINGS §12).
+    out.sort(key=lambda r: (-r["size"], -r["near_share"], -r["weakest_one_in"]))
+    return out
+
+
+def _common_habits(short, pool: str, members: list[int]) -> list[dict]:
+    """Values every FIR in the group records identically, rarest first."""
+    spec = short.scorer.pools[pool]
+    rows = [short.cases[short.case_ids[i]] for i in members]
+    out = []
+    for f in spec["fields"]:
+        values = {r.get(f) for r in rows}
+        if len(values) != 1:
+            continue
+        v = values.pop()
+        if v is None or v in schema.TOKENS or f in schema.TAG_FIELDS or v not in spec["vocab"][f]:
+            continue
+        out.append({"field": f, "value": v, "share": round(float(spec["u"][f][spec["vocab"][f].index(v)]), 3)})
+    return sorted(out, key=lambda h: h["share"])[:5]
+
+
+def type_checks(short) -> list[dict]:
+    """FIRs whose MO looks like another crime type in the same family — e.g. a
+    'house burglary' with shutter entry into a shop closed for the holidays.
+    Sum over the fields both pools score of log2(frequency of the recorded
+    value under the other type / under the recorded type). Uses no labels."""
+    cases, pools = short.cases, short.scorer.pools
+    out = []
+    for own in schema.CRIME_TYPES:
+        for other in schema.CRIME_TYPES:
+            if own == other or schema.FAMILY[own] != schema.FAMILY[other] or own not in pools or other not in pools:
+                continue
+            po, pt = pools[own], pools[other]
+            fields = [f for f in po["fields"] if f in pt["fields"] and f not in schema.TAG_FIELDS]
+            for cid in (short.case_ids[i] for i in np.flatnonzero(short.types == own)):
+                c = cases[cid]
+                terms = []
+                for f in fields:
+                    v = c.get(f)
+                    if v is None or v in schema.TOKENS or v not in po["vocab"][f] or v not in pt["vocab"][f]:
+                        continue
+                    uo = max(po["u"][f][po["vocab"][f].index(v)], 1e-4)
+                    ut = max(pt["u"][f][pt["vocab"][f].index(v)], 1e-4)
+                    terms.append((float(np.log2(ut / uo)), f, v, uo, ut))
+                bits = sum(t[0] for t in terms)
+                if bits >= TYPE_CHECK_MIN_BITS:
+                    terms.sort(reverse=True)
+                    out.append({"case_id": cid, "recorded": own, "likely": other, "bits": round(bits, 2),
+                                "state_code": c["state_code"], "district": c["district"], "fir_no": c.get("fir_no"),
+                                "police_station": c.get("police_station"), "occurred_from": c.get("occurred_from"),
+                                "reasons": [{"field": f, "value": v, "share_recorded": round(uo, 3),
+                                             "share_likely": round(ut, 3)} for b, f, v, uo, ut in terms[:3] if b > 0]})
+    return sorted(out, key=lambda r: -r["bits"])
+
+
+def series_quality(series: list[dict], truth: Path, seed: int, normalised: Path) -> dict:
+    """Share of FIR pairs inside a series that are one offender (estimated as in
+    _precision), and how many series are wholly one offender."""
     df = dataset.load(normalised, truth, oracle_extraction=False)
+    offender = dict(zip(df["case_id"], df["offender_id"]))
+    split = dict(zip(df["offender_id"], dataset.split_of(df["offender_id"], seed)))
+    pairs = []
+    for s in series:
+        ids = [m["case_id"] for m in s["members"]]
+        pairs += [(ids[i], ids[j]) for i in range(len(ids)) for j in range(i + 1, len(ids))]
+    whole = sum(len({offender[m["case_id"]] for m in s["members"]}) == 1 for s in series)
+    return {"series": len(series), "pairs": _precision(pairs, offender, split, _held_out_share(df, seed)),
+            "one_offender_series_all_offenders": whole}
+
+
+def type_check_quality(flags: list[dict], truth: Path) -> dict:
+    """Precision and recall of the misfiling check against the generator's true crime type."""
+    t = pd.read_parquet(truth, columns=["case_id", "crime_type", "rec_crime_type", "ingested"])
+    t = t[t["ingested"]]
+    misfiled = set(t.loc[t["crime_type"] != t["rec_crime_type"], "case_id"])
+    hits = sum(f["case_id"] in misfiled for f in flags)
+    return {"flagged": len(flags), "truly_misfiled": hits, "misfiled_total": len(misfiled),
+            "precision": round(hits / len(flags), 3) if flags else None,
+            "recall": round(hits / len(misfiled), 3) if misfiled else None}
+
+
+def _held_out_share(df: pd.DataFrame, seed: int) -> float:
+    """Share of all true same-type pairs that belong to held-out (test) offenders."""
+    test = dataset.split_of(df["offender_id"], seed) == "test"
+    everyone = np.ones(len(df), dtype=bool)
+    pools = [p for p in schema.CRIME_TYPES]
+    held = sum(len(dataset.positive_pairs(df, p, test)) for p in pools)
+    total = sum(len(dataset.positive_pairs(df, p, everyone)) for p in pools)
+    return held / total
+
+
+def _precision(pairs: list[tuple[str, str]], offender: dict, split: dict, held_share: float) -> dict:
+    """How many of these pairs are one offender, estimated without trusting the
+    offenders the scorer was trained on.
+
+    Restricting to pairs where BOTH cases are held-out offenders is biased: a
+    true pair (one offender) survives that filter with probability ~0.25, a false
+    pair (two offenders) with ~0.0625, so it inflates the odds about 4x. Instead
+    count true pairs whose offender is held out, scale by the held-out share of
+    all true pairs, and divide by every pair."""
+    n = len(pairs)
+    same = [(a, b) for a, b in pairs if offender[a] == offender[b]]
+    held = sum(split[offender[a]] == "test" for a, _ in same)
+    return {"n": n, "true_all_offenders": len(same), "true_held_out": held,
+            "rate_all_offenders": round(len(same) / n, 4) if n else None,
+            "rate": round(held / held_share / n, 4) if n else None}
+
+
+def lead_quality(leads: list[dict], truth: Path, seed: int, normalised: Path) -> dict:
+    """Share of leads that are true links, per lane (see _precision for why the
+    estimate scales held-out hits rather than filtering to held-out pairs)."""
+    df = dataset.load(normalised, truth, oracle_extraction=False)
+    offender = dict(zip(df["case_id"], df["offender_id"]))
+    split = dict(zip(df["offender_id"], dataset.split_of(df["offender_id"], seed)))
+    held_share = _held_out_share(df, seed)
+    groups = {"all": leads, "cross_state": [l for l in leads if l["cross_state"]],
+              **{lane: [l for l in leads if l["lane"] == lane] for lane in LANES}}
+    out = {name: _precision([(l["a"], l["b"]) for l in rows], offender, split, held_share) for name, rows in groups.items()}
+    # chance: how often a random same-type pair is a true link, for the "x times better than chance" line
     true_pairs = sum(len(dataset.positive_pairs(df, p, np.ones(len(df), bool))) for p in schema.CRIME_TYPES)
     all_pairs = sum(dataset.pool_pair_count(df, p) for p in schema.CRIME_TYPES)
     out["chance_rate"] = true_pairs / all_pairs
+    out["held_out_share"] = round(held_share, 4)
     return out
 
 
@@ -251,12 +430,24 @@ def main(argv: list[str] | None = None) -> int:
 
     from linkage.serve import Shortlister
     short = Shortlister(weights, df["case_id"].tolist(), types.tolist(), codes_by_pool, meta, cases)
-    leads = compute_leads(short)
-    with gzip.open(out / "leads.json.gz", "wt", encoding="utf-8") as fh:
-        json.dump(leads, fh)
+    matches = top_matches(short)
+    checks = type_checks(short)
+    doubtful = {c["case_id"] for c in checks}
+    leads = compute_leads(short, matches, doubtful)
+    series = compute_series(short, matches, doubtful)
+    for name, rows in (("leads", leads), ("series", series), ("checks", checks)):
+        with gzip.open(out / f"{name}.json.gz", "wt", encoding="utf-8") as fh:
+            json.dump(rows, fh)
     meta["leads"] = {"count": len(leads), "per_case": LEADS_PER_CASE, "min_one_in": LEAD_MIN_ONE_IN}
+    meta["series"] = {"count": len(series), "near_one_in": SERIES_NEAR_ONE_IN, "far_one_in": SERIES_FAR_ONE_IN,
+                      "multi_district": sum(len(s["districts"]) > 1 for s in series)}
+    meta["checks"] = {"count": len(checks), "min_bits": TYPE_CHECK_MIN_BITS}
     if args.truth.exists():
         meta["lead_quality"] = lead_quality(leads, args.truth, weights["seed"], args.normalised)
+        meta["series_quality"] = series_quality(series, args.truth, weights["seed"], args.normalised)
+        meta["check_quality"] = type_check_quality(checks, args.truth)
+        print("series", meta["series"], meta["series_quality"])
+        print("checks", meta["check_quality"])
     (out / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
     if args.with_ground_truth:

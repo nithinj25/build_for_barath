@@ -69,13 +69,14 @@ Resources:
           DEMO_GROUND_TRUTH: !Ref DemoGroundTruth
       Policies:
         - DynamoDBWritePolicy: {TableName: !Ref FeedbackTable}
+        - DynamoDBReadPolicy: {TableName: !Ref FeedbackTable}     # decision history on the compare page
         - DynamoDBWritePolicy: {TableName: !Ref AuditTable}
       FunctionUrlConfig:
         AuthType: NONE
         Cors:
           AllowOrigins: ["*"]
           AllowMethods: ["GET", "POST"]
-          AllowHeaders: ["content-type"]
+          AllowHeaders: ["content-type", "x-officer"]
 
   # Keep logs small: 7 days instead of forever.
   AppLogs:

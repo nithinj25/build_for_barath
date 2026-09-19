@@ -29,6 +29,7 @@ def make_handler(api):
             event = {"rawPath": url.path[len("/api"):] or "/",
                      "queryStringParameters": dict(parse_qsl(url.query)) or None,
                      "requestContext": {"http": {"method": method}},
+                     "headers": {k.lower(): v for k, v in self.headers.items()},
                      "body": self.rfile.read(length).decode("utf-8") if length else None}
             result = api(event)
             body = result.get("body", "").encode("utf-8")
