@@ -17,7 +17,8 @@ feeds it real requests locally. The same code both places.
     GET  /series/{id}                            one series: its FIRs in date order and the links joining them
     GET  /checks?state&district&limit&offset     FIRs whose MO looks like another crime type
     GET  /form                                   fields and allowed values per crime type, stations per district
-    GET  /form/sample?crime_type                 a held-out test FIR to re-enter as if new (demo)
+    GET  /form/sample?crime_type                 a held-out test FIR to re-enter as if new (demo), with its text
+    POST /read                                   {"text": "...", "crime_type"?} fields read from FIR text, and where
     POST /match                                  {"record": {...}, "rank": "blind"|"nearby", "demo_source": id?}
                                                  shortlists for a newly entered FIR, not stored in the corpus
     GET  /links/{id_a}__{id_b}/feedback          decisions already recorded on this pair
@@ -43,7 +44,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from handlers.store import load_bundle, open_store
-from linkage import schema
+from linkage import schema, textread
 from linkage.serve import Shortlister
 
 CASE = r"([0-9a-f]{16})"
@@ -74,6 +75,7 @@ def _app() -> dict:
             stations.setdefault(c["district"], set()).add(c.get("police_station"))
         _APP["stations"] = {d: sorted(s for s in v if s) for d, v in stations.items()}
         _APP["sample_turn"] = 0
+        _APP["phrases"] = bundle["phrases"]
         _APP["check_of_case"] = {c["case_id"]: c for c in bundle["checks"]}
         meta = {**bundle["meta"], "ground_truth_marks": demo}
         if not demo:
@@ -188,7 +190,8 @@ def _sample(app: dict, crime_type: str | None) -> dict:
             fields[f] = [x for x in v.split(";") if x] or ["none"]
         else:
             fields[f] = v if known else None
-    return {"source_case_id": case["case_id"], "source_fir_no": case["fir_no"],
+    text = " ".join(x for x in (case.get("narrative_text"), case.get("mo_description")) if x)
+    return {"source_case_id": case["case_id"], "source_fir_no": case["fir_no"], "text": text,
             "record": {"crime_type": case["crime_type"], "state_code": case["state_code"], "district": case["district"],
                        "police_station": case.get("police_station"), "occurred_from": (case.get("occurred_from") or "")[:10],
                        "fields": fields}}
@@ -290,6 +293,16 @@ def handler(event: dict, context=None) -> dict:
 
         if method == "GET" and path == "/form/sample":
             return _response(200, _sample(app, query.get("crime_type")))
+
+        if method == "POST" and path == "/read":
+            if app["phrases"] is None:
+                return _response(404, {"error": "text reading not packaged"})
+            body = _body(event)
+            text = str(body.get("text") or "")[:8000]
+            crime_type = body.get("crime_type") if body.get("crime_type") in schema.CRIME_TYPES else None
+            pool_fields = {ct: app["shortlister"].scorer.pools[ct]["fields"] for ct in schema.CRIME_TYPES
+                           if ct in app["shortlister"].scorer.pools}
+            return _response(200, textread.read_fir(text, app["phrases"], app["meta"]["places"], pool_fields, crime_type))
 
         if method == "POST" and path == "/match":
             body = _body(event)

@@ -34,9 +34,10 @@ These are easy to violate by accident and each one breaks something real.
    ~0.27% and that reads as broken. Render rank, bits, and the driving
    features: `rank 2 of 10,482 · +5.85 bits · roof entry, disabled CCTV`.
    **+5.85 is a STRONG match, not a typical one** — it is the spec's
-   constructed example and sits in the top 5–21% of same-type true pairs
-   (MO + time) depending on crime type. Measured medians are +0.8 to +2.9
-   bits, p90 +4.8 to +7.5 (`results/with_time/evidence_distribution.json`).
+   constructed example and sits in the top 6–22% of same-type true pairs
+   (MO + time, gaps read from FIR text) depending on crime type. Measured
+   medians are +1.8 to +3.3 bits, p90 +5.3 to +7.5
+   (`results/textfilled/evidence_distribution.json`).
    Never quote +5.85 as what a link scores; quote it as a strong case beside
    the typical range. The UI states strength as rarity ("about 1 in N
    unrelated pairs look this alike"), measured on random unrelated pairs.
@@ -68,6 +69,7 @@ linkage/        pure functions, no AWS imports
   rank.py       default ranking (distinctiveness) and opt-in "nearby first" (place); numpy only
   tune.py       local: picks the ranking strengths on CALIB offenders
   checks.py     crime-type check for one FIR (misfiled burglaries); bundle and API share it
+  textread.py   reads FIR text into MO fields (phrase dictionary; runs on Lambda)
   dataset.py    local: normalised records + labels, offender split, pairs
   generate/     synthetic corpus with ground-truth offender IDs
     sample.py     truth: style tilt → θ → values, series, geography, clocks
@@ -122,7 +124,8 @@ python -m linkage.generate --seed 7 --cross-type-sharing 1 --out data/dev/   # c
 python -m linkage.sweep --out results/sweep         # repeat_rate × cross_type_sharing grid
 python scripts/plot_sweep.py results/sweep          # headline figure + summary.csv
 python -m linkage.normalise --feeds data/final/feeds --out data/final_normalised.parquet --check data/final/truth.parquet
-python -m linkage.train --normalised data/final_sharing1_normalised.parquet --truth data/final_sharing1/truth.parquet --out data/weights.json
+python scripts/fill_from_text.py --out data/final_sharing1_textfilled.parquet   # blank MO read from FIR text (provenance text_read)
+python -m linkage.train --normalised data/final_sharing1_textfilled.parquet --truth data/final_sharing1/truth.parquet --out data/weights.json
 python -m linkage.tune --weights data/weights.json --out data/weights.json   # ranking strengths on CALIB offenders
 python -m linkage.evaluate --normalised data/final_sharing1_normalised.parquet --truth data/final_sharing1/truth.parquet --weights data/weights.json --out data/eval.json
 python -m linkage.bundle --out data/serve --with-ground-truth   # serve bundle for the API
@@ -141,8 +144,9 @@ sam build && sam deploy --stack-name linkage-demo --resolve-s3 --capabilities CA
   overstates cross-type agreement.
 - Clustering uses a deliberately high edge threshold. Transitive chaining
   creates bogus mega-clusters otherwise.
-- Every MO field carries `field_provenance`: `source` or `llm_extracted`.
-  An analyst must be able to tell a recorded value from an inferred one.
+- Every MO field carries `field_provenance`: `source`, `llm_extracted` or
+  `text_read`. An analyst must be able to tell a recorded value from an
+  inferred one — the UI marks text-read values "from FIR text".
 
 ## Honesty requirements
 

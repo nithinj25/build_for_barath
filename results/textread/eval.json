@@ -1,0 +1,123 @@
+{
+  "firs": 44533,
+  "crime_type": {
+    "read": 1.0,
+    "right": 1.0
+  },
+  "district_right": 0.785,
+  "police_station_right": 0.672,
+  "date_right": 1.0,
+  "mo_values_read_right_vs_truth": 0.9283,
+  "fields": {
+    "alarm_defeated": {
+      "read_rate": 0.742,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 1.0
+    },
+    "approach_mode": {
+      "read_rate": 0.743,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.93
+    },
+    "attack_method": {
+      "read_rate": 0.741,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.913
+    },
+    "counter_forensic": {
+      "read_rate": 0.727,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.919
+    },
+    "entry_method": {
+      "read_rate": 0.737,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.917
+    },
+    "entry_point": {
+      "read_rate": 0.736,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.919
+    },
+    "escape_direction": {
+      "read_rate": 0.709,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.92
+    },
+    "exit_mode": {
+      "read_rate": 0.714,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.936
+    },
+    "group_size_est": {
+      "read_rate": 0.729,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.921
+    },
+    "ignition_method": {
+      "read_rate": 0.742,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.926
+    },
+    "location_type": {
+      "read_rate": 0.748,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.918
+    },
+    "machine_type": {
+      "read_rate": 0.749,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.955
+    },
+    "occupancy": {
+      "read_rate": 0.617,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.921
+    },
+    "premise": {
+      "read_rate": 0.745,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.942
+    },
+    "property_taken": {
+      "read_rate": 0.743,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 1.0
+    },
+    "search_pattern": {
+      "read_rate": 0.689,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.919
+    },
+    "target_selection": {
+      "read_rate": 0.607,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.926
+    },
+    "time_band": {
+      "read_rate": 0.596,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.829
+    },
+    "tools": {
+      "read_rate": 0.728,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.957
+    },
+    "vehicle_class": {
+      "read_rate": 0.739,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.918
+    },
+    "vehicle_used": {
+      "read_rate": 0.75,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.929
+    },
+    "victim_activity": {
+      "read_rate": 0.754,
+      "right_vs_record": 1.0,
+      "right_vs_truth": 0.924
+    }
+  }
+}

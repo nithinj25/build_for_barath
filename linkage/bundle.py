@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from linkage import checks, dataset, features, rank, schema
+from linkage import checks, dataset, features, rank, schema, textread
 from linkage.score import Scorer
 
 DISPLAY = ("case_id", "state_code", "district", "police_station", "fir_no", "crime_type",
@@ -256,6 +256,32 @@ def type_checks(short) -> list[dict]:
     return sorted(out, key=lambda r: -r["bits"])
 
 
+def series_quality(series: list[dict], truth: Path, seed: int, normalised: Path) -> dict:
+    """Share of FIR pairs inside a series that are one offender (estimated as in
+    _precision), and how many series are wholly one offender."""
+    df = dataset.load(normalised, truth, oracle_extraction=False)
+    offender = dict(zip(df["case_id"], df["offender_id"]))
+    split = dict(zip(df["offender_id"], dataset.split_of(df["offender_id"], seed)))
+    pairs = []
+    for s in series:
+        ids = [m["case_id"] for m in s["members"]]
+        pairs += [(ids[i], ids[j]) for i in range(len(ids)) for j in range(i + 1, len(ids))]
+    whole = sum(len({offender[m["case_id"]] for m in s["members"]}) == 1 for s in series)
+    return {"series": len(series), "pairs": _precision(pairs, offender, split, _held_out_share(df, seed)),
+            "one_offender_series_all_offenders": whole}
+
+
+def type_check_quality(flags: list[dict], truth: Path) -> dict:
+    """Precision and recall of the misfiling check against the generator's true crime type."""
+    t = pd.read_parquet(truth, columns=["case_id", "crime_type", "rec_crime_type", "ingested"])
+    t = t[t["ingested"]]
+    misfiled = set(t.loc[t["crime_type"] != t["rec_crime_type"], "case_id"])
+    hits = sum(f["case_id"] in misfiled for f in flags)
+    return {"flagged": len(flags), "truly_misfiled": hits, "misfiled_total": len(misfiled),
+            "precision": round(hits / len(flags), 3) if flags else None,
+            "recall": round(hits / len(misfiled), 3) if misfiled else None}
+
+
 def _held_out_share(df: pd.DataFrame, seed: int) -> float:
     """Share of all true same-type pairs that belong to held-out (test) offenders."""
     test = dataset.split_of(df["offender_id"], seed) == "test"
@@ -316,13 +342,14 @@ def demo_cases(normalised: Path, truth: Path, seed: int, n: int = 12) -> list[di
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="python -m linkage.bundle", description=__doc__.splitlines()[0])
-    ap.add_argument("--normalised", type=Path, default=Path("data/final_sharing1_normalised.parquet"))
+    ap.add_argument("--normalised", type=Path, default=Path("data/final_sharing1_textfilled.parquet"))
     ap.add_argument("--weights", type=Path, default=Path("model/weights.json"))
     ap.add_argument("--extractions", type=Path, default=None)
     ap.add_argument("--truth", type=Path, default=Path("data/final_sharing1/truth.parquet"))
-    ap.add_argument("--eval", type=Path, default=Path("results/ranked/eval.json"))
-    ap.add_argument("--evidence", type=Path, default=Path("results/with_time/evidence_distribution.json"))
+    ap.add_argument("--eval", type=Path, default=Path("results/textfilled/eval.json"))
+    ap.add_argument("--evidence", type=Path, default=Path("results/textfilled/evidence_distribution.json"))
     ap.add_argument("--with-ground-truth", action="store_true", help="enable demo-mode true-link marks")
+    ap.add_argument("--vocab", type=Path, default=Path("config/vocab.yaml"), help="state wording, for reading FIR text")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8")
@@ -338,6 +365,9 @@ def main(argv: list[str] | None = None) -> int:
     out = args.out
     out.mkdir(parents=True, exist_ok=True)
     shutil.copy(args.weights, out / "weights.json")
+    import yaml
+    (out / "phrases.json").write_text(json.dumps(textread.phrase_table(yaml.safe_load(args.vocab.read_text(encoding="utf-8")))),
+                                      encoding="utf-8")
     (out / "index.json").write_text(json.dumps({"case_ids": df["case_id"].tolist(),
                                                 "crime_types": df["crime_type"].tolist()}), encoding="utf-8")
     arrays = {}

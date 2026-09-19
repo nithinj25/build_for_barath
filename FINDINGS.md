@@ -528,13 +528,71 @@ score on location.
 
 ---
 
+## 15. Reading FIR text fills the gaps — the largest gain since timing
+
+29% of MO cells in the corpus are blank (Telangana: 93% — its MO exists
+only as free text, 8,295 FIRs pending extraction; other states 11–20%).
+`linkage/textread.py` reads an FIR's text with a phrase dictionary: each
+state's own wording from `config/vocab.yaml` plus a short list of everyday
+variants ("iron rod", "masked"). Longest phrase first, each stretch of text
+claimed once, only the fields of the FIR's crime type. No language model, so
+it runs on Lambda in milliseconds.
+
+**Reading accuracy** (`scripts/textread_eval.py` → `results/textread/eval.json`,
+all 44,533 FIRs, crime type NOT given to the reader):
+
+| | |
+|---|---|
+| crime type read right | 100% |
+| date of offence right | 100% |
+| district / police station right | 78.5% / 67.2% |
+| MO fields read, when the field applies | 60–75% |
+| read MO values agreeing with the recorded field | ~100% |
+| read MO values agreeing with the generator's true value | 92.8% |
+
+The 7% gap to truth is recording noise the narrative inherits, not reading
+error. Read against real FIR text this would be far lower: the synthetic
+narratives are built from the very phrases the reader starts from.
+
+**Filling blank fields from text, then retraining** (`scripts/fill_from_text.py`
+→ `data/final_sharing1_textfilled.parquet`; recorded values are never
+overwritten; filled cells carry provenance `text_read` and the UI marks them
+"from FIR text"): 83,053 cells filled, 74,241 of them Telangana's; every
+pending free-text FIR now has structured MO. Train → tune → evaluate as before
+(`results/textfilled/eval.json`, held-out test offenders):
+
+| | before (§14) | text-filled |
+|---|---|---|
+| default ranking hit@10 / PR-AUC | 0.262 / 0.087 | **0.277 / 0.091** |
+| "nearby first" hit@10 / PR-AUC | 0.457 / 0.161 | **0.502 / 0.187** |
+| cross-type hit@10 | 0.029 | **0.038** |
+| cross-state partner in top 10 (default) | 17 / 495 | **24 / 495** |
+| same-district inbox lane, real links | 24.0% | **28.7%** |
+| other-district lane | 3.5% | **6.0%** |
+| crime-type check recall (precision) | 73% (97%) | **93% (98%)** |
+
+§3 said better extraction of the Telangana text would move same-type hit@10
+by ~2 points; filling every state's gaps moved it 1.5 points on the default
+ranking and 4.5 on "nearby first", and let the misfiling check see Telangana
+at all.
+
+**Discarded: series-aware re-ranking.** Adding shared-nearest-neighbour
+evidence (how many of the query's top-20 look-alikes a candidate shares, and
+mutual top-20 membership) gained 0.001 PR-AUC on calib offenders and lost on
+test (hit@10 0.263 → 0.256; nearby 0.457 → 0.413). Look-alike FIRs share
+look-alikes whether or not they are one offender.
+
+---
+
 ## Where things are
 
 | | |
 |---|---|
 | `pre-core-fix` tag | corpus + results with core habits drawn per type (sharing = 0) |
 | `results/pre_core_fix/` | eval, oracle eval, weights, evidence distribution |
-| `results/ranked/` | current model: with_time weights + tuned ranking (`rank`), eval with blind / nearby rows |
+| `results/textfilled/` | **current model**: blank MO filled from FIR text, retrained and tuned; eval, evidence distribution |
+| `results/textread/` | how well the FIR-text reader reads (§15) |
+| `results/ranked/` | with_time weights + tuned ranking (`rank`), eval with blind / nearby rows |
 | `results/with_time/` | weights, eval and evidence distribution with the time evidence |
 | `results/sweep/` | repeat_rate × cross_type_sharing grid, one file per point |
 | `data/final/` | the 45k corpus (sharing = 0; see manifest `derived`) |

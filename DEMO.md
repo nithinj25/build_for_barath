@@ -17,7 +17,9 @@ data" once, early, and mean it.
 ## 0:20 — Check a new FIR (35 s)
 
 The landing page opens with the lens sweeping the evidence board. Click
-**Check a new FIR** → **Fill with a test FIR** → **Find matching FIRs**.
+**Check a new FIR** → **Fill with a test FIR**: the test FIR's text is pasted
+and read — the phrases it understood light up in brass and the form fills,
+each value tagged "from text". Then **Find matching FIRs**.
 
 - *This re-registers a held-out test FIR as if it were being filed now; the
   original is hidden from the results.* The FIR is compared with every FIR of
@@ -26,7 +28,7 @@ The landing page opens with the lens sweeping the evidence board. Click
   and how common it is, what differs.
 - Flip **Nearby first** and watch the list re-rank. Green marks are the test
   FIR's real partners (synthetic truth); they won't always be there — the
-  true partner reaches the top 10 for 26% of FIRs (46% with nearby first),
+  true partner reaches the top 10 for 28% of FIRs (50% with nearby first),
   and saying so is part of the demo. Click **Fill with a test FIR** again for
   another one.
 
@@ -34,8 +36,8 @@ The landing page opens with the lens sweeping the evidence board. Click
 
 **Leads → Same district**.
 
-- Point at the blue line: *about 1 in 4 leads like these was a real serial
-  link in testing — ~6,200× better than picking case pairs at random.*
+- Point at the blue line: *about 1 in 3 leads like these was a real serial
+  link in testing — ~7,500× better than picking case pairs at random.*
 - Lead #1: house burglary, Mysuru, **different police stations**, 3 weeks
   apart. Both FIRs: gas cutter (4% of house burglaries), faces covered,
   inside information.
@@ -59,17 +61,18 @@ Click lead #1 (FIRs `b9612100ef5bc0ff` ↔ `5f14011fad04a685`).
 
 Open any case (**Find a case** → an example), flip **Nearby first** and read
 the line under the switch: *it nearly doubles how often the true partner is
-in the top 10 (26% → 46%) but finds a cross-state partner for 3 cases instead
-of 17. The officer chooses; the default stays location-blind, because that
+in the top 10 (28% → 50%) but finds a cross-state partner for 2 cases instead
+of 24. The officer chooses; the default stays location-blind, because that
 is the point of this system.*
 
 ## 1:55 — Possible series (25 s)
 
-**Series** → open the chain-snatching series across **Kolhapur, Nashik and Thane**
-(id `2ca66ef385`, or filter State = Maharashtra, Crime type = Chain
-snatching).
+**Series** → open the vehicle-theft series across **Bengaluru Urban and
+Kalaburagi** (id `c4601eae53`, or filter State = Karnataka, Crime type =
+Vehicle theft). Series ids change when the bundle is rebuilt.
 
-- Map and timeline: six FIRs, three districts, one MO.
+- The investigation board: five case files on red string, in date order.
+  Then the map and the timeline — five FIRs, two districts, five months.
 - Be straight about it: *this one is clean — all one offender. Across all
   series, about 1 in 5 FIR pairs inside a series are the same offender, so
   every link is shown separately with its own strength.*
@@ -82,7 +85,7 @@ the demo.)
 **Checks** → first card (`MP-IND-02/0059/2021`): recorded as house burglary,
 but warehouse premises, shutter entry, closed for the night.
 
-> 714 FIRs flagged; 97% really were filed under the wrong type. A misfiled
+> 901 FIRs flagged; 98% really were filed under the wrong type. A misfiled
 > FIR is compared with the wrong cases, so its real links are invisible —
 > and its unusual details create false matches. The inbox pushes those leads
 > to the bottom.
@@ -98,9 +101,9 @@ but warehouse premises, shutter entry, closed for the night.
 ## If asked
 
 - **"How accurate is it?"** Accuracy is the wrong measure — a true link is
-  1 in ~26,000 pairs, so "never linked" is 99.996% accurate. For 26% of
+  1 in ~26,000 pairs, so "never linked" is 99.996% accurate. For 28% of
   cases the true partner is in the top 10 of ~15,000 FIRs of that type
-  (46% with "nearby first").
+  (50% with "nearby first").
 - **"Is this real data?"** No. Synthetic, generated to resemble FIRs from
   four states. The method's numbers must be re-measured on real records;
   the timing gain in particular comes from how we generated the data.

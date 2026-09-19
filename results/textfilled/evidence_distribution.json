@@ -1,0 +1,59 @@
+{
+  "source": "results\\textfilled\\weights.json on data\\final_sharing1_textfilled.parquet, held-out offenders",
+  "pools": {
+    "BURGLARY_RESIDENTIAL": {
+      "true_pairs": 506,
+      "mean": 2.43,
+      "median": 2.06,
+      "p90": 6.54,
+      "p99": 10.36,
+      "max": 12.74,
+      "share_at_or_above_strong_example": 0.1502
+    },
+    "BURGLARY_COMMERCIAL": {
+      "true_pairs": 98,
+      "mean": 3.53,
+      "median": 3.27,
+      "p90": 7.48,
+      "p99": 10.84,
+      "max": 12.26,
+      "share_at_or_above_strong_example": 0.2245
+    },
+    "VEHICLE_THEFT": {
+      "true_pairs": 927,
+      "mean": 1.77,
+      "median": 1.92,
+      "p90": 5.49,
+      "p99": 9.49,
+      "max": 12.49,
+      "share_at_or_above_strong_example": 0.0798
+    },
+    "SNATCHING": {
+      "true_pairs": 383,
+      "mean": 1.52,
+      "median": 1.75,
+      "p90": 5.35,
+      "p99": 8.23,
+      "max": 9.08,
+      "share_at_or_above_strong_example": 0.0627
+    },
+    "ATM_TAMPERING": {
+      "true_pairs": 316,
+      "mean": 1.77,
+      "median": 1.88,
+      "p90": 5.81,
+      "p99": 8.3,
+      "max": 10.96,
+      "share_at_or_above_strong_example": 0.0981
+    },
+    "CROSS_TYPE": {
+      "true_pairs": 1301,
+      "mean": 1.19,
+      "median": 1.22,
+      "p90": 3.78,
+      "p99": 6.4,
+      "max": 8.44,
+      "share_at_or_above_strong_example": 0.0154
+    }
+  }
+}

@@ -15,7 +15,7 @@ from pathlib import Path
 import numpy as np
 
 BUNDLE_FILES = ("weights.json", "index.json", "codes.npz", "cases.json.gz", "meta.json")
-OPTIONAL_FILES = ("truth_groups.json", "leads.json.gz", "series.json.gz", "checks.json.gz", "extras.npz")
+OPTIONAL_FILES = ("truth_groups.json", "leads.json.gz", "series.json.gz", "checks.json.gz", "extras.npz", "phrases.json")
 
 
 def load_bundle(uri: str) -> dict:
@@ -40,8 +40,9 @@ def load_bundle(uri: str) -> dict:
     if (root / "extras.npz").exists():
         with np.load(root / "extras.npz") as extras:
             hub_r = extras["hub_r"].astype(np.float64)
+    phrases = json.loads((root / "phrases.json").read_text(encoding="utf-8")) if (root / "phrases.json").exists() else None
     return {
-        **lists, "hub_r": hub_r,
+        **lists, "hub_r": hub_r, "phrases": phrases,
         "weights": json.loads((root / "weights.json").read_text(encoding="utf-8")),
         "case_ids": index["case_ids"], "crime_types": index["crime_types"],
         "codes": codes, "cases": cases,

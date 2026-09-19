@@ -1,0 +1,4 @@
+place bits: {'same_station': 3.23, 'same_district': 3.37, 'same_state': 0.51, 'other_state': -2.23}
+calib PR-AUC by hub_beta: {0.0: 0.0954, 0.15: 0.0953, 0.25: 0.0961, 0.35: 0.0959, 0.5: 0.0954} -> 0.25
+calib PR-AUC by geo_beta: {0.25: 0.14, 0.5: 0.1767, 0.75: 0.196, 1.0: 0.2035} -> 1.0
+wrote results\textfilled\weights.json

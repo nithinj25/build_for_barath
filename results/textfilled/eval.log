@@ -1,0 +1,43 @@
+test offenders only
+
+pool                   queries  cands   prior  model            hit@10  rec@10   P@10  PR-AUC  rank1
+BURGLARY_RESIDENTIAL       293  12564 -15.096  agreement_count   0.150   0.054  0.019   0.024    285
+                                               fs                0.328   0.170  0.049   0.109     50
+                                               fs_lr             0.338   0.176  0.050   0.117     52
+                                               blind             0.341   0.175  0.050   0.116     53
+                                               nearby            0.485   0.279  0.093   0.216     12
+BURGLARY_COMMERCIAL         90   5032 -13.858  agreement_count   0.211   0.143  0.024   0.088    121
+                                               fs                0.433   0.327  0.060   0.207     17
+                                               fs_lr             0.456   0.332  0.059   0.210     16
+                                               blind             0.456   0.325  0.057   0.208     18
+                                               nearby            0.667   0.495  0.110   0.330      4
+VEHICLE_THEFT              528  15482 -15.064  agreement_count   0.059   0.024  0.006   0.014    485
+                                               fs                0.189   0.083  0.024   0.055     87
+                                               fs_lr             0.191   0.082  0.023   0.057     83
+                                               blind             0.189   0.081  0.023   0.057     81
+                                               nearby            0.466   0.241  0.066   0.137     13
+SNATCHING                  266   8006 -14.192  agreement_count   0.064   0.023  0.006   0.013    420
+                                               fs                0.226   0.131  0.027   0.080    109
+                                               fs_lr             0.252   0.142  0.029   0.082    106
+                                               blind             0.252   0.143  0.029   0.081    106
+                                               nearby            0.447   0.262  0.059   0.181     14
+ATM_TAMPERING              141   3444  -12.16  agreement_count   0.106   0.037  0.013   0.022     95
+                                               fs                0.397   0.147  0.058   0.108     20
+                                               fs_lr             0.404   0.150  0.060   0.106     21
+                                               blind             0.404   0.149  0.059   0.110     21
+                                               nearby            0.667   0.334  0.129   0.231      4
+CROSS_TYPE                1005  33917  -16.87  agreement_count   0.012   0.005  0.001   0.002   4977
+                                               fs                0.029   0.014  0.003   0.008    866
+                                               fs_lr             0.038   0.017  0.004   0.008    829
+
+SAME-TYPE (pooled): fs_lr hit@10 0.277  recall@10 0.139  P@10 0.037  PR-AUC 0.091  (1318 queries)
+
+SAME-TYPE (pooled): blind hit@10 0.277  recall@10 0.139  P@10 0.036  PR-AUC 0.091  (1318 queries)
+
+SAME-TYPE (pooled): nearby hit@10 0.501  recall@10 0.281  P@10 0.080  PR-AUC 0.187  (1318 queries)
+
+CROSS-TYPE: fs_lr hit@10 0.038  recall@10 0.017  P@10 0.004  PR-AUC 0.008  (1005 queries)
+
+same-type queries whose cross-state partner is in the top 10: {'agreement_count': '23/495', 'fs': '27/495', 'fs_lr': '26/495', 'blind': '24/495', 'nearby': '2/495'}
+
+wrote results\textfilled\eval.json
