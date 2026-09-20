@@ -7,7 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230f2240'/%3E%3Ccircle cx='7' cy='7' r='3.6' fill='none' stroke='%23d6b36a' stroke-width='1.8'/%3E%3Cpath d='M9.7 9.7 13 13' stroke='%23d6b36a' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Zilla+Slab:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     color-scheme: light;
@@ -36,6 +36,9 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", "Nirmala UI", sans-serif; }
+  :root { --display: "Zilla Slab", Georgia, serif; }
+  h1, h2, .stat, .hero h1, .verdict .big, .logo > div { font-family: var(--display); letter-spacing: -.01em; }
+  :lang(hi) h1, :lang(hi) h2, :lang(hi) .stat, :lang(hi) .hero h1, :lang(hi) .verdict .big, :lang(hi) .logo > div { font-family: inherit; letter-spacing: 0; }
   a { color: var(--accent); }
   button, input, select, textarea { font: inherit; color: inherit; }
   button { cursor: pointer; }
@@ -55,7 +58,9 @@
   .pill-synth { font-size: 12px; background: rgba(255,255,255,.18); padding: 3px 10px; border-radius: 99px; }
 
   main { max-width: 1180px; margin: 0 auto; padding: 22px 20px 60px; }
-  @media (max-width: 700px) { main, .bar-inner { padding-left: 16px; padding-right: 16px; } nav { margin-left: 0; } }
+  @media (max-width: 700px) { main, .bar-inner { padding-left: 16px; padding-right: 16px; }
+    nav { margin-left: 0; flex-wrap: nowrap; overflow-x: auto; max-width: 100%; scrollbar-width: none; }
+    nav::-webkit-scrollbar { display: none; } nav a { white-space: nowrap; } }
   h1 { font-size: 24px; margin: 0 0 4px; }
   h2 { font-size: 17px; margin: 0 0 12px; }
   h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
@@ -90,7 +95,10 @@
   .leads { display: grid; gap: 12px; }
   .lead { background: var(--surface); border: 1px solid var(--ring); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow);
           display: grid; grid-template-columns: 1fr auto; gap: 10px 18px; cursor: pointer; }
-  .lead:hover { border-color: var(--line-2); }
+  .lead { border-left: 4px solid var(--line-2); transition: transform .12s ease, box-shadow .12s ease; }
+  .lead.strong { border-left-color: var(--strong); } .lead.possible { border-left-color: var(--possible); } .lead.weak { border-left-color: var(--weak); }
+  .lead[tabindex]:hover { border-color: var(--line-2); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,.10); }
+  @media (prefers-reduced-motion: reduce) { .lead { transition: none; } .lead[tabindex]:hover { transform: none; } }
   .lead-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .crime { font-weight: 600; }
   .pair { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; grid-column: 1 / -1; }
@@ -109,12 +117,14 @@
   .btn:hover { border-color: var(--ink-2); }
   .btn.primary { background: var(--brass); border-color: var(--brass); color: var(--brass-ink); font-weight: 600; }
   .btn.small { padding: 4px 10px; font-size: 13px; }
-  .lanes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 6px; }
-  .lane { text-align: left; background: var(--surface); border: 1px solid var(--line-2); border-radius: 10px; padding: 10px 14px; display: grid; gap: 2px; }
+  .lanes { display: flex; gap: 6px; align-items: flex-end; border-bottom: 2px solid var(--line-2); margin-bottom: 0; }
+  .lane { flex: 1 1 0; text-align: left; background: var(--surface-2); border: 1px solid var(--line-2); border-bottom: 0;
+          border-radius: 10px 10px 0 0; padding: 9px 14px; display: grid; gap: 2px; position: relative; top: 2px; }
   .lane span { font-size: 12.5px; color: var(--muted); }
-  .lane[aria-selected=true] { border: 2px solid var(--accent); background: var(--accent-soft); padding: 9px 13px; }
-  .lane-help { margin: 4px 0 14px; }
-  @media (max-width: 640px) { .lanes { grid-template-columns: 1fr; } }
+  .lane[aria-selected=true] { background: var(--surface); box-shadow: inset 0 3px 0 var(--brass); }
+  .lane[aria-selected=true]::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: var(--surface); }
+  .lane-help { margin: 10px 0 14px; }
+  @media (max-width: 640px) { .lanes { flex-wrap: wrap; border-bottom: 0; } .lane { flex: 1 1 100%; border-bottom: 1px solid var(--line-2); border-radius: 10px; top: 0; } }
   .pager { display: flex; gap: 10px; align-items: center; justify-content: center; margin-top: 16px; }
   .route { font-weight: 600; font-size: 15px; }
   .route .arrow { color: var(--muted); font-weight: 400; }
@@ -188,9 +198,13 @@
 
 
   /* landing */
-  .hero { background: radial-gradient(120% 140% at 85% 20%, #1d3b66 0%, #0f2240 45%, #0a1628 100%); color: #eef3fb;
-          border-radius: 16px; padding: 40px 40px 36px; display: grid; grid-template-columns: 1.05fr 1fr; gap: 28px; align-items: center; overflow: hidden; }
-  @media (max-width: 900px) { .hero { grid-template-columns: 1fr; padding: 28px 20px; } }
+  .hero { background: radial-gradient(120% 140% at 85% 15%, #1d3b66 0%, #0f2240 45%, #08121f 100%); color: #eef3fb;
+          border-bottom: 2px solid var(--brass); overflow: hidden; }
+  .hero-inner { max-width: 1180px; margin: 0 auto; padding: 54px 20px 48px; display: grid; grid-template-columns: 1.02fr 1fr; gap: 34px; align-items: center; }
+  @media (max-width: 900px) { .hero-inner { grid-template-columns: 1fr; padding: 32px 16px 28px; } }
+  footer .foot-inner { max-width: 1180px; margin: 0 auto; padding: 26px 20px 40px; display: flex; gap: 14px 28px; flex-wrap: wrap;
+                       justify-content: space-between; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); margin-top: 8px; }
+  footer a { color: var(--ink-2); }
   .eyebrow { text-transform: uppercase; letter-spacing: .12em; font-size: 12px; font-weight: 600; color: #d6b36a; margin: 0 0 12px; }
   :lang(hi) .eyebrow { text-transform: none; letter-spacing: .02em; font-size: 13px; }
   .hero h1 { font-size: 40px; line-height: 1.12; margin: 0 0 14px; letter-spacing: -.01em; }
@@ -257,7 +271,9 @@
 </head>
 <body>
 <div class="bar"><div class="bar-inner" id="bar"></div></div>
+<div id="hero"></div>
 <main id="view" aria-live="polite"></main>
+<footer id="foot"></footer>
 
 <script>
 const API = window.API_BASE || "/api";
@@ -437,6 +453,18 @@ const HI = {
   "Where they differ": "कहाँ अलग हैं", "Not recorded in one of the FIRs, so not used: {list}.": "किसी एक एफआईआर में दर्ज नहीं, इसलिए उपयोग नहीं हुआ: {list}।",
   "FIR A — narrative": "एफआईआर A — विवरण", "FIR B — narrative": "एफआईआर B — विवरण", "No narrative.": "कोई विवरण नहीं।",
   ". ": "। ",
+  "What a lead looks like": "एक सुराग कैसा दिखता है",
+  "Straight from today's inbox: two FIRs nobody had connected, with the reasons the system found them.":
+    "आज की सूची से सीधे: दो एफआईआर जिन्हें किसी ने नहीं जोड़ा था, उन कारणों के साथ जिनसे सिस्टम ने इन्हें खोजा।",
+  "It reads the FIR itself": "यह एफआईआर खुद पढ़ता है",
+  "Paste an FIR's text on the \"New FIR\" page and the details come out of the words — no form-filling, no AI guesswork.":
+    "\"नई एफआईआर\" पृष्ठ पर एफआईआर का पाठ चिपकाएँ और विवरण शब्दों से ही निकल आते हैं — न फ़ॉर्म भरना, न एआई का अनुमान।",
+  "The FIR, as written": "एफआईआर, जैसी लिखी गई", "What the system read": "सिस्टम ने क्या पढ़ा",
+  "{n} details, then checked against every FIR of this kind.": "{n} विवरण, फिर इसी प्रकार की हर एफआईआर से जाँच।",
+  "Try it with your own text": "अपने पाठ के साथ आज़माएँ", "No leads to show.": "दिखाने के लिए कोई सुराग नहीं।",
+  "Text reading is not available in this build.": "इस संस्करण में पाठ पढ़ना उपलब्ध नहीं है।",
+  "Synthetic demo data — no real FIR, person or place.": "कृत्रिम डेमो डेटा — कोई वास्तविक एफआईआर, व्यक्ति या स्थान नहीं।",
+  "Source and findings": "स्रोत और निष्कर्ष",
   "Investigation board": "जाँच बोर्ड", "The evidence: why these may be the same offender": "सबूत: ये एक ही अपराधी के क्यों हो सकते हैं",
   "from text": "पाठ से", "from FIR text": "एफआईआर पाठ से", "Paste the FIR text here — the facts as recorded": "एफआईआर का पाठ यहाँ चिपकाएँ — जैसे दर्ज हैं वैसे तथ्य",
   "FIR text": "एफआईआर पाठ", "Read {n} details from the text.": "पाठ से {n} विवरण पढ़े गए।",
@@ -601,7 +629,8 @@ async function api(path, opts = {}) {
 }
 const view = document.getElementById("view");
 function fill(box, ...nodes) { box.replaceChildren(...nodes.flat(Infinity).filter(n => n != null && n !== false)); }
-function render(...nodes) { fill(view, ...nodes); window.scrollTo(0, 0); }
+const heroBand = document.getElementById("hero"), footBand = document.getElementById("foot");
+function render(...nodes) { heroBand.replaceChildren(); footBand.replaceChildren(); fill(view, ...nodes); window.scrollTo(0, 0); }
 function loading(text = "Loading…") {
   render(h("div", { class: "empty" },
     h("div", { class: "lens-wait", "aria-hidden": "true" }, svgEl('<svg viewBox="0 0 56 56" fill="none" stroke="var(--brass)" stroke-width="4" stroke-linecap="round"><circle cx="24" cy="24" r="14"/><path d="M34 34 46 46"/></svg>')),
@@ -701,7 +730,7 @@ function gapNode(days) {
     days == null ? t("time unknown") : t("{gap} apart", { gap: gapText(days) }));
 }
 function leadCard(l) {
-  return h("article", { class: "lead", ...openOnClick(() => { location.hash = `#/compare/${l.a}/${l.b}`; }) },
+  return h("article", { class: `lead ${l.tier || ""}`, ...openOnClick(() => { location.hash = `#/compare/${l.a}/${l.b}`; }) },
     h("div", { class: "lead-top" }, tierBadge(l), h("span", { class: "crime" }, crime(l.crime_type)),
       l.cross_state ? h("span", { class: "xstate" }, t("Across states")) : l.same_station === false ? h("span", { class: "xstate" }, t("Different police stations")) : null,
       l.type_doubt ? h("span", { class: "xstate", style: "color:var(--caution-ink);border-color:var(--caution-ink)" }, t("Crime type doubtful")) : null,
@@ -1012,7 +1041,7 @@ async function showCase(id, tab = "same", mode = "blind") {
 }
 function candidateCard(c, item, mode = "blind") {
   const shared = item.reasons.filter(r => r.kind === "shared").slice(0, 3);
-  return h("article", { class: "lead", ...openOnClick(() => { location.hash = `#/compare/${c.case_id}/${item.case_id}${mode === "nearby" ? "/nearby" : ""}`; }) },
+  return h("article", { class: `lead ${item.tier || ""}`, ...openOnClick(() => { location.hash = `#/compare/${c.case_id}/${item.case_id}${mode === "nearby" ? "/nearby" : ""}`; }) },
     h("div", { class: "lead-top" }, h("b", {}, `#${item.rank}`), tierBadge(item), h("span", { class: "crime" }, crime(item.crime_type)),
       item.cross_state ? h("span", { class: "xstate" }, t("Other state")) : null,
       item.ground_truth_link ? h("span", { class: "truth" }, t("✓ true link (synthetic truth)")) : null),
@@ -1140,28 +1169,28 @@ function startLens(svg) {
     if (still) { a.pause(); a.currentTime = 2200; }
   });
 }
-function showHome() {
+async function showHome() {
   setNav("home");
   const ms = META.model_summary || {}, lq = META.lead_quality;
   const board = h("div", { class: "board" }, boardSvg());
   const stat = (big, text) => h("div", { class: "card" }, h("div", { class: "stat" }, big), h("div", { class: "muted small" }, text));
+  const leadSlot = h("div", { class: "leads" }, h("div", { class: "muted small" }, t("Loading…")));
+  const readSlot = h("div", {}, h("div", { class: "muted small" }, t("Loading…")));
   render(
-    h("section", { class: "hero" },
-      h("div", {},
-        h("p", { class: "eyebrow" }, t("For crime branches and district police")),
-        h("h1", {}, t("Every FIR is a clue."), h("span", {}, t("Some are the same offender."))),
-        h("p", { class: "hero-lede" }, t("The system reads the modus operandi of every property-crime FIR across districts and states and puts the matches worth a look in front of your team — with every reason written out.")),
-        h("div", { class: "hero-cta" },
-          h("a", { class: "cta primary", href: "#/new" }, t("Check a new FIR")),
-          h("a", { class: "cta ghost", href: "#/leads" }, t("Review leads")),
-          h("a", { class: "cta ghost", href: "#/search" }, t("Find a case"))),
-        h("p", { class: "hero-note" }, t("Links cases, never people. No caste, religion or community data. An officer decides."))),
-      board),
+    h("div", { class: "space" }),
     h("div", { class: "strip" },
       stat(num(META.cases), t("FIRs compared, every one against every other")),
       lq && lq.same_district && lq.same_district.rate ? stat(t("1 in {k}", { k: Math.round(1 / lq.same_district.rate) }), t("same-district leads was a real serial link in testing")) : null,
       ms.nearby ? stat(`${Math.round(ms.nearby.hit_at_10 * 100)}%`, t("of cases had their true partner in the top 10 with \"nearby first\"")) : null,
       META.checks ? stat(num(META.checks.count), t("FIRs flagged as probably filed under the wrong crime type")) : null),
+    h("div", { style: "height:26px" }),
+    h("h2", {}, t("What a lead looks like")),
+    h("p", { class: "muted small" }, t("Straight from today's inbox: two FIRs nobody had connected, with the reasons the system found them.")),
+    leadSlot,
+    h("div", { style: "height:26px" }),
+    h("h2", {}, t("It reads the FIR itself")),
+    h("p", { class: "muted small" }, t("Paste an FIR's text on the \"New FIR\" page and the details come out of the words — no form-filling, no AI guesswork.")),
+    readSlot,
     h("div", { style: "height:26px" }),
     h("h2", {}, t("How it works, in three steps")),
     h("div", { class: "steps" },
@@ -1170,7 +1199,52 @@ function showHome() {
        ["Reasons you can act on", "Each match says how rare it is and which details agree and differ. An officer marks it linked, not linked or needs investigation."]]
         .map(([title, text], i) => h("div", { class: "card" }, h("div", { class: "step-n" }, String(i + 1)), h("h2", {}, t(title)), h("p", { class: "muted", style: "margin:0" }, t(text))))),
     h("p", { class: "muted small", style: "margin-top:18px" }, t("All figures are measured on synthetic FIRs built to resemble four states' records. They show the method works; real records must be measured again.")));
+
+  heroBand.replaceChildren(h("section", { class: "hero" }, h("div", { class: "hero-inner" },
+    h("div", {},
+      h("p", { class: "eyebrow" }, t("For crime branches and district police")),
+      h("h1", {}, t("Every FIR is a clue."), h("span", {}, t("Some are the same offender."))),
+      h("p", { class: "hero-lede" }, t("The system reads the modus operandi of every property-crime FIR across districts and states and puts the matches worth a look in front of your team — with every reason written out.")),
+      h("div", { class: "hero-cta" },
+        h("a", { class: "cta primary", href: "#/new" }, t("Check a new FIR")),
+        h("a", { class: "cta ghost", href: "#/leads" }, t("Review leads")),
+        h("a", { class: "cta ghost", href: "#/search" }, t("Find a case"))),
+      h("p", { class: "hero-note" }, t("Links cases, never people. No caste, religion or community data. An officer decides."))),
+    board)));
+  footBand.replaceChildren(h("div", { class: "foot-inner" },
+    h("div", {}, t("Synthetic demo data — no real FIR, person or place."), " ",
+      h("a", { href: "#/about" }, t("How it works")), " · ",
+      h("a", { href: "https://github.com/nithinj25/build_for_barath", rel: "noopener" }, t("Source and findings"))),
+    h("div", {}, t("Cross-Jurisdiction Linkage"))));
   startLens(board.querySelector("svg"));
+
+  // a real lead and a real FIR read live, so the landing page shows the product, not a mock-up
+  api("/leads?lane=same_district&limit=1").then(r => {
+    if (r.items[0]) fill(leadSlot, leadCard(r.items[0]));
+  }).catch(() => fill(leadSlot, h("p", { class: "muted small" }, t("No leads to show."))));
+  api("/form/sample").then(async s => {
+    const read = await api("/read", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text: s.text }) });
+    fill(readSlot, readShowcase(s.text, read));
+  }).catch(() => fill(readSlot, h("p", { class: "muted small" }, t("Text reading is not available in this build."))));
+}
+function readShowcase(text, read) {
+  const spans = (read.found || []).filter(f => f.start != null).sort((a, b) => a.start - b.start);
+  const parts = []; let at = 0;
+  for (const f of spans) {
+    if (f.start < at) continue;
+    parts.push(text.slice(at, f.start));
+    parts.push(h("mark", {}, text.slice(f.start, f.end)));
+    at = f.end;
+  }
+  parts.push(text.slice(at));
+  const chips = Object.entries(read.fields || {}).slice(0, 6).map(([f, v]) =>
+    h("span", { class: "chip" }, `${field(f)}: ${val(Array.isArray(v) ? v.join(";") : v)}`));
+  return h("div", { class: "grid2" },
+    h("div", { class: "card" }, h("h3", {}, t("The FIR, as written")), h("div", { class: "readout" }, parts)),
+    h("div", { class: "card stack" }, h("h3", {}, t("What the system read")),
+      h("div", { class: "reasons-inline" }, chips),
+      h("p", { class: "muted small" }, t("{n} details, then checked against every FIR of this kind.", { n: Object.keys(read.fields || {}).length })),
+      h("a", { class: "btn primary", href: "#/new" }, t("Try it with your own text"))));
 }
 
 // ---------- new FIR ----------
@@ -1330,7 +1404,7 @@ function matchCard(rc, item, crimeType) {
   const shared = item.reasons.filter(r => r.kind === "shared").slice(0, 3);
   const maxAbs = Math.max(1, ...item.reasons.map(r => Math.abs(r.bits)));
   const order = ["timing", "place", "shared", "different", "distinctiveness"];
-  return h("article", { class: "lead", style: "cursor:default" },
+  return h("article", { class: `lead ${item.tier || ""}`, style: "cursor:default" },
     h("div", { class: "lead-top" }, h("b", {}, `#${item.rank}`), tierBadge(item), h("span", { class: "crime" }, crime(item.crime_type)),
       item.cross_state ? h("span", { class: "xstate" }, t("Other state")) : null,
       item.ground_truth_link ? h("span", { class: "truth" }, t("✓ true link (synthetic truth)")) : null),
