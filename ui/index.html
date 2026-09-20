@@ -261,8 +261,30 @@
   .readout mark { background: var(--brass-soft); color: inherit; border-bottom: 2px solid var(--brass); padding: 0 1px; }
   .fromtext { font-size: 11px; font-weight: 600; color: var(--brass-ink); background: var(--brass-soft); border: 1px solid var(--brass); border-radius: 99px; padding: 0 7px; margin-left: 6px; }
   @media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) .fromtext { color: var(--brass); } }
+  /* page head, shared by every list page */
+  .pagehead { margin-bottom: 18px; }
+  .pagehead .eyebrow { color: var(--muted); margin-bottom: 6px; }
+  .pagehead h1 { margin-bottom: 6px; }
+  .pagehead h1:focus { outline: none; }
+  .pagehead p { margin: 0; color: var(--ink-2); max-width: 820px; }
+  /* skeletons while a list loads */
+  .skel { background: var(--surface); border: 1px solid var(--ring); border-left: 4px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 10px; }
+  .skel i { display: block; height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--surface-2) 25%, var(--line) 37%, var(--surface-2) 63%);
+            background-size: 400% 100%; animation: shimmer 1.4s ease infinite; }
+  .skel i:nth-child(1) { width: 38%; height: 16px; } .skel i:nth-child(2) { width: 100%; height: 34px; } .skel i:nth-child(3) { width: 62%; }
+  @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+  @media (prefers-reduced-motion: reduce) { .skel i { animation: none; } }
+  .summary-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .summary-strip span { font-size: 13px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 99px; padding: 3px 11px; }
+  .btn:active, .cta:active { transform: translateY(1px); }
+  .result { transition: border-color .12s ease; }
+  .tabs button:hover, .lane:hover { border-color: var(--ink-2); }
+  ::selection { background: var(--brass-soft); }
+
   @media print {
-    .bar, nav, .actions, .back, .noprint, .pager { display: none !important; }
+    .bar, nav, .actions, .back, .noprint, .pager, #hero, footer, .modes, .tabs { display: none !important; }
+    .folder, .stamp { border-color: #555 !important; }
+    a[href^="#"] { text-decoration: none; color: inherit; }
     body { background: #fff; color: #000; }
     .card, .lead { box-shadow: none; border-color: #bbb; break-inside: avoid; }
     main { padding: 0; }
@@ -453,6 +475,9 @@ const HI = {
   "Where they differ": "कहाँ अलग हैं", "Not recorded in one of the FIRs, so not used: {list}.": "किसी एक एफआईआर में दर्ज नहीं, इसलिए उपयोग नहीं हुआ: {list}।",
   "FIR A — narrative": "एफआईआर A — विवरण", "FIR B — narrative": "एफआईआर B — विवरण", "No narrative.": "कोई विवरण नहीं।",
   ". ": "। ",
+  "Today's work": "आज का काम", "Patterns": "प्रतिरूप", "Record quality": "रिकॉर्ड गुणवत्ता", "Case lookup": "मामला खोज",
+  "Registration desk": "दर्ज करने की मेज़", "About": "परिचय",
+  "{n} shared": "{n} समान", "{n} different": "{n} अलग", "{n} not recorded": "{n} दर्ज नहीं",
   "What a lead looks like": "एक सुराग कैसा दिखता है",
   "Straight from today's inbox: two FIRs nobody had connected, with the reasons the system found them.":
     "आज की सूची से सीधे: दो एफआईआर जिन्हें किसी ने नहीं जोड़ा था, उन कारणों के साथ जिनसे सिस्टम ने इन्हें खोजा।",
@@ -630,7 +655,23 @@ async function api(path, opts = {}) {
 const view = document.getElementById("view");
 function fill(box, ...nodes) { box.replaceChildren(...nodes.flat(Infinity).filter(n => n != null && n !== false)); }
 const heroBand = document.getElementById("hero"), footBand = document.getElementById("foot");
-function render(...nodes) { heroBand.replaceChildren(); footBand.replaceChildren(); fill(view, ...nodes); window.scrollTo(0, 0); }
+let firstPaint = true;
+function render(...nodes) {
+  heroBand.replaceChildren(); footBand.replaceChildren(); fill(view, ...nodes); window.scrollTo(0, 0);
+  const title = view.querySelector(".pagehead h1");          // move screen readers to the new page's title
+  if (title && !firstPaint) title.focus({ preventScroll: true });
+  firstPaint = false;
+}
+function pageHead(eyebrow, title, lede) {
+  return h("header", { class: "pagehead" },
+    eyebrow ? h("p", { class: "eyebrow" }, t(eyebrow)) : null,
+    h("h1", { tabindex: "-1" }, t(title)),
+    lede ? h("p", {}, t(lede)) : null);
+}
+function skeletonList(n = 3) {
+  return h("div", { class: "leads", "aria-hidden": "true" }, Array.from({ length: n }, () =>
+    h("div", { class: "skel" }, h("i", {}), h("i", {}), h("i", {}))));
+}
 function loading(text = "Loading…") {
   render(h("div", { class: "empty" },
     h("div", { class: "lens-wait", "aria-hidden": "true" }, svgEl('<svg viewBox="0 0 56 56" fill="none" stroke="var(--brass)" stroke-width="4" stroke-linecap="round"><circle cx="24" cy="24" r="14"/><path d="M34 34 46 46"/></svg>')),
@@ -690,9 +731,14 @@ const LANES = [
 const leadState = { lane: "same_district", state: "", district: "", crime_type: "", offset: 0 };
 async function showLeads() {
   setNav("leads");
-  loading();
+  const pending = api(`/leads?${queryOf(leadState, { lane: leadState.lane })}`);
+  if (!leadState.seen) {                                      // first visit: shell + skeletons, so the page appears at once
+    render(pageHead("Today's work", "Leads to review", "Pairs of FIRs whose modus operandi and timing match more closely than unrelated cases almost ever do. The system found them by comparing every FIR with every other — nobody had to suspect them first."),
+      skeletonList(3));
+  }
+  leadState.seen = true;
   let data;
-  try { data = await api(`/leads?${queryOf(leadState, { lane: leadState.lane })}`); } catch (e) { return fail(e); }
+  try { data = await pending; } catch (e) { return fail(e); }
   const reset = patch => { Object.assign(leadState, patch, { offset: 0 }); showLeads(); };
   const lanes = h("div", { class: "lanes", role: "tablist", "aria-label": t("Where") },
     LANES.map(([id, label]) => h("button", { role: "tab", "aria-selected": String(leadState.lane === id), class: "lane",
@@ -716,8 +762,7 @@ async function showLeads() {
   if (!data.items.length) list.append(h("div", { class: "empty", text: t("No leads match these filters.") }));
   for (const l of data.items) list.append(leadCard(l));
   render(
-    h("h1", {}, t("Leads to review")),
-    h("p", { class: "lede" }, t("Pairs of FIRs whose modus operandi and timing match more closely than unrelated cases almost ever do. The system found them by comparing every FIR with every other — nobody had to suspect them first.")),
+    pageHead("Today's work", "Leads to review", "Pairs of FIRs whose modus operandi and timing match more closely than unrelated cases almost ever do. The system found them by comparing every FIR with every other — nobody had to suspect them first."),
     lanes, h("p", { class: "muted small lane-help" }, t(lane[2])),
     filterBar(leadState, reset), notice,
     h("p", { class: "muted small" }, t("{n} leads · strongest first; leads involving a FIR whose crime type looks wrong are listed last", { n: num(data.total) })),
@@ -745,17 +790,21 @@ function leadCard(l) {
 const seriesState = { state: "", district: "", crime_type: "", offset: 0 };
 async function showSeriesList() {
   setNav("series");
-  loading();
+  const pending = api(`/series?${queryOf(seriesState)}`);
+  if (!seriesState.seen) {
+    render(pageHead("Patterns", "Possible series", "Groups of FIRs joined by strong matches — the same MO turning up again and again, often across district lines. Each group is built only from links an analyst would also see in the leads inbox; links across state borders are left out because in testing they were almost never real."),
+      skeletonList(3));
+  }
+  seriesState.seen = true;
   let data;
-  try { data = await api(`/series?${queryOf(seriesState)}`); } catch (e) { return fail(e); }
+  try { data = await pending; } catch (e) { return fail(e); }
   const reset = patch => { Object.assign(seriesState, patch, { offset: 0 }); showSeriesList(); };
   const sq = META.series_quality;
   const list = h("div", { class: "leads" });
   if (!data.items.length) list.append(h("div", { class: "empty", text: t("No series match these filters.") }));
   for (const s of data.items) list.append(seriesCard(s));
   render(
-    h("h1", {}, t("Possible series")),
-    h("p", { class: "lede" }, t("Groups of FIRs joined by strong matches — the same MO turning up again and again, often across district lines. Each group is built only from links an analyst would also see in the leads inbox; links across state borders are left out because in testing they were almost never real.")),
+    pageHead("Patterns", "Possible series", "Groups of FIRs joined by strong matches — the same MO turning up again and again, often across district lines. Each group is built only from links an analyst would also see in the leads inbox; links across state borders are left out because in testing they were almost never real."),
     sq && sq.pairs && sq.pairs.rate ? h("div", { class: "notice info" },
       h("b", {}, t("In testing, about 1 in {k} pairs of FIRs inside these series were the same offender.", { k: Math.round(1 / sq.pairs.rate) })),
       t(" A series is a set of links to check one by one, not a confirmed gang.")) : null,
@@ -921,11 +970,12 @@ function timeline(members) {
     const lv = levels.find(l => cx - l.end > 78) || levels.reduce((a, b) => (a.end < b.end ? a : b));
     lv.end = cx;
     const ty = lv.y, tick = lv.up ? [ty + 18, cy - 12] : [cy + 12, ty - 12];
+    const crowded = i && cx - x(ts[i - 1]) < 46 && i !== members.length - 1;
     return `<line x1="${cx}" y1="${tick[0]}" x2="${cx}" y2="${tick[1]}" stroke="var(--line-2)"/>` +
       `<circle cx="${cx}" cy="${cy}" r="11" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>` +
       `<text x="${cx}" y="${cy + 4}" font-size="11" font-weight="700" text-anchor="middle" fill="#fff">${i + 1}</text>` +
       `<text x="${cx}" y="${ty}" font-size="11" text-anchor="middle" fill="var(--ink-2)">${esc(district(m.district))}</text>` +
-      `<text x="${cx}" y="${ty + 13}" font-size="10" text-anchor="middle" fill="var(--muted)">${esc(date(m.occurred_from))}</text>`;
+      (crowded ? "" : `<text x="${cx}" y="${ty + 13}" font-size="10" text-anchor="middle" fill="var(--muted)">${esc(date(m.occurred_from))}</text>`);
   }).join("");
   return svgEl(`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t("When"))}"><line x1="${P - 10}" y1="${AXIS}" x2="${W - P + 10}" y2="${AXIS}" stroke="var(--line-2)" stroke-width="2"/>${marks}</svg>`);
 }
@@ -934,9 +984,14 @@ function timeline(members) {
 const checkState = { state: "", district: "", crime_type: "", offset: 0 };
 async function showChecks() {
   setNav("checks");
-  loading();
+  const pending = api(`/checks?${queryOf(checkState)}`);
+  if (!checkState.seen) {
+    render(pageHead("Record quality", "Crime-type checks", "FIRs whose MO reads like a different crime type from the one recorded — for example a \"house burglary\" through a shop shutter while the premises were closed for the holidays. A misfiled FIR is compared with the wrong set of cases, so its real links can be missed."),
+      skeletonList(3));
+  }
+  checkState.seen = true;
   let data;
-  try { data = await api(`/checks?${queryOf(checkState)}`); } catch (e) { return fail(e); }
+  try { data = await pending; } catch (e) { return fail(e); }
   const reset = patch => { Object.assign(checkState, patch, { offset: 0 }); showChecks(); };
   const cq = META.check_quality;
   const list = h("div", { class: "leads" });
@@ -949,8 +1004,7 @@ async function showChecks() {
       t("{field}: {value} — {p1} of {of1}, {p2} of {of2}", { field: field(r.field), value: val(r.value),
         p1: pct(r.share_recorded), of1: cases(c.recorded), p2: pct(r.share_likely), of2: cases(c.likely) }))))));
   render(
-    h("h1", {}, t("Crime-type checks")),
-    h("p", { class: "lede" }, t("FIRs whose MO reads like a different crime type from the one recorded — for example a \"house burglary\" through a shop shutter while the premises were closed for the holidays. A misfiled FIR is compared with the wrong set of cases, so its real links can be missed.")),
+    pageHead("Record quality", "Crime-type checks", "FIRs whose MO reads like a different crime type from the one recorded — for example a \"house burglary\" through a shop shutter while the premises were closed for the holidays. A misfiled FIR is compared with the wrong set of cases, so its real links can be missed."),
     cq && cq.flagged ? h("div", { class: "notice info" }, t("In testing, {a} of {b} flagged FIRs really had been recorded under the wrong type, and the check found {r}% of all misfiled FIRs.",
       { a: num(cq.truly_misfiled), b: num(cq.flagged), r: Math.round(cq.recall * 100) })) : null,
     filterBar(checkState, reset),
@@ -974,8 +1028,7 @@ async function showSearch(q = "") {
   };
   input.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
   render(
-    h("h1", {}, t("Find a case")),
-    h("p", { class: "lede" }, t("Open any FIR to see which cases elsewhere look like the same offender's work.")),
+    pageHead("Case lookup", "Find a case", "Open any FIR to see which cases elsewhere look like the same offender's work."),
     h("div", { class: "card" },
       h("div", { class: "searchbox" }, input, h("button", { class: "btn primary", onclick: go }, t("Search"))),
       h("div", { class: "examples" }, h("span", { class: "muted small" }, t("Or try an example:")),
@@ -1309,8 +1362,7 @@ async function showNew() {
   };
 
   render(
-    h("h1", {}, t("Check a new FIR")),
-    h("p", { class: "lede" }, t("Enter what the FIR records. The system compares it with every FIR of the same kind and lists the ones that look like the same offender's work. Nothing is saved to the records in this demo.")),
+    pageHead("Registration desk", "Check a new FIR", "Enter what the FIR records. The system compares it with every FIR of the same kind and lists the ones that look like the same offender's work. Nothing is saved to the records in this demo."),
     readBox(rec, redraw),
     newState.source ? h("div", { class: "notice info" }, t("Filled from test FIR {fir}. It is hidden from the results, as if it were being registered now.", { fir: newState.sourceFir }),
       META.ground_truth_marks ? t(" Its real linked FIRs are marked in green when they appear.") : "") : null,
@@ -1472,6 +1524,13 @@ async function showCompare(a, b, mode = "blind") {
         p.ground_truth_link === false ? h("span", { class: "muted small" }, t("not a true link in the synthetic truth")) : null),
       h("p", { class: "explain" }, h("b", {}, `${rarity[0].toUpperCase()}${rarity.slice(1)}. `), detailsText,
         t("This is a reason to investigate, not proof — confirm through the FIRs, witnesses and recovered property.")),
+      h("div", { class: "summary-strip" },
+        timing ? h("span", {}, t("{gap} apart", { gap: gapText(timing.days) })) : null,
+        h("span", {}, t("{n} shared", { n: shared.length })),
+        different.length ? h("span", {}, t("{n} different", { n: different.length })) : null,
+        notRec.length ? h("span", {}, t("{n} not recorded", { n: notRec.length })) : null,
+        placeRow ? h("span", {}, t({ same_station: "Same police station", same_district: "Same district, different police station",
+          same_state: "Same state, different district", other_state: "Different states" }[placeRow.where])) : null),
       p.same_type ? null : h("p", { class: "notice caution small" }, t("Different crime types: only the offender's personal habits are compared, so this is a weak lead by design.")))),
     h("div", { class: "space" }),
     h("div", { class: "grid2" }, firCard(p.case_a, t("FIR A")), firCard(p.case_b, t("FIR B"))),
@@ -1508,7 +1567,7 @@ function showAbout() {
   const stat = (big, text) => h("div", { class: "card" }, h("div", { class: "stat" }, big), h("div", { class: "muted small" }, text));
   const card = (title, text) => h("div", { class: "card" }, h("h3", {}, t(title)), h("p", {}, t(text)));
   render(
-    h("h1", {}, t("How it works")),
+    pageHead("About", "How it works", null),
     h("p", { class: "lede" }, t("Police record the modus operandi of every property crime. Offenders repeat their habits — how they enter, what tools they carry, when they strike. This system compares every FIR's MO against every other FIR of the same kind, across all districts and states, and brings the most similar pairs to an analyst.")),
     h("div", { class: "howto" },
       card("1 · Rare habits count most", "Two FIRs that both say \"entered by breaking the lock\" prove little — most burglars do. Both saying \"entered through the roof\" or \"disabled the CCTV\" is far more telling. Each shared detail is weighted by how rare it is."),
